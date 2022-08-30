@@ -1,2 +1,2 @@
-# multiparameter_package
-A package implementing approaches for multiple-parameter regularization of ill-posed problems.
+# psandqs
+A package implementing approaches for regularization of ill-posed inverse problems.
