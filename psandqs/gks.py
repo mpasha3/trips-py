@@ -1,5 +1,6 @@
+from dis import dis
 from .decompositions import generalized_golub_kahan
-from .parameter_selection import generalized_crossvalidation
+from .parameter_selection import generalized_crossvalidation, discrepancy_principle
 from .utils import smoothed_holder_weights
 
 import numpy as np
@@ -11,7 +12,7 @@ from tqdm import tqdm
 Functions which implement variants of GKS.
 """
 
-def GKS(A, b, L, projection_dim, iter):
+def GKS(A, b, L, projection_dim, iter, selection_method = 'gcv', **kwargs):
 
     (U, betas, alphas, V) = generalized_golub_kahan(A, b, projection_dim) # Find a small basis V
     
@@ -24,9 +25,12 @@ def GKS(A, b, L, projection_dim, iter):
         
         (Q_L, R_L) = la.qr(L @ V, mode='economic') # Project L into V, separate into Q and R
         
+        if selection_method == 'gcv':
+            lambdah = generalized_crossvalidation(A @ V, b, L @ V)['x'] # find ideal lambda by crossvalidation
+        else:
+            lambdah = discrepancy_principle(A @ V, b, L @ V, kwargs['eta'], kwargs['delta'])['x'] # find ideal lambdas by crossvalidation
 
-        lambdah = generalized_crossvalidation(A @ V, b, L @ V)['x'] # find ideal lambdas by crossvalidation
-        
+
         lambda_history.append(lambdah)
 
         bhat = (Q_A.T @ b).reshape(-1,1) # Project b
@@ -61,7 +65,7 @@ def GKS(A, b, L, projection_dim, iter):
 
 
 
-def MMGKS(A, b, L, pnorm, projection_dim, iter):
+def MMGKS(A, b, L, pnorm, qnorm, projection_dim, iter, selection_method='gcv', **kwargs):
 
     (U, betas, alphas, V) = generalized_golub_kahan(A, b, projection_dim) # Find a small basis V
     
@@ -72,18 +76,26 @@ def MMGKS(A, b, L, pnorm, projection_dim, iter):
 
     for ii in tqdm(range(iter)):
 
-        (Q_A, R_A) = np.linalg.qr(A @ V) # Project A into V, separate into Q and R
+        # compute reweighting for p-norm approximation
+        v = A @ x - b
+        z = smoothed_holder_weights(v, epsilon=0.001, p=pnorm).flatten()**(1/2)
+        p = z[:, np.newaxis]
+        temp = p * (A @ V)
+
+        (Q_A, R_A) = la.qr(temp, mode='economic') # Project A into V, separate into Q and R
         
 
-        # Compute reweighting for p-norm approximation
+        # Compute reweighting for q-norm approximation
         u = L @ x
-        z = smoothed_holder_weights(u, epsilon=0.001, p=pnorm).flatten()**(1/2)
-        p = z[:, np.newaxis]
-        temp = p * (L @ V)  
+        z = smoothed_holder_weights(u, epsilon=0.001, p=qnorm).flatten()**(1/2)
+        q = z[:, np.newaxis]
+        temp = q * (L @ V)  
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
 
-
-        lambdah = generalized_crossvalidation(A @ V, b, p * (L @ V) )['x'] # find ideal lambdas by crossvalidation
+        if selection_method == 'gcv':
+            lambdah = generalized_crossvalidation(p * (A @ V), b, q * (L @ V) )['x'] # find ideal lambda by crossvalidation
+        else:
+            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), kwargs['eta'], kwargs['delta'] )['x']
         
         lambda_history.append(lambdah)
 
@@ -99,10 +111,10 @@ def MMGKS(A, b, L, pnorm, projection_dim, iter):
         
         x_history.append(x)
 
-        r = (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
+        r = p * (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
         ra = A.T @ r
 
-        rb = lambdah[0] * L.T @ (p * (L @ x))# this likely needs to include information from the pnorm weighting
+        rb = lambdah[0] * L.T @ (q * (L @ x))# this likely needs to include information from the pnorm weighting
         r = ra  + rb
 
         #r = r - V@(V.T@r)
