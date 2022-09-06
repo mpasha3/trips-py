@@ -4,6 +4,10 @@ import scipy.linalg as la
 
 from .utils import operator_qr
 
+"""
+Generalized crossvalidation
+"""
+
 def gcv_numerator(reg_param, Q_A, R_A, Q_L, R_L, b):
 
     # The regularizer term:
@@ -48,8 +52,29 @@ def generalized_crossvalidation(A, b, L):
 
     # function to minimize
 
-    gcv_func = lambda reg_params: gcv_numerator(reg_params, Q_A, R_A, Q_L, R_L, b) / gcv_denominator(reg_params, Q_A, R_A, Q_L, R_L, b)
+    gcv_func = lambda reg_param: gcv_numerator(reg_param, Q_A, R_A, Q_L, R_L, b) / gcv_denominator(reg_param, Q_A, R_A, Q_L, R_L, b)
 
-    lambdas = minimize(method='L-BFGS-B', fun=gcv_func, x0=np.zeros(shape=1) + 0.00001, bounds = [(0, None)], tol=10**(-12))
+    lambdah = minimize(method='L-BFGS-B', fun=gcv_func, x0=np.zeros(shape=1) + 0.00001, bounds = [(0, None)], tol=10**(-12))
 
-    return lambdas
+    return lambdah
+
+"""
+Morozov's discrepancy principle
+"""
+
+def discrepancy_principle(A, b, L, eta, delta):
+
+    # first, compute skinny QR factorizations.
+
+    (Q_A, R_A) = la.qr(A)
+
+
+    (Q_L, R_L) = la.qr(L)
+
+    # function to minimize
+
+    discrepancy_func = lambda reg_param: (gcv_numerator(reg_param, Q_A, R_A, Q_L, R_L, b) - (eta*delta)**2)**2
+
+    lambdah = minimize(method='L-BFGS-B', fun=discrepancy_func, x0=np.zeros(shape=1) + 10**(-6), bounds = [(0, None)], tol=10**(-12))
+
+    return lambdah
