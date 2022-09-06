@@ -22,3 +22,6 @@ def operator_qr(A):
         return la.qr(A.todense(), mode='economic')
     else:
         return la.qr(A, mode='economic')
+
+
+### TODO: Add a general reweighting function
