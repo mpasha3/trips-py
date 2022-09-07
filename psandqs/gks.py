@@ -12,23 +12,23 @@ from tqdm import tqdm
 Functions which implement variants of GKS.
 """
 
-def GKS(A, b, L, projection_dim, iter, selection_method = 'gcv', **kwargs):
+def GKS(A, b, L, projection_dim=3, iter=50, selection_method = 'gcv', **kwargs):
 
     (U, betas, alphas, V) = generalized_golub_kahan(A, b, projection_dim) # Find a small basis V
     
     x_history = []
     lambda_history = []
 
-    for ii in tqdm(range(iter)):
+    for ii in tqdm(range(iter), 'running GKS...'):
 
         (Q_A, R_A) = la.qr(A @ V, mode='economic') # Project A into V, separate into Q and R
         
         (Q_L, R_L) = la.qr(L @ V, mode='economic') # Project L into V, separate into Q and R
         
         if selection_method == 'gcv':
-            lambdah = generalized_crossvalidation(A @ V, b, L @ V)['x'] # find ideal lambda by crossvalidation
+            lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'] # find ideal lambda by crossvalidation
         else:
-            lambdah = discrepancy_principle(A @ V, b, L @ V, kwargs['eta'], kwargs['delta'])['x'] # find ideal lambdas by crossvalidation
+            lambdah = discrepancy_principle(A @ V, b, L @ V, **kwargs)['x'] # find ideal lambdas by crossvalidation
 
 
         lambda_history.append(lambdah)
@@ -65,7 +65,7 @@ def GKS(A, b, L, projection_dim, iter, selection_method = 'gcv', **kwargs):
 
 
 
-def MMGKS(A, b, L, pnorm, qnorm, projection_dim, iter, selection_method='gcv', **kwargs):
+def MMGKS(A, b, L, pnorm=2, qnorm=2, projection_dim=3, iter=50, selection_method='gcv', **kwargs):
 
     (U, betas, alphas, V) = generalized_golub_kahan(A, b, projection_dim) # Find a small basis V
     
@@ -74,7 +74,7 @@ def MMGKS(A, b, L, pnorm, qnorm, projection_dim, iter, selection_method='gcv', *
 
     x = A.T @ b # initialize x to b for reweighting
 
-    for ii in tqdm(range(iter)):
+    for ii in tqdm(range(iter), desc='running MMGKS...'):
 
         # compute reweighting for p-norm approximation
         v = A @ x - b
@@ -93,9 +93,9 @@ def MMGKS(A, b, L, pnorm, qnorm, projection_dim, iter, selection_method='gcv', *
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
 
         if selection_method == 'gcv':
-            lambdah = generalized_crossvalidation(p * (A @ V), b, q * (L @ V) )['x'] # find ideal lambda by crossvalidation
+            lambdah = generalized_crossvalidation(p * (A @ V), b, q * (L @ V), **kwargs )['x'] # find ideal lambda by crossvalidation
         else:
-            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), kwargs['eta'], kwargs['delta'] )['x']
+            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), **kwargs )['x']
         
         lambda_history.append(lambdah)
 
