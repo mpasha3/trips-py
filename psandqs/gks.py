@@ -67,6 +67,8 @@ def GKS(A, b, L, projection_dim=3, iter=50, selection_method = 'gcv', **kwargs):
 
 def MMGKS(A, b, L, pnorm=2, qnorm=2, projection_dim=3, iter=50, selection_method='gcv', **kwargs):
 
+    epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.001
+
     (U, betas, alphas, V) = generalized_golub_kahan(A, b, projection_dim) # Find a small basis V
     
     x_history = []
@@ -78,7 +80,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=2, projection_dim=3, iter=50, selection_method
 
         # compute reweighting for p-norm approximation
         v = A @ x - b
-        z = smoothed_holder_weights(v, epsilon=0.001, p=pnorm).flatten()**(1/2)
+        z = smoothed_holder_weights(v, epsilon=epsilon, p=pnorm).flatten()**(1/2)
         p = z[:, np.newaxis]
         temp = p * (A @ V)
 
@@ -87,7 +89,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=2, projection_dim=3, iter=50, selection_method
 
         # Compute reweighting for q-norm approximation
         u = L @ x
-        z = smoothed_holder_weights(u, epsilon=0.001, p=qnorm).flatten()**(1/2)
+        z = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).flatten()**(1/2)
         q = z[:, np.newaxis]
         temp = q * (L @ V)  
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
