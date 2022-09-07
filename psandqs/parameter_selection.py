@@ -42,7 +42,12 @@ def gcv_denominator(reg_param, Q_A, R_A, Q_L, R_L, b):
     return trace_term**2
 
 
-def generalized_crossvalidation(A, b, L):
+def generalized_crossvalidation(A, b, L, **kwargs):
+
+    if 'tol' in kwargs:
+        tol = kwargs['tol']
+    else:
+        tol = 10**(-12)
 
     # first, compute skinny QR factorizations.
 
@@ -54,7 +59,7 @@ def generalized_crossvalidation(A, b, L):
 
     gcv_func = lambda reg_param: gcv_numerator(reg_param, Q_A, R_A, Q_L, R_L, b) / gcv_denominator(reg_param, Q_A, R_A, Q_L, R_L, b)
 
-    lambdah = minimize(method='L-BFGS-B', fun=gcv_func, x0=np.zeros(shape=1) + 0.00001, bounds = [(0, None)], tol=10**(-12))
+    lambdah = minimize(method='L-BFGS-B', fun=gcv_func, x0=np.zeros(shape=1) + 0.00001, bounds = [(0, None)], tol=tol)
 
     return lambdah
 
@@ -62,19 +67,24 @@ def generalized_crossvalidation(A, b, L):
 Morozov's discrepancy principle
 """
 
-def discrepancy_principle(A, b, L, eta, delta):
+def discrepancy_principle(A, b, L, eta, delta, **kwargs):
+
+    if 'tol' in kwargs:
+        tol = kwargs['tol']
+    else:
+        tol = 10**(-12)
 
     # first, compute skinny QR factorizations.
 
-    (Q_A, R_A) = la.qr(A)
+    (Q_A, R_A) = operator_qr(A)
 
 
-    (Q_L, R_L) = la.qr(L)
+    (Q_L, R_L) = operator_qr(L)
 
     # function to minimize
 
     discrepancy_func = lambda reg_param: (gcv_numerator(reg_param, Q_A, R_A, Q_L, R_L, b) - (eta*delta)**2)**2
 
-    lambdah = minimize(method='L-BFGS-B', fun=discrepancy_func, x0=np.zeros(shape=1) + 10**(-6), bounds = [(0, None)], tol=10**(-12))
+    lambdah = minimize(method='L-BFGS-B', fun=discrepancy_func, x0=np.zeros(shape=1) + 10**(-6), bounds = [(0, None)], tol=tol)
 
     return lambdah
