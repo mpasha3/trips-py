@@ -8,6 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import newton
 
+from tqdm import tqdm
+
 
 def generalized_golub_kahan(A, guess, n_iter):
 
@@ -21,7 +23,7 @@ def generalized_golub_kahan(A, guess, n_iter):
 
     U[:,0] = (guess/np.linalg.norm(guess)).flatten()
 
-    for ii in range(n_iter):
+    for ii in tqdm(range(n_iter), desc='generating golub-kahan basis...'):
 
         V[:,ii] = A.T @ U[:,ii] - betas[ii-1] * V[:,ii-1]
         alphas[ii] = np.linalg.norm(V[:,ii])
