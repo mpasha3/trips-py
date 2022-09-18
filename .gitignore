@@ -131,3 +131,5 @@ dmypy.json
 *virt*
 
 test_notebook.ipynb
+
+/data
