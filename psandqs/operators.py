@@ -102,34 +102,34 @@ def construct_H(l,n):
 
     # build H_0
 
-    H_0 = sparse.spdiags(e, -1-l, n, n) + sparse.spdiags(2*e, 0, n, n) + sparse.spdiags(e, l-1, n, n)
+    H_0 = sparse.spdiags(e, -1-l+1, n, n) + sparse.spdiags(2*e, 0, n, n) + sparse.spdiags(e, 1+l-1, n, n)
     H_0 = H_0.tocsr()
 
     for jj in range(0,l):
         H_0[jj, l-jj-1] += 1
-        H_0[-jj, -l+jj] += 1
+        H_0[-jj-1, -l+jj] += 1
 
     H_0 /= 4
 
     # build H_1
 
-    H_1 = sparse.spdiags(-e, -1-l, n, n) + sparse.spdiags(e, l-1, n, n)
+    H_1 = sparse.spdiags(-e, -1-l+1, n, n) + sparse.spdiags(e, 1+l-1, n, n)
     H_1 = H_1.tocsr()
 
     for jj in range(0,l):
         H_1[jj, l-jj-1] -= 1
-        H_1[-jj, -l+jj] += 1
+        H_1[-jj-1, -l+jj] += 1
 
     H_1 *= np.sqrt(2)/4
 
     # build H_2
 
-    H_2 = sparse.spdiags(-e, -1-l, n, n) + sparse.spdiags(2*e, 0, n, n) + sparse.spdiags(-e, l-1, n, n)
+    H_2 = sparse.spdiags(-e, -1-l+1, n, n) + sparse.spdiags(2*e, 0, n, n) + sparse.spdiags(-e, 1+l-1, n, n)
     H_2 = H_2.tocsr()
 
     for jj in range(0,l):
         H_2[jj, l-jj-1] -= 1
-        H_2[-jj, -l+jj] += 1
+        H_2[-jj-1, -l+jj] -= 1
 
     H_2 /= 4
 
@@ -158,9 +158,9 @@ def create_framelet_operator(n,m,l):
     W_n = create_analysis_operator(n, l)
     W_m = create_analysis_operator(m, l)
 
-    proj_forward = lambda x: (W_n @ (x.reshape(n,m) @ W_m.H)).reshape(-1,1)
+    proj_forward = lambda x: (W_n @ (x.reshape(n,m, order='F') @ W_m.H)).reshape(-1,1, order='F')
 
-    proj_backward = lambda x: (W_n.H @ (x.reshape(n,m) @ W_m)).reshape(-1,1)
+    proj_backward = lambda x: (W_n.H @ (x.reshape( n*(2*l+1) , m*(2*l+1), order='F' ) @ W_m)).reshape(-1,1, order='F')
 
     W = pylops.FunctionOperator(proj_forward, proj_backward, n*(2*l+1) * m*(2*l+1), n*m)
 
@@ -188,9 +188,15 @@ if __name__ == "__main__":
 
     blur = gaussian_blur_operator([5,5], 2, 1000, 1000)
 
-    thing = create_framelet_operator(10, 10, 1)
+    thing = create_framelet_operator(10, 10, 2)
 
-    print(thing)
+    out = thing @ np.eye(10).reshape(-1,1, order='F')
+
+    back = thing.T @ out
+
+    (H0, H1, H2) = construct_H(2,10)
+
+    output = H2 @ np.eye(10)
 
 
     breakpoint()
