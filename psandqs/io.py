@@ -7,18 +7,14 @@ from scipy import sparse
 import numpy as np
 import h5py
 
+from os import mkdir
 from os.path import exists
 
 """
 H image:
 """
 
-def build_x_true():
-    dx = 10
-    dy = 10
-    up_width = 10
-    bar_width= 5
-    size = 64
+def build_x_true(dx=10, dy=10, up_width=10, bar_width=5, size=64):
 
     h_im = np.zeros((size, size))
     for i in range(size):
@@ -39,16 +35,21 @@ def build_x_true():
 Emoji data and operator:
 """
 
-def get_emoji_data():
+def get_emoji_data(data_size = 30):
 
-    if exists('./data/DataDynamic_128x30.mat'):
+    assert data_size in [30,60]
+
+    if exists(f'./data/DataDynamic_128x{data_size}.mat'):
         print('data already downloaded.')
 
     else:
         print("downloading...")
-        r = requests.get('https://zenodo.org/record/1183532/files/DataDynamic_128x30.mat')
 
-        with open('./data/DataDynamic_128x30.mat', "wb") as file:
+        if not exists('./data'):
+            mkdir("./data")
+        r = requests.get(f'https://zenodo.org/record/1183532/files/DataDynamic_128x{data_size}.mat')
+
+        with open(f'./data/DataDynamic_128x{data_size}.mat', "wb") as file:
 
             file.write(r.content)
 
@@ -56,11 +57,11 @@ def get_emoji_data():
 
 
 
-def generate_emoji(noise_level):
+def generate_emoji(noise_level, data_size):
 
-    get_emoji_data()
+    get_emoji_data(data_size)
 
-    with h5py.File('./data/DataDynamic_128x30.mat', 'r') as f:
+    with h5py.File(f'./data/DataDynamic_128x{data_size}.mat', 'r') as f:
         A = sparse.csc_matrix((f["A"]["data"], f["A"]["ir"], f["A"]["jc"]))
         normA = np.array(f['normA'])
         sinogram = np.array(f['sinogram']).T
@@ -96,3 +97,19 @@ def generate_emoji(noise_level):
         B[ii] = b[ 2170*(ii) : 2170*(ii+1) ]
 
     return (A_small, b, AA, B, nx, ny, nt, 0)
+
+if __name__ == "__main__":
+
+    (A, b, AA, B, nx, ny, nt, z) = generate_emoji(noise_level = 0, data_size=60)
+
+    print(A.shape)
+    print(b.shape)
+    print(nx,ny,nt)
+
+    (A, b, AA, B, nx, ny, nt, z) = generate_emoji(noise_level = 0, data_size=30)
+
+    print(A.shape)
+    print(b.shape)
+    print(nx,ny,nt)
+
+    breakpoint()
