@@ -1,5 +1,5 @@
 from select import select
-from .decompositions import generalized_golub_kahan
+from .decompositions import generalized_golub_kahan, arnoldi
 from .parameter_selection import generalized_crossvalidation, discrepancy_principle
 from .utils import smoothed_holder_weights
 
@@ -15,8 +15,16 @@ Functions which implement variants of GKS.
 def GKS(A, b, L, projection_dim=3, iter=50, selection_method = 'gcv', **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
+    projection_method = kwargs['projection_method'] if ('projection_method' in kwargs) else 'auto'
 
-    (U, betas, alphas, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs) # Find a small basis V
+    if ((projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (projection_method == 'arnoldi'):
+
+        if A.shape[0] == A.shape[1]:
+            (V,H) = arnoldi(A, projection_dim, b)
+
+        else:
+            (U, B, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
+
     
     x_history = []
     lambda_history = []
@@ -73,7 +81,15 @@ def MMGKS(A, b, L, pnorm=2, qnorm=2, projection_dim=3, iter=50, selection_method
 
     epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.001
 
-    (U, betas, alphas, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs) # Find a small basis V
+    projection_method = kwargs['projection_method'] if ('projection_method' in kwargs) else 'auto'
+
+    if ((projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (projection_method == 'arnoldi'):
+
+        if A.shape[0] == A.shape[1]:
+            (V,H) = arnoldi(A, projection_dim, b)
+
+        else:
+            (U, B, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
     
     x_history = []
     lambda_history = []
@@ -144,15 +160,15 @@ Classes which implement GKS.
 
 class GKSClass:
 
-    def __init__(self, projection_dim=3, selection_method='gcv', **kwargs):
+    def __init__(self, projection_dim=3, selection_method='gcv', projection_method='auto', **kwargs):
 
         self.projection_dim = projection_dim
+        self.projection_method = projection_method
         self.selection_method = selection_method
 
         self.kwargs = kwargs
 
         self.dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
-        epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.001
 
         self.x_history = []
         self.lambda_history = []
@@ -161,10 +177,23 @@ class GKSClass:
         
         if projection_dim is not None:
 
-            (_,_,_,basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
+            if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
+
+                if A.shape[0] == A.shape[1]:
+                    (basis,_) = arnoldi(A, projection_dim, b)
+
+                else:
+                    (_, _, basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
         
         else:
-            (_,_,_,basis) = generalized_golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
+            
+            if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
+
+                if A.shape[0] == A.shape[1]:
+                    (basis,_) = arnoldi(A, self.projection_dim, b)
+
+                else:
+                    (_, _, basis) = generalized_golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
 
         self.basis = basis
 
@@ -230,101 +259,18 @@ class GKSClass:
         
 
     
-class GKSClass:
-
-    def __init__(self, projection_dim=3, selection_method='gcv', **kwargs):
-
-        self.projection_dim = projection_dim
-        self.selection_method = selection_method
-
-        self.kwargs = kwargs
-
-        self.dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
-
-        self.x_history = []
-        self.lambda_history = []
-
-    def _project(self, A, b, projection_dim=None, **kwargs):
-        
-        if projection_dim is not None:
-
-            (_,_,_,basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
-        
-        else:
-            (_,_,_,basis) = generalized_golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
-
-        self.basis = basis
-
-        return basis
-    
-    def restart(self):
-        self.basis = None
-
-    def run(self, A, b, L, iter=50, warm_start=False):
-
-        if warm_start == False:
-
-            self._project(A, b, self.projection_dim)
-
-            x = A.T @ b # initialize x to b for reweighting
-            self.x = x
-
-        x = self.x
-
-        for ii in tqdm(range(iter), 'running GKS...'):
-
-            (Q_A, R_A) = la.qr(A @ self.basis, mode='economic') # Project A into V, separate into Q and R
-            
-            (Q_L, R_L) = la.qr(L @ self.basis, mode='economic') # Project L into V, separate into Q and R
-            
-            if self.selection_method == 'gcv':
-                lambdah = generalized_crossvalidation(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'] # find ideal lambda by crossvalidation
-            else:
-                lambdah = discrepancy_principle(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'] # find ideal lambdas by crossvalidation
-
-
-            self.lambda_history.append(lambdah)
-
-            bhat = (Q_A.T @ b).reshape(-1,1) # Project b
-
-            R_stacked = np.vstack( [R_A]+ [lambdah*R_L] ) # Stack projected operators
-
-            b_stacked = np.vstack([bhat] + [np.zeros(shape=(R_L.shape[0], 1))]) # pad with zeros
-
-            y, _,_,_ = la.lstsq(R_stacked, b_stacked) # get least squares solution
-
-            x = self.basis @ y # project y back
-
-            self.x_history.append(x)
-
-            r = (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
-            ra = A.T@r
-
-            rb = lambdah[0] * L.T @ (L @ x)
-            r = ra + rb
-
-
-            normed_r = r / la.norm(r) # normalize residual
-
-            self.basis = np.hstack([self.basis, normed_r]) # add residual to basis
-
-            self.basis, _ = la.qr(self.basis, mode='economic') # orthonormalize basis using QR
-
-            self.x = x
-
-
-        return x
 
 
 
 class MMGKSClass:
 
-    def __init__(self, pnorm=1, qnorm=1, projection_dim=3, selection_method='gcv', **kwargs):
+    def __init__(self, pnorm=1, qnorm=1, projection_dim=3, selection_method='gcv', projection_method='auto', **kwargs):
 
         self.pnorm = pnorm
         self.qnorm=qnorm
 
         self.projection_dim = projection_dim
+        self.projection_method = projection_method
         self.selection_method = selection_method
 
         self.kwargs = kwargs
@@ -339,10 +285,23 @@ class MMGKSClass:
         
         if projection_dim is not None:
 
-            (_,_,_,basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
+            if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
+
+                if A.shape[0] == A.shape[1]:
+                    (basis,_) = arnoldi(A, projection_dim, b)
+
+                else:
+                    (_, _, basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
         
         else:
-            (_,_,_,basis) = generalized_golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
+            
+            if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
+
+                if A.shape[0] == A.shape[1]:
+                    (basis,_) = arnoldi(A, self.projection_dim, b)
+
+                else:
+                    (_, _, basis) = generalized_golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
 
         self.basis = basis
 
