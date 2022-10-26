@@ -146,18 +146,20 @@ def get_gelPhantom():
     if not exists('./data/gelphantom_data'):
         mkdir("./data/gelphantom_data")
 
-    if exists(f"./data/crossphantom_data/GelPhantomData_b4.mat"):
+    if exists(f"./data/gelphantom_data/GelPhantomData_b4.mat"):
         print('Data already downloaded.')
     else:
         r = requests.get(f'https://zenodo.org/record/3696817/files/GelPhantomData_b4.mat')
-        with open(f'./data/crossphantom_data/GelPhantomData_b4.mat', "wb") as file:
+        with open(f'./data/gelphantom_data/GelPhantomData_b4.mat', "wb") as file:
             file.write(r.content)
         print("gelphantom data downloaded.")
 
 
-def gen_gelphantom():
+def gen_gelPhantom():
+    
+    get_gelPhantom()
 
-    path = os.path.abspath("/home/mpasha3/CIL/CILDemos/CIL-Demos/examples/3_Multichannel/data")
+    path = os.path.abspath("./data/gelphantom_data")
     data_mat = "GelPhantomData_b4"
     file_info = read_frames(path, data_mat)
     # Get sinograms + metadata
