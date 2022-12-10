@@ -91,6 +91,7 @@ def pdfp(A, b, L, **kwargs):
 
         iter = iter + 1
 
+
     return f
 
 
@@ -102,7 +103,7 @@ if __name__ == "__main__":
     I = np.random.rand(10,10)
 
 
-    out = pdfp(A, b, I, lambdah=1, gamma=1, maxiter=11, norm_tol = 0.01, sparsity_tol = 0.01, sparsity_prior = 0.1, psi=1, omega=1, kappa=10**(-7))
+    out = pdfp(A, b, np.flip(I), lambdah=10**(-7), gamma=10**(-7), maxiter=10000, norm_tol = 0.01, sparsity_tol = 0.01, sparsity_prior = 0.1, psi=1, omega=1, kappa=10**(-7))
 
     print(out)
 

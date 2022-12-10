@@ -1,6 +1,7 @@
 from pylops import LinearOperator
 
 from scipy import linalg as la
+import numpy as np
 
 """
 Utility functions.
@@ -22,6 +23,13 @@ def operator_qr(A):
         return la.qr(A.todense(), mode='economic')
     else:
         return la.qr(A, mode='economic')
+
+def soft_thresh(x, mu):
+    #y = np.sign(x)*np.max([np.abs(x)-mu], 0)
+    y = np.abs(x) - mu
+    y[y < 0] = 0
+    y = y * np.sign(x)
+    return y
 
 
 ### TODO: Add a general reweighting function
