@@ -50,7 +50,7 @@ def arnoldi(A: 'np.ndarray[np.float]', n: int, q_0: 'np.ndarray[np.float]' ) -> 
 
 def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
 
-    eta = kwargs['gk_eta'] if ('gk_eta' in kwargs) else 0.001
+    eta = kwargs['gk_eta'] if ('gk_eta' in kwargs) else 1.001
     delta = kwargs['gk_delta'] if ('gk_delta' in kwargs) else 0.001
 
     (rows, cols) = A.shape

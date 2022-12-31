@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.linalg as la
+import scipy.sparse.linalg as spla
 
 from psandqs.utils import *
 
@@ -10,7 +11,14 @@ Functions which implement variants of ADMM.
 
 def update_x(A, b, L, y, z, rho):
 
-    x = la.solve((A.T@A + rho*L.T@L).todense(), (A.T@b + L.T@y + rho*L.T@z))
+    if isinstance(A, LinearOperator):
+
+        x = spla.spsolve((A.T@A + rho*L.T@L).tosparse(), (A.T@b + L.T@y + rho*L.T@z), permc_spec='NATURAL')
+
+    else:
+        x = la.solve((A.T@A + rho*L.T@L).todense(), (A.T@b + L.T@y + rho*L.T@z))
+
+    x = x.reshape(A.shape[1], b.shape[1])
     return x
 
     

@@ -5,8 +5,7 @@ from scipy import linalg as la
 #from .decompositions import generalized_golub_kahan
 #from .utils import soft_thresh
 
-import decompositions
-import utils
+from psandqs import decompositions, utils
 
 """
 Functions which implement variants of Bregman iteration.
@@ -15,21 +14,25 @@ Functions which implement variants of Bregman iteration.
 
 def bregman(A, b, mu, noise_norm, iterations):
     [m, n] = A.shape
-    s = np.zeros(n)
-    z = np.zeros(n)
-    c = np.zeros(n)
+    s = np.zeros((n,1))
+    z = np.zeros((n,1))
+    xhat = np.zeros((n,1))
     # Bregman method needs the constant eta that we find as \|B\|_2^2, 
     # where B is a matrix of small dimension resulting from Golub-Kahan decomposition.
-    (U, B, V) = decompositions.generalized_golub_kahan(A, b, noise_norm)
+    (U, B, V) = decompositions.generalized_golub_kahan(A, b, gk_eta=1.01, gk_delta=noise_norm, n_iter=100)
     eta = la.norm(B)
 
+    history = []
+
     for i in range(1, iterations + 1):
-        z = z + A.T*(b-A*c)
-        c = (0.9/eta)*utils.soft_thresh(z, mu)
-        if (np.linalg.norm(A*c - b) < noise_norm):
+
+        z = z + A.T@(b-A@xhat)
+        xhat = (0.9/eta)*utils.soft_thresh(z, mu)
+        history.append(xhat)
+        if (np.linalg.norm(A@xhat - b) < noise_norm):
             it = i
             break
-    return c, it
+    return xhat, history
 
 if __name__ == "__main__":
 
