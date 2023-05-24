@@ -63,12 +63,18 @@ def GKS(A, b, L, projection_dim=3, iter=50, regparam = 'gcv', x_true=None, **kwa
         (Q_L, R_L) = la.qr(L @ V, mode='economic') # Project L into V, separate into Q and R
         
         if regparam == 'gcv':
-            lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'] # find ideal lambda by crossvalidation
+            lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambda by crossvalidation
+
         elif regparam == 'dp':
-            lambdah = discrepancy_principle(A @ V, b, L @ V, **kwargs)['x'] # find ideal lambdas by crossvalidation
+            lambdah = discrepancy_principle(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambdas by crossvalidation
         else:
             lambdah = regparam
 
+
+        if (regparam in ['gcv', 'dp']) and (ii > 1):
+
+            if abs(lambdah - lambda_history[-1]) > (1)*lambda_history[-1]:
+                lambdah = lambda_history[-1]
 
         lambda_history.append(lambdah)
 
@@ -87,8 +93,9 @@ def GKS(A, b, L, projection_dim=3, iter=50, regparam = 'gcv', x_true=None, **kwa
         r = (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
         ra = A.T@r
 
-        rb = lambdah[0] * L.T @ (L @ x)
-        #rb = lambdah * L.T @ (L @ x)
+        #rb = lambdah[0] * L.T @ (L @ x)
+
+        rb = lambdah * L.T @ (L @ x)
         r = ra + rb
 
         #r = r - V@(V.T@r)

@@ -53,7 +53,7 @@ def discrepancy_principle(A, b, L, eta, delta, **kwargs):
         beta_new = beta - f/f_prime
 
 
-        if abs(beta_new - beta) < 10**(-7): #* beta:
+        if abs(beta_new - beta) < 10**(-7)* beta:
             break
 
         beta = beta_new
@@ -64,7 +64,7 @@ def discrepancy_principle(A, b, L, eta, delta, **kwargs):
         
     print(iterations, alpha)
 
-    return {'x':[alpha.item()]}
+    return {'x':alpha}
 
 """def discrepancy_principle(A, b, eta, delta, **kwargs):
 
