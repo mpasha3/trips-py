@@ -134,4 +134,8 @@ test_notebook.ipynb
 ADMM_notebook.ipynb
 bregman_notebook.ipynb
 
+*.ipynb
+
 /data
+/trips/errata
+/trips/experimental
