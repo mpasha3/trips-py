@@ -61,8 +61,6 @@ def discrepancy_principle(A, b, L, eta, delta, **kwargs):
         alpha = 1/beta_new
 
         iterations += 1
-        
-    print(iterations, alpha)
 
     return {'x':alpha}
 

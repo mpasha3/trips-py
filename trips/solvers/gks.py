@@ -1,4 +1,3 @@
-from select import select
 from ..decompositions import generalized_golub_kahan, arnoldi
 from ..parameter_selection.gcv import generalized_crossvalidation
 from ..parameter_selection.discrepancy_principle import discrepancy_principle
@@ -8,6 +7,8 @@ import numpy as np
 from scipy import linalg as la
 
 from tqdm import tqdm
+
+from collections.abc import Iterable
 
 #from trips import testproblems
 
@@ -67,6 +68,8 @@ def GKS(A, b, L, projection_dim=3, iter=50, regparam = 'gcv', x_true=None, **kwa
 
         elif regparam == 'dp':
             lambdah = discrepancy_principle(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambdas by crossvalidation
+        elif isinstance(regparam, Iterable):
+            lambdah = regparam[ii]
         else:
             lambdah = regparam
 
@@ -92,9 +95,6 @@ def GKS(A, b, L, projection_dim=3, iter=50, regparam = 'gcv', x_true=None, **kwa
 
         r = (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
         ra = A.T@r
-
-        #rb = lambdah[0] * L.T @ (L @ x)
-
         rb = lambdah * L.T @ (L @ x)
         r = ra + rb
 
@@ -159,11 +159,18 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, iter=50, regparam='gcv', 
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
 
         if regparam == 'gcv':
-            lambdah = generalized_crossvalidation(p * (A @ V), b, q * (L @ V), **kwargs )['x'] # find ideal lambda by crossvalidation
+            lambdah = generalized_crossvalidation(p * (A @ V), b, q * (L @ V), **kwargs )['x'].item() # find ideal lambda by crossvalidation
         elif regparam == 'dp':
-            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), **kwargs )['x']
+            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), **kwargs )['x'].item()
+        elif isinstance(regparam, Iterable):
+            lambdah = regparam[ii]
         else:
             lambdah = regparam
+
+        if (regparam in ['gcv', 'dp']) and (ii > 1):
+
+            if abs(lambdah - lambda_history[-1]) > (1)*lambda_history[-1]:
+                lambdah = lambda_history[-1]
 
         lambda_history.append(lambdah)
 
@@ -181,9 +188,7 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, iter=50, regparam='gcv', 
 
         r = p * (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
         ra = A.T @ r
-
-        rb = lambdah[0] * L.T @ (q * (L @ x))# this likely needs to include information from the pnorm weighting
-        #rb = lambdah * L.T @ (L @ x)
+        rb = lambdah * L.T @ (q * (L @ x))
         r = ra  + rb
 
         #r = r - V@(V.T@r)
@@ -275,11 +280,19 @@ class GKSClass:
             (Q_L, R_L) = la.qr(L @ self.basis, mode='economic') # Project L into V, separate into Q and R
             
             if self.regparam == 'gcv':
-                lambdah = generalized_crossvalidation(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'] # find ideal lambda by crossvalidation
+                lambdah = generalized_crossvalidation(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
             elif self.regparam == 'dp':
-                lambdah = discrepancy_principle(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'] # find ideal lambdas by crossvalidation
+                lambdah = discrepancy_principle(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'].item() # find ideal lambdas by crossvalidation
+            elif isinstance(self.regparam, Iterable):
+                lambdah = self.regparam[ii]
             else:
                 lambdah = self.regparam
+
+            if (self.regparam in ['gcv', 'dp']) and (ii > 1):
+
+                if abs(lambdah - self.lambda_history[-1]) > (1)*self.lambda_history[-1]:
+                    lambdah = self.lambda_history[-1]
+
 
             self.lambda_history.append(lambdah)
 
@@ -298,7 +311,7 @@ class GKSClass:
             r = (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
             ra = A.T@r
 
-            rb = lambdah[0] * L.T @ (L @ x)
+            rb = lambdah * L.T @ (L @ x)
             r = ra + rb
 
 
@@ -405,11 +418,18 @@ class MMGKSClass:
             (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
             
             if self.regparam == 'gcv':
-                lambdah = generalized_crossvalidation(p * (A @ self.basis), b, p * (L @ self.basis), **self.kwargs)['x'] # find ideal lambda by crossvalidation
+                lambdah = generalized_crossvalidation(p * (A @ self.basis), b, q * (L @ self.basis), **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
             elif self.regparam == 'dp':
-                lambdah = discrepancy_principle(p * (A @ self.basis), b, p * (L @ self.basis), **self.kwargs)['x'] # find ideal lambdas by crossvalidation
+                lambdah = discrepancy_principle(p * (A @ self.basis), b, q * (L @ self.basis), **self.kwargs)['x'].item() # find ideal lambdas by crossvalidation
+            elif isinstance(self.regparam, Iterable):
+                lambdah = self.regparam[ii]
             else:
                 lambdah = self.regparam
+
+            if (self.regparam in ['gcv', 'dp']) and (ii > 1):
+
+                if abs(lambdah - self.lambda_history[-1]) > (1)*self.lambda_history[-1]:
+                    lambdah = self.lambda_history[-1]
 
             self.lambda_history.append(lambdah)
 
@@ -428,7 +448,7 @@ class MMGKSClass:
             r = p * (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
             ra = A.T @ r
 
-            rb = lambdah[0] * L.T @ (q * (L @ x))# this likely needs to include information from the pnorm weighting
+            rb = lambdah * L.T @ (q * (L @ x))# this likely needs to include information from the pnorm weighting
             r = ra  + rb
 
 
