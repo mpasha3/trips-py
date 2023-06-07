@@ -66,6 +66,12 @@ class Deblurring:
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
             x_truef = X_true.flatten(order = 'F')
+        elif choose_image == 'satellite64':
+            data = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/Package_October1/multiparameter_package/satellite64.mat')
+            X = data['x_new']
+            X_true = X/X.max()
+            self.nx, self.ny = X_true.shape  
+            x_truef = X_true.flatten(order = 'F')
         elif choose_image == 'edges':
             data = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/Package_October1/multiparameter_package/edges.mat')
             X = data['x']

@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from scipy.linalg import fractional_matrix_power
 from numpy import array, diag, dot, maximum, empty, repeat, ones, sum
 from numpy.linalg import inv
-from demos.operators import *
+from trips.operators import *
 ##Specify the font
 ##Latex needs to be installed! If not installed, please comment the following 5 lines
 # parameters = {'xtick.labelsize': 12, 'ytick.labelsize': 12,
@@ -97,7 +97,7 @@ generate_matrix = True #Defines a blurring operator where the forward operator m
 imagesize_x = 64 # Define the first dimension of the image
 imagesize_y = 64 # Defines the second dimension of the image
 spread = 1.5 # The PSF parameter
-choose_image = 'pattern1' #The choice of the image
+choose_image = 'satellite64' #The choice of the image
 if generate_matrix == True:
         # spread = [2,2]
         size = imagesize_x
@@ -113,6 +113,5 @@ b_vec = b.reshape((-1,1))
 L = np.identity(A.shape[1], dtype='float32')
 # xTik = np.linalg.solve(A.T@A + alpha*L.T@L, A.T@b_vec)
 # plt.imshow((xTik.reshape((imagesize_x, imagesize_x))))
-regvals = [0.01*(0.8**(x)) for x in range(0,20)]
-xx = Tikhonov(A, b_vec, L, x_true, regparam = 'DP')
+xx = Tikhonov(A, b_vec, L, x_true, regparam = 'gcv')
 Deblur.plot_rec(xx.reshape((64,64)), save_imgs = True, save_path='./saveImagesDeblurring')
