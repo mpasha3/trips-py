@@ -4,6 +4,7 @@ import scipy.linalg as la
 
 from ..utils import operator_qr, operator_svd
 from .gcv import gcv_numerator
+import warnings
 
 """def discrepancy_principle(A, b, L, eta, delta, **kwargs):
 
@@ -27,17 +28,11 @@ from .gcv import gcv_numerator
 
     return lambdah"""
 
-
-def discrepancy_principle(A, b, L, eta, delta, **kwargs):
-
+def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
     U, S, V = la.svd(A, full_matrices=False)
-
     singular_values = S**2
-
     singular_values.shape = (singular_values.shape[0], 1)
-
     bhat = U.T @ b
-
     beta = 1.0
 
     alpha = 0.0
@@ -45,7 +40,9 @@ def discrepancy_principle(A, b, L, eta, delta, **kwargs):
     iterations = 0
 
     while (iterations < 30) or ((iterations <= 100) and (np.abs(alpha) < 10**(-16))):
-
+        if delta == None:
+            warnings.warn("Warning: Discrepancy principle can not be applied without the noise level delta.")
+            break
         f = ((singular_values*beta + 1)**(-2)).T @ bhat - (eta*delta)**2
 
         f_prime = -2*  ((singular_values*beta + 1)**(-3) * singular_values).T @ bhat

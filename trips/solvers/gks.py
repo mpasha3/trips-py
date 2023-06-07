@@ -73,7 +73,6 @@ def GKS(A, b, L, projection_dim=3, iter=50, regparam = 'gcv', x_true=None, **kwa
         else:
             lambdah = regparam
 
-
         if (regparam in ['gcv', 'dp']) and (ii > 1):
 
             if abs(lambdah - lambda_history[-1]) > (1)*lambda_history[-1]:
@@ -344,7 +343,7 @@ class GKSClass:
 
 class MMGKSClass:
 
-    def __init__(self, pnorm=1, qnorm=1, projection_dim=3, regparam='gcv', projection_method='auto', **kwargs):
+    def __init__(self, pnorm=2, qnorm=1, projection_dim=3, regparam='gcv', projection_method='auto', **kwargs):
 
         self.pnorm = pnorm
         self.qnorm = qnorm
