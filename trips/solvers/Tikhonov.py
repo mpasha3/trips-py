@@ -5,7 +5,6 @@ from ..parameter_selection.discrepancy_principle import discrepancy_principle
 from ..utils import smoothed_holder_weights
 from collections.abc import Iterable
 def Tikhonov(A, b, L, x_true, regparam = 'gcv', **kwargs):
-    minerror = 100
     if regparam in ['gcv', 'GCV', 'Gcv']:
         lambdah = generalized_crossvalidation(A, b, L)['x'].item() # find ideal lambda by crossvalidation
         xTikh = np.linalg.solve(A.T@A + lambdah*L.T@L, A.T@b)
