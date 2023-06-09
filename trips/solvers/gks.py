@@ -231,6 +231,11 @@ class GKSClass:
 
         self.x_history = []
         self.lambda_history = []
+        
+
+    def change_regparam(self, regparam='gcv'):
+        self.regparam = regparam
+
 
     def _project(self, A, b, projection_dim=None, **kwargs):
         
@@ -359,6 +364,9 @@ class MMGKSClass:
 
         self.x_history = []
         self.lambda_history = []
+
+    def change_regparam(self, regparam='gcv'):
+        self.regparam = regparam
 
     def _project(self, A, b, projection_dim=None, **kwargs):
         
