@@ -29,6 +29,11 @@ import warnings
     return lambdah"""
 
 def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
+
+    if not isinstance(delta, float):
+
+        raise TypeError('You must supply a value for the noise level delta.')
+
     U, S, V = la.svd(A, full_matrices=False)
     singular_values = S**2
     singular_values.shape = (singular_values.shape[0], 1)
@@ -40,9 +45,7 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
     iterations = 0
 
     while (iterations < 30) or ((iterations <= 100) and (np.abs(alpha) < 10**(-16))):
-        if delta == None:
-            warnings.warn("Warning: Discrepancy principle can not be applied without the noise level delta.")
-            break
+
         f = ((singular_values*beta + 1)**(-2)).T @ bhat - (eta*delta)**2
 
         f_prime = -2*  ((singular_values*beta + 1)**(-3) * singular_values).T @ bhat
