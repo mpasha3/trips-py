@@ -134,8 +134,14 @@ test_notebook.ipynb
 ADMM_notebook.ipynb
 bregman_notebook.ipynb
 
-*.ipynb
+
 
 /data
 /trips/errata
 /trips/experimental
+
+/saveImagesDeblurring*
+/saveImagesDeblurringrecpattern1*
+/saveImagesDeblurringrecsattelite64*
+
+/misc_images*
