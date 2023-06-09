@@ -11,7 +11,6 @@ __version__ = "0.1"
 __maintainer__ = "Mirjeta Pasha"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com"
 
-from select import select
 from ..decompositions import arnoldi
 import numpy as np
 from scipy import linalg as la
