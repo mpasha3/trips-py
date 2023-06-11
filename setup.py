@@ -12,7 +12,7 @@ REQUIRED = [
 with open('README.md', 'r') as fh:
     LONG_DESCRIPTION = fh.read()
     setuptools.setup(
-        name = 'psandqs',
+        name = 'trips',
         version = '0.1.0',
         author = 'Mirjeta Pasha, Connor Sanderford',
         description = 'A package implementing approaches for regularization of ill-posed inverse problems.',
