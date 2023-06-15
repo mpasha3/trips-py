@@ -26,21 +26,23 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
     H = np.zeros((cols, 1))
 
     # normalize b
-    b = b/np.linalg.norm(b, ord=2)
+    b = b/np.linalg.norm(b)
 
     # b is first basis vector
-    Q[:, 0] = b[:,0]
+    Q[:, 0] = b.flatten()
 
     iterations = 0
 
     res_norm = np.inf
+
+    print(n_iter)
 
     for ii in tqdm(range(0,n_iter), desc = "generating basis..."): # for each iteration over the method:
 
         if ((dp_stop==True) and (res_norm <= eta*delta)):
 
             print('discrepancy principle satisfied, stopping early.')
-            
+
             break
 
         if iterations != 0:

@@ -40,7 +40,7 @@ two cases:
 - add one more top-level directory structure (algorithms, operators, etc) (done a bit of this)
 """
 
-def GKS(A, b, L, projection_dim=3, iter=50, regparam = 'gcv', x_true=None, **kwargs):
+def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
     projection_method = kwargs['projection_method'] if ('projection_method' in kwargs) else 'auto'
@@ -48,7 +48,7 @@ def GKS(A, b, L, projection_dim=3, iter=50, regparam = 'gcv', x_true=None, **kwa
     if ((projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (projection_method == 'arnoldi'):
 
         if A.shape[0] == A.shape[1]:
-            (V,H) = arnoldi(A, projection_dim, b)
+            (V,H) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
 
         else:
             (U, B, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
@@ -57,7 +57,7 @@ def GKS(A, b, L, projection_dim=3, iter=50, regparam = 'gcv', x_true=None, **kwa
     x_history = []
     lambda_history = []
 
-    for ii in tqdm(range(iter), 'running GKS...'):
+    for ii in tqdm(range(n_iter), 'running GKS...'):
 
         (Q_A, R_A) = la.qr(A @ V, mode='economic') # Project A into V, separate into Q and R
         
@@ -118,7 +118,7 @@ def GKS(A, b, L, projection_dim=3, iter=50, regparam = 'gcv', x_true=None, **kwa
 
 
 
-def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, iter=50, regparam='gcv', x_true=None, **kwargs):
+def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=50, regparam='gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
@@ -129,7 +129,7 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, iter=50, regparam='gcv', 
     if ((projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (projection_method == 'arnoldi'):
 
         if A.shape[0] == A.shape[1]:
-            (V,H) = arnoldi(A, projection_dim, b)
+            (V,H) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
 
         else:
             (U, B, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
@@ -139,7 +139,7 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, iter=50, regparam='gcv', 
 
     x = A.T @ b # initialize x for reweighting
 
-    for ii in tqdm(range(iter), desc='running MMGKS...'):
+    for ii in tqdm(range(n_iter), desc='running MMGKS...'):
 
         # compute reweighting for p-norm approximation
         v = A @ x - b
@@ -244,7 +244,7 @@ class GKSClass:
             if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
 
                 if A.shape[0] == A.shape[1]:
-                    (basis,_) = arnoldi(A, projection_dim, b)
+                    (basis,_) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
 
                 else:
                     (_, _, basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
@@ -254,7 +254,7 @@ class GKSClass:
             if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
 
                 if A.shape[0] == A.shape[1]:
-                    (basis,_) = arnoldi(A, self.projection_dim, b)
+                    (basis,_) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
 
                 else:
                     (_, _, basis) = generalized_golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
@@ -375,7 +375,7 @@ class MMGKSClass:
             if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
 
                 if A.shape[0] == A.shape[1]:
-                    (basis,_) = arnoldi(A, projection_dim, b)
+                    (basis,_) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
 
                 else:
                     (_, _, basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
@@ -385,7 +385,7 @@ class MMGKSClass:
             if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
 
                 if A.shape[0] == A.shape[1]:
-                    (basis,_) = arnoldi(A, self.projection_dim, b)
+                    (basis,_) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
 
                 else:
                     (_, _, basis) = generalized_golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
