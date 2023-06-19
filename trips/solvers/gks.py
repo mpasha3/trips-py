@@ -128,11 +128,10 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=50, regparam='gcv'
 
     if ((projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (projection_method == 'arnoldi'):
 
-        if A.shape[0] == A.shape[1]:
-            (V,H) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
+        (V,H) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
 
-        else:
-            (U, B, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
+    else:
+        (U, B, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
     
     x_history = []
     lambda_history = []

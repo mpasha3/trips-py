@@ -10,9 +10,25 @@ from tqdm import tqdm
 
 def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, dp_stop=False, **kwargs ) -> 'Tuple[np.ndarray[np.float], np.ndarray[np.float]]':
     """
-    computes the rank-n Arnoldi factorization of A, with initial guess q_0.
+    computes the rank-n Arnoldi factorization of A, with initial guess b.
 
     returns Q (m x n), an orthonormal matrix, and H (n+1 x n), an upper Hessenberg matrix.
+
+    A: the matrix to be factorized.
+
+    b: an initial guess for the first basis vector of the factorization.
+
+    n_iter: the number of iterations over which to factorize A.
+
+    dp_stop: whether or not to use the discrepancy principle to halt further factorization. Defaults to false.
+
+    Calling with the minimal number of arguments:
+
+    (Q,H) = arnoldi(A, b, n_iter)
+
+    Calling with all the arguments necessary for discrepancy principle stopping:
+
+    (Q,H) = arnoldi(A, b, n_iter, dp_stop=True, gk_eta=1.001, gk_delta=0.001)
     """
 
     eta = kwargs['gk_eta'] if ('gk_eta' in kwargs) else 1.001
@@ -83,6 +99,27 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
 
 
 def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
+    """
+    computes the rank-n Golub-Kahan factorization of A, with initial guess b.
+
+    returns U (m x n), an orthonormal matrix, V, an orthonormal matrix, and B (n+1 x n), a tridiagonal matrix.
+
+    A: the matrix to be factorized.
+
+    b: an initial guess for the first basis vector of the factorization.
+
+    n_iter: the number of iterations over which to factorize A.
+
+    dp_stop: whether or not to use the discrepancy principle to halt further factorization. Defaults to false.
+
+    Calling with the minimal number of arguments:
+
+    (U,B,V) = arnoldi(A, b, n_iter)
+
+    Calling with all the arguments necessary for discrepancy principle stopping:
+
+    (U,B,V) = arnoldi(A, b, n_iter, dp_stop=True, gk_eta=1.001, gk_delta=0.001)
+    """
 
     eta = kwargs['gk_eta'] if ('gk_eta' in kwargs) else 1.001
     delta = kwargs['gk_delta'] if ('gk_delta' in kwargs) else 0.001
