@@ -15,6 +15,7 @@ from trips.operators import *
 from trips.solvers.AnisoTV import *
 from matplotlib import transforms
 from scipy import ndimage
+from trips.cil_io import *
 def plot_recstructions_series(img, shape, dynamic, testproblem, geome_x, geome_x_small, save_imgs= True, save_path='./reconstruction/Emoji'):
     """
     Plot the reconstruction.
