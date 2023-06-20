@@ -104,7 +104,7 @@ def generate_emoji(noise_level, dataset):
         AA[ii] = A_small[ 2170*(ii):2170*(ii+1), 16384*ii:16384*(ii+1) ]
         B[ii] = b[ 2170*(ii) : 2170*(ii+1) ]
 
-    return (A_small, b, AA, B, nx, ny, nt, 0)
+    return (A_small, b, AA, B, nx, ny, nt, delta)
 
 
 """Crossphantom data and operator"""
@@ -128,7 +128,7 @@ def get_crossPhantom(dataset):
         print("CrossPhantom data downloaded.")
  
 
-def generate_crossPhantom(dataset, noise_level): # use noise_level
+def generate_crossPhantom(noise_level, dataset): # use noise_level
 
     assert dataset in [15,60]
 

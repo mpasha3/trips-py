@@ -21,7 +21,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import astra
-from data.phantoms import *
+# from data.phantoms import *
 from venv import create
 import pylops
 from scipy.ndimage import convolve
