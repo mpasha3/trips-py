@@ -118,7 +118,7 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 
 
 
-def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=50, regparam='gcv', x_true=None, **kwargs):
+def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
