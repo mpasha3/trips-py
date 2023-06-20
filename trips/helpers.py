@@ -69,3 +69,20 @@ def plot_recstructions_series(img, shape, dynamic, testproblem, geome_x, geome_x
                         plt.pause(.1)
                         plt.draw()
 
+
+# def plot_sinograms(B, nt, sinoshape, save_imgs= False):
+#     """
+#     Plot the sinograms.
+#     """
+#     plt.set_cmap('inferno')
+#     if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
+#     f = plt.figure(figsize=(15,15))
+#     f, axarr = plt.subplots(6,6)
+#     count = 0
+#     for i in range(6):
+#         for j in range(6):
+#             count = count + 1
+#             if count >32:
+#                 break
+#             axarr[i,j].imshow(B[count-1].reshape(217, 10, order='F'), aspect = 'auto')
+
