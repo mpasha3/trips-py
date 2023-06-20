@@ -43,7 +43,7 @@ def get_emoji_data(dataset = 30):
 
     assert dataset in [30,60]
 
-    if exists(f'./data/emoji/DataDynamic_128x{dataset}.mat'):
+    if exists(f'./data/emoji_data/DataDynamic_128x{dataset}.mat'):
         print('data already downloaded.')
 
     else:
