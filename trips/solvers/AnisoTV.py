@@ -3,7 +3,7 @@
 Definition of test problems
 --------------------------------------------------------------------------
 Created December 10, 2022 for TRIPs-Py library
-""
+"""
 __author__ = "Mirjeta Pasha and Connor Sanderford"
 __copyright__ = "Copyright 2022, TRIPs-Py library"
 __license__ = "GPL"
@@ -27,15 +27,25 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, testproblem):
             (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
 #            xx = np.reshape(x, (nx, ny, nt), order="F")
         else:
-
             xx = list(range(nt))
             L = spatial_derivative_operator(nx, ny, 1)
             for i in range(nt):
-                b_vec = B[i].reshape((-1,1))
+                b_vec = B[:, i].reshape((-1,1))
                 (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
                 xx[i] = x
-    else:  
-
+    elif testproblem == 'Stempo':
+        if dynamic == True:
+            L = time_derivative_operator(nx, ny, nt)
+            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
+            xx = np.reshape(x, (nx, ny, nt), order="F")
+        else:
+            xx = list(range(nt))
+            L = spatial_derivative_operator(nx, ny, 1)
+            for i in range(nt):
+                b_vec = B[:, i].reshape((-1,1))
+                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
+                xx[i] = x
+    else:
         if dynamic == True:
             L = time_derivative_operator(nx, ny, nt)
             (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
@@ -47,6 +57,7 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, testproblem):
                 b_vec = B[i].reshape((-1,1))
                 (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
                 xx[i] = x
+
     return xx  
 
 
