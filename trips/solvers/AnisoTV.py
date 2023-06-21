@@ -30,8 +30,8 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, testproblem):
             xx = list(range(nt))
             L = spatial_derivative_operator(nx, ny, 1)
             for i in range(nt):
-                data_f = B[:, i].reshape(-1,1)
-                (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None) 
+                b_vec = B[:,i].reshape((-1,1))
+                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
                 xx[i] = x
     else:  
         if dynamic == True:
@@ -42,7 +42,8 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, testproblem):
             xx = list(range(nt))
             L = spatial_derivative_operator(nx, ny, 1)
             for i in range(nt):
-                (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
+                b_vec = B[:,i].reshape((-1,1))
+                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
                 xx[i] = x
     return xx  
 
