@@ -33,7 +33,7 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, testproblem):
                 b_vec = B[:, i].reshape((-1,1))
                 (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam='gcv', x_true=None)
                 xx[i] = x
-    elif testproblem == 'Stempo':
+    elif testproblem == 'Test':
         if dynamic == True:
             b_vec = b.reshape((-1,1))
             L = time_derivative_operator(nx, ny, nt)
