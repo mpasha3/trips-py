@@ -15,6 +15,7 @@ from trips.operators import *
 from trips.solvers.AnisoTV import *
 from matplotlib import transforms
 from scipy import ndimage
+import matplotlib as plt
 # from trips.cil_io import *
 def plot_recstructions_series(img, shape, dynamic, testproblem, geome_x, geome_x_small, save_imgs= True, save_path='./reconstruction/Emoji'):
     """
@@ -71,19 +72,18 @@ def plot_recstructions_series(img, shape, dynamic, testproblem, geome_x, geome_x
                         plt.draw()
 
 
-# def plot_sinograms(B, nt, sinoshape, save_imgs= False):
-#     """
-#     Plot the sinograms.
-#     """
-#     plt.set_cmap('inferno')
-#     if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-#     f = plt.figure(figsize=(15,15))
-#     f, axarr = plt.subplots(6,6)
-#     count = 0
-#     for i in range(6):
-#         for j in range(6):
-#             count = count + 1
-#             if count >32:
-#                 break
-#             axarr[i,j].imshow(B[count-1].reshape(217, 10, order='F'), aspect = 'auto')
-
+def plot_sinograms(B, nt, sinoshape, save_imgs= False):
+    """
+    Plot the sinograms.
+    """
+    plt.set_cmap('inferno')
+    if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
+    f = plt.figure(figsize=(15,15))
+    f, axarr = plt.subplots(6,6)
+    count = 0
+    for i in range(6):
+        for j in range(6):
+            count = count + 1
+            if count >32:
+                break
+            axarr[i,j].imshow(B[count-1].reshape(217, 10, order='F'), aspect = 'auto')
