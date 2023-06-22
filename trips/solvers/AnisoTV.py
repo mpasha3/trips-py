@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
 Definition of test problems
+
 --------------------------------------------------------------------------
 Created December 10, 2022 for TRIPs-Py library
 """
