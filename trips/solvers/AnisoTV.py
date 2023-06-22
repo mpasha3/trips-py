@@ -20,44 +20,46 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, testproblem):
     """
     Reconstruct images by Anisotropic Total Variation
     """
-    b_vec = b.reshape((-1,1))
     if testproblem == 'gelPhantom':
         if dynamic == True:
+            b_vec = b.reshape((-1,1))
             L = time_derivative_operator(nx, ny, nt)
-            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
+            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam='gcv', x_true=None)
 #            xx = np.reshape(x, (nx, ny, nt), order="F")
         else:
             xx = list(range(nt))
             L = spatial_derivative_operator(nx, ny, 1)
             for i in range(nt):
                 b_vec = B[:, i].reshape((-1,1))
-                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
+                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam='gcv', x_true=None)
                 xx[i] = x
     elif testproblem == 'Stempo':
         if dynamic == True:
+            b_vec = b.reshape((-1,1))
             L = time_derivative_operator(nx, ny, nt)
-            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
+            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam='gcv', x_true=None)
             xx = np.reshape(x, (nx, ny, nt), order="F")
         else:
             xx = list(range(nt))
             L = spatial_derivative_operator(nx, ny, 1)
             for i in range(nt):
-                b_vec = B[:, i].reshape((-1,1))
-                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
+                print(i)
+                b_vec = B[i].reshape((-1,1))
+                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam='gcv', x_true=None)
                 xx[i] = x
     else:
         if dynamic == True:
+            b_vec = b.reshape((-1,1))
             L = time_derivative_operator(nx, ny, nt)
-            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
+            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam='gcv', x_true=None)
             xx = np.reshape(x, (nx, ny, nt), order="F")
         else:
             xx = list(range(nt))
             L = spatial_derivative_operator(nx, ny, 1)
             for i in range(nt):
                 b_vec = B[i].reshape((-1,1))
-                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, iter = 10, regparam='gcv', x_true=None)
+                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam='gcv', x_true=None)
                 xx[i] = x
-
     return xx  
 
 
