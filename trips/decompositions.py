@@ -12,7 +12,7 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
     """
     computes the rank-n Arnoldi factorization of A, with initial guess b.
 
-    returns Q (m x n), an orthonormal matrix, and H (n+1 x n), an upper Hessenberg matrix.
+    returns Q (m x n_iter+1), an orthonormal matrix, and H (n_iter+1 x n_iter), an upper Hessenberg matrix.
 
     A: the matrix to be factorized.
 
@@ -39,7 +39,7 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
     # preallocate
 
     Q = np.zeros((rows, 1+1))
-    H = np.zeros((cols, 1))
+    H = np.zeros((1+1, 1))
 
     # normalize b
     b = b/np.linalg.norm(b)
@@ -51,8 +51,6 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
 
     res_norm = np.inf
 
-    print(n_iter)
-
     for ii in tqdm(range(0,n_iter), desc = "generating basis..."): # for each iteration over the method:
 
         if ((dp_stop==True) and (res_norm <= eta*delta)):
@@ -63,7 +61,7 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
 
         if iterations != 0:
             Q = np.pad(Q, ((0,0), (0,1)) )  # at each iteration that doesn't satisfy the discrepancy principle,
-            H = np.pad(H, ((0,0), (0,1)) )  # add an additional column to the bases and entry to the bidiagonal entries.
+            H = np.pad(H, ((0,1), (0,1)) )  # add an additional column to the bases and entry to the bidiagonal entries.
 
 
         b_nplus1  = A @ Q[:,ii] # generate the next vector in the Krylov subspace
@@ -102,7 +100,7 @@ def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
     """
     computes the rank-n Golub-Kahan factorization of A, with initial guess b.
 
-    returns U (m x n), an orthonormal matrix, V, an orthonormal matrix, and B (n+1 x n), a tridiagonal matrix.
+    returns U (m x n_iter+1), an orthonormal matrix, V (n x n_iter), an orthonormal matrix, and B (n_iter+1 x n_iter), a bidiagonal matrix.
 
     A: the matrix to be factorized.
 
@@ -114,11 +112,11 @@ def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
 
     Calling with the minimal number of arguments:
 
-    (U,B,V) = arnoldi(A, b, n_iter)
+    (U,B,V) = generalized_golub_kahan(A, b, n_iter)
 
     Calling with all the arguments necessary for discrepancy principle stopping:
 
-    (U,B,V) = arnoldi(A, b, n_iter, dp_stop=True, gk_eta=1.001, gk_delta=0.001)
+    (U,B,V) = generalized_golub_kahan(A, b, n_iter, dp_stop=True, gk_eta=1.001, gk_delta=0.001)
     """
 
     eta = kwargs['gk_eta'] if ('gk_eta' in kwargs) else 1.001
