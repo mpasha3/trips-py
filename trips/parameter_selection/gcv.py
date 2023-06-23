@@ -4,7 +4,7 @@ import scipy.linalg as la
 
 from pylops import Identity
 
-from ..utils import operator_qr, operator_svd, check_identity
+from ..utils import operator_qr, operator_svd, is_identity
 
 #separate into two modules
 
@@ -55,11 +55,11 @@ def generalized_crossvalidation(A, b, L, **kwargs):
 
     # first, compute skinny factorizations.
 
-    if check_identity(L):
+    if is_identity(L):
 
         Q_A, R_A, _ = operator_svd(A)
 
-        (Q_L, R_L) = (np.eye(L.shape[0]), np.eye(L.shape[0]))
+        (Q_L, R_L) = (Identity(L.shape[0]), Identity(L.shape[0]))
 
     else:
 
