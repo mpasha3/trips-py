@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+"""
+Definition of test problems
+--------------------------------------------------------------------------
+Created Jun 7, 2023 for TRIPs-Py library
+"""
+__authors__ = "Mirjeta Pasha and Connor Sanderford"
+__copyright__ = "Copyright 2022, TRIPs-Py library"
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Mirjeta Pasha"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com"
+
+
 from ..decompositions import generalized_golub_kahan, arnoldi
 from ..parameter_selection.gcv import generalized_crossvalidation
 from ..parameter_selection.discrepancy_principle import discrepancy_principle
@@ -370,10 +384,6 @@ class GKSClass:
         
         else:
             return x
-        
-
-    
-
 
 
 class MMGKSClass:
