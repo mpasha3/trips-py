@@ -3,6 +3,8 @@ from pylops import LinearOperator
 from scipy import linalg as la
 import numpy as np
 
+from pylops import Identity, LinearOperator
+
 """
 Utility functions.
 """
@@ -54,6 +56,21 @@ def generate_noise(shape, noise_level, dist='normal'):
     elif dist == 'poisson':
         noise = np.random.poisson
     e = noise_level * noise / la.norm(noise)
+
+
+def check_identity(A):
+    """
+    Checks whether the operator A is identity.
+    """
+
+    if isinstance(A, Identity): # check if A is a pylops identity operator
+        return True
+
+    elif (not isinstance(A, LinearOperator)) and ( A.shape[0] == A.shape[1] ) and ( np.allclose(A, np.eye(A.shape[0])) ): # check if A is an array resembling the identity matrix
+        return True
+    
+    else:
+        return False
     
 
 
