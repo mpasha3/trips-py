@@ -2,7 +2,9 @@ import numpy as np
 from scipy.optimize import newton, minimize
 import scipy.linalg as la
 
-from ..utils import operator_qr
+from pylops import Identity
+
+from ..utils import operator_qr, operator_svd, check_identity
 
 #separate into two modules
 
@@ -51,11 +53,19 @@ def generalized_crossvalidation(A, b, L, **kwargs):
     else:
         tol = 10**(-12)
 
-    # first, compute skinny QR factorizations.
+    # first, compute skinny factorizations.
 
-    (Q_A, R_A) = operator_qr(A)
+    if check_identity(L):
 
-    (Q_L, R_L) = operator_qr(L)
+        Q_A, R_A, _ = operator_svd(A)
+
+        (Q_L, R_L) = (np.eye(L.shape[0]), np.eye(L.shape[0]))
+
+    else:
+
+        (Q_A, R_A) = operator_qr(A)
+
+        (Q_L, R_L) = operator_qr(L)
 
     # function to minimize
 

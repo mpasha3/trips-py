@@ -32,7 +32,7 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
 
     if not isinstance(delta, float):
 
-        raise TypeError('You must supply a value for the noise level delta.')
+        raise TypeError('You must provide a value for the noise level delta.')
 
     U, S, V = la.svd(A, full_matrices=False)
     singular_values = S**2
