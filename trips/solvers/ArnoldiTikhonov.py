@@ -2,7 +2,7 @@
 """
 Definition of test problems
 --------------------------------------------------------------------------
-Created Jun 7, 2023 for TRIPs-Py library
+Created June 23rd, 2023 for TRIPs-Py library
 """
 __authors__ = "Mirjeta Pasha and Connor Sanderford"
 __copyright__ = "Copyright 2022, TRIPs-Py library"
