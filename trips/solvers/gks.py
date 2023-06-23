@@ -1,10 +1,11 @@
 from ..decompositions import generalized_golub_kahan, arnoldi
 from ..parameter_selection.gcv import generalized_crossvalidation
 from ..parameter_selection.discrepancy_principle import discrepancy_principle
-from ..utils import smoothed_holder_weights
+from ..utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
 
 import numpy as np
 from scipy import linalg as la
+from pylops import Identity
 
 from tqdm import tqdm
 
@@ -38,10 +39,20 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 
     for ii in tqdm(range(n_iter), 'running GKS...'):
 
-        (Q_A, R_A) = la.qr(A @ V, mode='economic') # Project A into V, separate into Q and R
+        if is_identity(L):
+
+            Q_A, R_A, _ = la.svd(A @ V, full_matrices=False)
+
+            R_A = np.diag(R_A)
+
+            (Q_L, R_L) = (Identity(L.shape[0]) @ V, Identity(L.shape[0]) @ V)
+
+        else:
+
+            (Q_A, R_A) = la.qr(A @ V, mode='economic') # Project A into V, separate into Q and R
         
-        (Q_L, R_L) = la.qr(L @ V, mode='economic') # Project L into V, separate into Q and R
-        
+            (Q_L, R_L) = la.qr(L @ V, mode='economic') # Project L into V, separate into Q and R
+
         if regparam == 'gcv':
             lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambda by crossvalidation
 
@@ -143,6 +154,7 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         z = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).flatten()**(1/2)
         q = z[:, np.newaxis]
         temp = q * (L @ V)  
+        
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
 
         if regparam == 'gcv':
@@ -278,9 +290,19 @@ class GKSClass:
 
         for ii in tqdm(range(n_iter), 'running GKS...'):
 
-            (Q_A, R_A) = la.qr(A @ self.basis, mode='economic') # Project A into V, separate into Q and R
-            
-            (Q_L, R_L) = la.qr(L @ self.basis, mode='economic') # Project L into V, separate into Q and R
+            if is_identity(L):
+
+                Q_A, R_A, _ = la.svd(A @ self.basis, full_matrices=False)
+
+                (Q_L, R_L) = (Identity(L.shape[0]) @ self.basis, Identity(L.shape[0]) @ self.basis)
+
+                R_A = np.diag(R_A)
+
+            else:
+
+                (Q_A, R_A) = la.qr(A @ self.basis, mode='economic') # Project A into V, separate into Q and R
+        
+                (Q_L, R_L) = la.qr(L @ self.basis, mode='economic') # Project L into V, separate into Q and R
             
             if self.regparam == 'gcv':
                 lambdah = generalized_crossvalidation(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
@@ -425,13 +447,14 @@ class MMGKSClass:
             temp = p * (A @ self.basis)
 
             (Q_A, R_A) = la.qr(temp, mode='economic') # Project A into V, separate into Q and R
-
             
             u = L @ x
             z = smoothed_holder_weights(u, epsilon=self.epsilon, p=self.qnorm).flatten()**(1/2)
             q = z[:, np.newaxis]
-            temp = q * (L @ self.basis)  
+            temp = q * (L @ self.basis) 
+        
             (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
+
             
             if self.regparam == 'gcv':
                 lambdah = generalized_crossvalidation(p * (A @ self.basis), b, q * (L @ self.basis), **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
