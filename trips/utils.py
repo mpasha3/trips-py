@@ -1,6 +1,9 @@
 from pylops import LinearOperator
 
 from scipy import linalg as la
+from scipy.sparse._arrays import _sparray
+from scipy import sparse
+
 import numpy as np
 
 from pylops import Identity, LinearOperator
@@ -58,7 +61,7 @@ def generate_noise(shape, noise_level, dist='normal'):
     e = noise_level * noise / la.norm(noise)
 
 
-def check_identity(A):
+def is_identity(A):
     """
     Checks whether the operator A is identity.
     """
@@ -67,6 +70,9 @@ def check_identity(A):
         return True
 
     elif (not isinstance(A, LinearOperator)) and ( A.shape[0] == A.shape[1] ) and ( np.allclose(A, np.eye(A.shape[0])) ): # check if A is an array resembling the identity matrix
+        return True
+    
+    elif isinstance(A, _sparray) and ( A.shape[0] == A.shape[1] ) and ( A - sparse.eye(A.shape[0]) ).sum() < 10**(-6):
         return True
     
     else:
