@@ -10,48 +10,27 @@ from tqdm import tqdm
 
 from collections.abc import Iterable
 
-#from trips import testproblems
-
-#testproblems.suchandsuch
-
-#from trips.gks import gks
 
 """
-Functions which implement variants of GKS.
-"""
-
-"""
-notes:
-
-two cases:
-
-- make no assumptions about regparam, user manually selects (grid search)
-    (do we need to be able to supply an array of values here, for each iteration? maybe later)
-
-
-- make a notebook for GKS / MMGKS / class implementations (notebooks made for gcv, add dp?)
-
-- solutions, convergence curves (part of the notebook)
-
-- docstrings with inputs/outputs
-
-- test cases with different forms of noise added
-
-- add one more top-level directory structure (algorithms, operators, etc) (done a bit of this)
+Variants of GKS.
 """
 
 def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
+
     projection_method = kwargs['projection_method'] if ('projection_method' in kwargs) else 'auto'
+
+    regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else None
+
 
     if ((projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (projection_method == 'arnoldi'):
 
-        if A.shape[0] == A.shape[1]:
-            (V,H) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
+        (V,H) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
 
-        else:
-            (U, B, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
+    else:
+
+        (U, B, V) = generalized_golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
 
     
     x_history = []
@@ -68,8 +47,16 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 
         elif regparam == 'dp':
             lambdah = discrepancy_principle(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambdas by crossvalidation
+
+        elif regparam == 'gcv+sequence':
+            if ii == 0:
+                lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambda by crossvalidation
+            else:
+                lambdah = lambda_history[0] * regparam_sequence[ii]
+        
         elif isinstance(regparam, Iterable):
             lambdah = regparam[ii]
+        
         else:
             lambdah = regparam
 
@@ -124,6 +111,8 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
 
     epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.001
 
+    regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else None
+
     projection_method = kwargs['projection_method'] if ('projection_method' in kwargs) else 'auto'
 
     if ((projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (projection_method == 'arnoldi'):
@@ -158,10 +147,19 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
 
         if regparam == 'gcv':
             lambdah = generalized_crossvalidation(p * (A @ V), b, q * (L @ V), **kwargs )['x'].item() # find ideal lambda by crossvalidation
+        
         elif regparam == 'dp':
             lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), **kwargs )['x'].item()
+
+        elif regparam == 'gcv+sequence':
+            if ii == 0:
+                lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambda by crossvalidation
+            else:
+                lambdah = lambda_history[0] * regparam_sequence[ii]
+        
         elif isinstance(regparam, Iterable):
             lambdah = regparam[ii]
+        
         else:
             lambdah = regparam
 
@@ -228,6 +226,8 @@ class GKSClass:
 
         self.dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
+        self.regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else None
+
         self.x_history = []
         self.lambda_history = []
         
@@ -242,18 +242,18 @@ class GKSClass:
 
             if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
 
-                if A.shape[0] == A.shape[1]:
-                    (basis,_) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
 
-                else:
-                    (_, _, basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
+                (basis,_) = arnoldi(A, b, projection_dim, self.dp_stop, **kwargs)
+
+            else:
+                (_, _, basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
         
         else:
             
             if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
 
                 if A.shape[0] == A.shape[1]:
-                    (basis,_) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
+                    (basis,_) = arnoldi(A, b, projection_dim, self.dp_stop, **kwargs)
 
                 else:
                     (_, _, basis) = generalized_golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
@@ -265,7 +265,7 @@ class GKSClass:
     def restart(self):
         self.basis = None
 
-    def run(self, A, b, L, iter=50, warm_start=False, x_true=None):
+    def run(self, A, b, L, n_iter=50, warm_start=False, x_true=None):
 
         if warm_start == False:
 
@@ -276,7 +276,7 @@ class GKSClass:
 
         x = self.x
 
-        for ii in tqdm(range(iter), 'running GKS...'):
+        for ii in tqdm(range(n_iter), 'running GKS...'):
 
             (Q_A, R_A) = la.qr(A @ self.basis, mode='economic') # Project A into V, separate into Q and R
             
@@ -284,10 +284,19 @@ class GKSClass:
             
             if self.regparam == 'gcv':
                 lambdah = generalized_crossvalidation(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
+            
             elif self.regparam == 'dp':
                 lambdah = discrepancy_principle(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'].item() # find ideal lambdas by crossvalidation
+            
+            elif self.regparam == 'gcv+sequence':
+                if ii == 0:
+                    lambdah = generalized_crossvalidation(A @ V, b, L @ V, **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
+                else:
+                    lambdah = self.lambda_history[0] * self.regparam_sequence[ii]
+
             elif isinstance(self.regparam, Iterable):
                 lambdah = self.regparam[ii]
+            
             else:
                 lambdah = self.regparam
 
@@ -361,6 +370,8 @@ class MMGKSClass:
         self.dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
         self.epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.001
 
+        self.regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else None
+
         self.x_history = []
         self.lambda_history = []
 
@@ -373,18 +384,17 @@ class MMGKSClass:
 
             if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
 
-                if A.shape[0] == A.shape[1]:
-                    (basis,_) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
+                (basis,_) = arnoldi(A, b, projection_dim, self.dp_stop, **kwargs)
 
-                else:
-                    (_, _, basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
+            else:
+                (_, _, basis) = generalized_golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
         
         else:
             
             if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
 
                 if A.shape[0] == A.shape[1]:
-                    (basis,_) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
+                    (basis,_) = arnoldi(A, b, projection_dim, self.dp_stop, **kwargs)
 
                 else:
                     (_, _, basis) = generalized_golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
@@ -396,7 +406,7 @@ class MMGKSClass:
     def restart(self):
         self.basis = None
 
-    def run(self, A, b, L, iter=50, warm_start=False, x_true=None):
+    def run(self, A, b, L, n_iter=50, warm_start=False, x_true=None):
 
         if warm_start == False:
 
@@ -407,7 +417,7 @@ class MMGKSClass:
 
         x = self.x
 
-        for ii in tqdm(range(iter), 'running MMGKS...'):
+        for ii in tqdm(range(n_iter), 'running MMGKS...'):
 
             v = A @ x - b
             z = smoothed_holder_weights(v, epsilon=self.epsilon, p=self.pnorm).flatten()**(1/2)
@@ -425,10 +435,19 @@ class MMGKSClass:
             
             if self.regparam == 'gcv':
                 lambdah = generalized_crossvalidation(p * (A @ self.basis), b, q * (L @ self.basis), **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
+            
             elif self.regparam == 'dp':
                 lambdah = discrepancy_principle(p * (A @ self.basis), b, q * (L @ self.basis), **self.kwargs)['x'].item() # find ideal lambdas by crossvalidation
+            
+            elif self.regparam == 'gcv+sequence':
+                if ii == 0:
+                    lambdah = generalized_crossvalidation(A @ V, b, L @ V, **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
+                else:
+                    lambdah = self.lambda_history[0] * self.regparam_sequence[ii]
+            
             elif isinstance(self.regparam, Iterable):
                 lambdah = self.regparam[ii]
+            
             else:
                 lambdah = self.regparam
 
