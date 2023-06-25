@@ -38,8 +38,8 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
 
     # preallocate
 
-    Q = np.zeros((rows, 1+1))
-    H = np.zeros((1+1, 1))
+    Q = np.zeros((rows, n_iter+1))
+    H = np.zeros((n_iter+1, 1))
 
     # normalize b
     b = b/np.linalg.norm(b)
