@@ -33,39 +33,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import astra
-import phantoms as phantom
-from venv import create
-import pylops
-from scipy.ndimage import convolve
-from scipy import sparse
-from scipy.ndimage import convolve
-import scipy.special as spe
-from trips.testProblems import *
-from trips.solvers.gks import *
-import os,sys
-sys.path.insert(0,'/Users/mirjetapasha/Documents/Research_Projects/TRIPSpy/TRIPSpy')
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from scipy.linalg import fractional_matrix_power
-from numpy import array, diag, dot, maximum, empty, repeat, ones, sum
-from numpy.linalg import inv
-from trips.operators import *
-##Specify the font
-##Latex needs to be installed! If not installed, please comment the following 5 lines
-# parameters = {'xtick.labelsize': 12, 'ytick.labelsize': 12,
-#           'axes.titlesize': 18, 'axes.labelsize': 18, 'figure.titlesize': 14, 'legend.fontsize': 13}
-# plt.rcParams.update(parameters)
-import time
-import numpy as np
-import scipy as sp
-import scipy.stats as sps
-import scipy.io as spio
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
-import astra
-import phantoms as phantom
+# import phantoms as phantom
 from venv import create
 import pylops
 from scipy.ndimage import convolve
@@ -76,6 +44,8 @@ from trips.testProblems import *
 from trips.operators import *
 from trips.solvers.gks import *
 from trips.solvers.Tikhonov import *
+from trips.solvers.tSVD import *
+
 # Deblurring example test problem
 Deblur = Deblurring()
 # In the class Deblurring we have can define the type of problem to be used.
@@ -94,10 +64,14 @@ x_true = Deblur.generate_true(choose_image)
 b_true = Deblur.generate_data(x_true, generate_matrix)
 (b, delta) = Deblur.add_noise(b_true, 'Gaussian', noise_level = 0.01)
 Deblur.plot_rec(x_true.reshape((shape), order = 'F'), save_imgs = True, save_path='./saveImagesDeblurring'+'rec'+choose_image)
-alpha = 0.1
+
+from pylops import Identity
 b_vec = b.reshape((-1,1))
-L = np.identity(A.shape[1], dtype='float32')
-# xTik = np.linalg.solve(A.T@A + alpha*L.T@L, A.T@b_vec)
-# plt.imshow((xTik.reshape((imagesize_x, imagesize_x))))
-xx = Tikhonov(A, b_vec, L, x_true, regparam = 'gcv')
-Deblur.plot_rec(xx.reshape((64,64)), save_imgs = True, save_path='./saveImagesDeblurring')
+(V,H) = arnoldi(A, b_vec, n_iter = 4, dp_stop= 0)
+UU = V[:, 0:-1]
+HH = H[0:-1, :]
+L = Identity(HH.shape[1]).todense()
+bhat = UU.T.dot(b_vec)
+reg_param = generalized_crossvalidation(HH, bhat, L)['x'] # find ideal lambda by crossvalidation
+
+reg_param.shape
