@@ -96,6 +96,47 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
     return (Q,H)
 
 
+def arnoldi_1(A: 'np.ndarray[np.float]', n: int, q_0: 'np.ndarray[np.float]' ) -> 'Tuple[np.ndarray[np.float], np.ndarray[np.float]]':
+    """
+    computes the rank-n Arnoldi factorization of A, with initial guess q_0.
+
+    returns Q (m x n), an orthonormal matrix, and H (n+1 x n), an upper Hessenberg matrix.
+    """
+
+    # preallocate
+
+    Q = np.zeros((A.shape[0], n+1))
+    H = np.zeros((n+1, n))
+
+    # normalize q_0
+    q_0 = q_0/np.linalg.norm(q_0, ord=2)
+
+    # q_0 is first basis vector
+    Q[:, 0] = q_0[:,0]
+
+    for ii in tqdm(range(0,n), desc = "generating basis..."): # for each iteration over the method:
+
+        q_nplus1  = A @ Q[:,ii] # generate the next vector in the Krylov subspace
+
+        for jj in range(0,n): # for each iteration *that has been previously completed*:
+
+            H[jj,ii] = np.dot( Q[:,jj], q_nplus1 ) # calculate projections of the new Krylov vector onto previous basis elements
+
+            q_nplus1 = q_nplus1 - H[jj,ii] * Q[:,jj] # and orthogonalize the new Krylov vector with respect to previous basis elements
+
+        if ii < n:
+            H[ii+1, ii] = np.linalg.norm(q_nplus1, 2)
+
+            if H[ii+1,ii] == 0:
+                return (Q,H)
+
+            Q[:, ii+1] = q_nplus1/H[ii+1,ii]
+
+
+    return (Q,H)
+
+
+
 def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
     """
     computes the rank-n Golub-Kahan factorization of A, with initial guess b.
