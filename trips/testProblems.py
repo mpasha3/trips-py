@@ -61,27 +61,27 @@ class Deblurring:
 
     def generate_true(self, choose_image):
         # Specify the path
-        
+        path_package = '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package'
         if choose_image == 'satellite128':
-            dataa = spio.loadmat('./demos/data/images/satellite.mat')
+            dataa = spio.loadmat(path_package + '/demos/data/images/satellite.mat')
             X = dataa['x_true']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
             x_truef = X_true.flatten(order = 'F')
         elif choose_image == 'satellite64':
-            dataa = spio.loadmat('./demos/data/images/satellite64.mat')
+            dataa = spio.loadmat(path_package + '/demos/data/images/satellite64.mat')
             X = dataa['x_new']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
             x_truef = X_true.flatten(order = 'F')
         elif choose_image == 'edges':
-            dataa = spio.loadmat('./demos/data/images/edges.mat')
+            dataa = spio.loadmat(path_package + '/demos/data/images/edges.mat')
             X = dataa['x']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
             x_truef = X_true.flatten(order = 'F')
         elif choose_image == 'pattern1':
-            dataa = spio.loadmat('./demos/data/images/shape1.mat')
+            dataa = spio.loadmat(path_package + '/demos/data/images/shape1.mat')
             X = dataa['xtrue']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
