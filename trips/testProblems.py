@@ -60,6 +60,8 @@ class Deblurring:
         return blur
 
     def generate_true(self, choose_image):
+        # Specify the path
+        
         if choose_image == 'satellite128':
             dataa = spio.loadmat('./demos/data/images/satellite.mat')
             X = dataa['x_true']
