@@ -161,7 +161,7 @@ class Deblurring:
         return A
 
     def generate_data(self, x, matrix):
-        if matrix == 'False':
+        if matrix == False:
             A = self.forward_Op(self.dim, self.spread, self.nx, self.ny)
             b = A*x
         else:
