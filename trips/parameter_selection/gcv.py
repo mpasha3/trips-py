@@ -2,7 +2,7 @@ import numpy as np
 from scipy.optimize import newton, minimize
 import scipy.linalg as la
 
-from pylops import Identity
+from pylops import Identity, LinearOperator
 
 from ..utils import operator_qr, operator_svd, is_identity
 
@@ -14,13 +14,21 @@ Generalized crossvalidation
 
 def gcv_numerator(reg_param, Q_A, R_A, Q_L, R_L, b):
 
+    # the observation term:
+
+    R_A_2 = R_A.T @ R_A
+
+    R_A_2 = R_A_2.todense() if isinstance(R_A_2, LinearOperator) else R_A_2
+
     # The regularizer term:
-    R_L_2 = reg_param* R_L.T @ R_L
+
+    R_L_2 = (R_L.T @ R_L)
+    
+    R_L_2 = R_L_2.todense() if isinstance(R_L_2, LinearOperator) else R_L_2
 
     # the inverse term:
 
-    inverted = la.solve( (R_A.T @ R_A + R_L_2), (R_A.T @ Q_A.T @ b) )
-
+    inverted = la.solve( ( R_A_2 + reg_param * R_L_2), (R_A.T @ Q_A.T @ b) )
 
     # times R_A, minus b, norm
 
@@ -28,12 +36,21 @@ def gcv_numerator(reg_param, Q_A, R_A, Q_L, R_L, b):
 
 def gcv_denominator(reg_param, Q_A, R_A, Q_L, R_L, b):
 
+    # the observation term:
+
+    R_A_2 = R_A.T @ R_A
+
+    R_A_2 = R_A_2.todense() if isinstance(R_A_2, LinearOperator) else R_A_2
+
     # The regularizer term:
-    R_L_2 = reg_param * R_L.T @ R_L
+
+    R_L_2 = (R_L.T @ R_L)
+
+    R_L_2 = R_L_2.todense() if isinstance(R_L_2, LinearOperator) else R_L_2
 
     # the inverse term:
 
-    inverted = la.solve( (R_A.T @ R_A + R_L_2), R_A.T )
+    inverted = la.solve( ( R_A_2 + reg_param * R_L_2), R_A.T )
 
     # trace term
 
@@ -59,7 +76,10 @@ def generalized_crossvalidation(A, b, L, **kwargs):
 
         Q_A, R_A, _ = operator_svd(A)
 
-        (Q_L, R_L) = (Identity(L.shape[0]), Identity(L.shape[0]))
+        Q_L = Identity(L.shape[0])
+        R_L = Identity(L.shape[0])
+
+        R_A = np.diag(R_A)
 
     else:
 
