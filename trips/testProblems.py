@@ -106,6 +106,8 @@ class Deblurring:
                         h_im[i, j] = 1
             x_truef = self.vec(h_im)
             # X_true = h_im
+        else:
+            raise ValueError("The image you requested does not exist! Specify the right name.")
         return x_truef
         ## convert a 2-d image into a 1-d vector
     def vec(self, image):
