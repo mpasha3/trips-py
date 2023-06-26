@@ -15,8 +15,20 @@ from trips.operators import *
 from trips.solvers.AnisoTV import *
 from matplotlib import transforms
 from scipy import ndimage
-import matplotlib as plt
+import matplotlib.pyplot as plt
 # from trips.cil_io import *
+from testProblems import *
+
+def check_imagesize_toreshape(existingimage, chooseimage, old_size, newsize):
+    path_package = '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package'
+    if (old_size[0] != newsize[0] or old_size[1] != newsize[1]):
+        Deblur.plot_rec(existingimage.reshape((shape), order = 'F'), save_imgs = False)
+        temp_im = Image.open(path_package + '/demos/data/images/'+chooseimage+'_'+str(newsize[0])+'.jpg')
+        image_new =  np.array(temp_im.resize((newsize[0], newsize[1])))
+        spio.savemat(path_package + '/demos/data/images/'+chooseimage+'_'+str(newsize[0])+'.mat', mdict={'x_true': image_new})
+    return image_new
+
+
 def plot_recstructions_series(img, shape, dynamic, testproblem, geome_x, geome_x_small, save_imgs= True, save_path='./reconstruction/Emoji'):
     """
     Plot the reconstruction.
