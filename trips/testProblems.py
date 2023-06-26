@@ -63,7 +63,7 @@ class Deblurring:
         # Specify the path
         path_package = '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package'
         if choose_image == 'satellite128':
-            dataa = spio.loadmat(path_package + '/demos/data/images/satellite.mat')
+            dataa = spio.loadmat(path_package + '/demos/data/images/satellite128.mat')
             X = dataa['x_true']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
