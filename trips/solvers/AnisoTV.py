@@ -25,7 +25,7 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, reg_param, testproblem, del
         if dynamic == True:
             b_vec = b.reshape((-1,1))
             L = time_derivative_operator(nx, ny, nt)
-            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam=reg_param, x_true=None, delta = delta)
+            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam=reg_param, x_true=None, eta=1.01, delta = delta)
 #            xx = np.reshape(x, (nx, ny, nt), order="F")
         else:
             xx = list(range(nt))
@@ -53,7 +53,7 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, reg_param, testproblem, del
             b_vec = b.reshape((-1,1))
             L = spatial_derivative_operator(nx, ny, nt)
             # L = time_derivative_operator(nx, ny, nt)
-            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=1, n_iter = iters, regparam=reg_param, x_true=None, delta = delta)
+            (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=1, n_iter = iters, regparam=reg_param, x_true=None, eta=1.01, delta = delta)
             xx = np.reshape(x, (nx, ny, nt), order="F")
         else:
             xx = list(range(nt))
@@ -61,7 +61,7 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, reg_param, testproblem, del
             L = first_derivative_operator_2d(nx, ny)
             for i in range(nt):
                 b_vec = B[i].reshape((-1,1))
-                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam=reg_param, x_true=None, delta = delta)
+                (x, x_history, lambdah, lambda_history) = MMGKS(AA[i], b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam=reg_param, x_true=None, eta=1.01, delta = delta)
                 xx[i] = x
     return xx  
 
