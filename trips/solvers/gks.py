@@ -136,7 +136,7 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
 
     epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.001
 
-    regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else None
+    regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.001*(0.5**(x)) for x in range(0,n_iter)]
 
     projection_method = kwargs['projection_method'] if ('projection_method' in kwargs) else 'auto'
 
