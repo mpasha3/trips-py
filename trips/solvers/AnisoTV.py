@@ -51,7 +51,8 @@ def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, reg_param, testproblem):
     else:
         if dynamic == True:
             b_vec = b.reshape((-1,1))
-            L = time_derivative_operator(nx, ny, nt)
+            L = spatial_derivative_operator(nx, ny, nt)
+            # L = time_derivative_operator(nx, ny, nt)
             (x, x_history, lambdah, lambda_history) = MMGKS(A, b_vec, L, pnorm=2, qnorm=1, projection_dim=3, n_iter = iters, regparam=reg_param, x_true=None)
             xx = np.reshape(x, (nx, ny, nt), order="F")
         else:
