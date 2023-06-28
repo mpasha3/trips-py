@@ -36,7 +36,7 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 
     projection_method = kwargs['projection_method'] if ('projection_method' in kwargs) else 'auto'
 
-    regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else None
+    regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
 
 
     if ((projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (projection_method == 'arnoldi'):
@@ -252,7 +252,7 @@ class GKSClass:
 
         self.dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
-        self.regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else None
+        
 
         self.x_history = []
         self.lambda_history = []
@@ -291,7 +291,9 @@ class GKSClass:
     def restart(self):
         self.basis = None
 
-    def run(self, A, b, L, n_iter=50, warm_start=False, x_true=None):
+    def run(self, A, b, L, n_iter=50, warm_start=False, x_true=None, **kwargs):
+
+        self.regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
 
         if warm_start == False:
 
@@ -402,8 +404,6 @@ class MMGKSClass:
         self.dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
         self.epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.001
 
-        self.regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else None
-
         self.x_history = []
         self.lambda_history = []
 
@@ -438,7 +438,9 @@ class MMGKSClass:
     def restart(self):
         self.basis = None
 
-    def run(self, A, b, L, n_iter=50, warm_start=False, x_true=None):
+    def run(self, A, b, L, n_iter=50, warm_start=False, x_true=None, **kwargs):
+
+        self.regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
 
         if warm_start == False:
 
