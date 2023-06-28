@@ -171,7 +171,7 @@ def get_stempo_data(data_set = 'real', data_thinning = '2'):
             import requests
             print("downloading...")
             r = requests.get('https://zenodo.org/record/7147139/files/'+data_file)
-            with open('./data/'+data_file, "wb") as file:
+            with open('./data/stempo_data/'+data_file, "wb") as file:
                 file.write(r.content)
             print("Stempo data downloaded.")
         if  data_set=='simulation':
