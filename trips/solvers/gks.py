@@ -167,7 +167,8 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         u = L @ x
         z = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).flatten()**(1/2)
         q = z[:, np.newaxis]
-        temp = q * (L @ V)  
+        temp = q * (L @ V)
+
         
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
 

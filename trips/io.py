@@ -97,7 +97,7 @@ def generate_emoji(noise_level, dataset):
     AA = list(range(T))
     B = list(range(T))
 
-    # delta = np.linalg.norm() # no added noise for this dataset
+    delta = 0 # np.linalg.norm() # no added noise for this dataset, change to allow added noise.
 
     for ii in range(T):
 

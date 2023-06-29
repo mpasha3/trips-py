@@ -30,7 +30,7 @@ import warnings
 
 def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
 
-    if not isinstance(delta, float):
+    if not ( isinstance(delta, float) or isinstance(delta, int)):
 
         raise TypeError('You must provide a value for the noise level delta.')
 

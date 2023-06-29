@@ -141,7 +141,7 @@ def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
     """
     computes the rank-n Golub-Kahan factorization of A, with initial guess b.
 
-    returns U (m x n_iter+1), an orthonormal matrix, V (n x n_iter), an orthonormal matrix, and B (n_iter+1 x n_iter), a bidiagonal matrix.
+    returns U (m x n_iter+1), an orthonormal matrix, V (n x n_iter), an orthonormal matrix, and S (n_iter+1 x n_iter), a bidiagonal matrix.
 
     A: the matrix to be factorized.
 
@@ -153,11 +153,11 @@ def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
 
     Calling with the minimal number of arguments:
 
-    (U,B,V) = generalized_golub_kahan(A, b, n_iter)
+    (U,S,V) = generalized_golub_kahan(A, b, n_iter)
 
     Calling with all the arguments necessary for discrepancy principle stopping:
 
-    (U,B,V) = generalized_golub_kahan(A, b, n_iter, dp_stop=True, gk_eta=1.001, gk_delta=0.001)
+    (U,S,V) = generalized_golub_kahan(A, b, n_iter, dp_stop=True, gk_eta=1.001, gk_delta=0.001)
     """
 
     eta = kwargs['gk_eta'] if ('gk_eta' in kwargs) else 1.001
@@ -199,11 +199,11 @@ def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
 
         if (dp_stop == True):
                                        
-            B = np.pad(np.diag(alphas),( (0,1),(0,0) )) + np.pad(np.diag(betas), ( (1,0),(0,0) ) ) # constrct B from the bidiagonal entries
+            S = np.pad(np.diag(alphas),( (0,1),(0,0) )) + np.pad(np.diag(betas), ( (1,0),(0,0) ) ) # constrct B from the bidiagonal entries
                                         
             bhat = U.T @ b
                                         
-            y = np.linalg.lstsq(B, bhat, rcond=None)[0] # solve the least squares problem
+            y = np.linalg.lstsq(S, bhat, rcond=None)[0] # solve the least squares problem
             
             x = V @ y # project back
                                         
@@ -212,12 +212,12 @@ def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
         iterations += 1
 
 
-    B = np.zeros(shape=(alphas.shape[0]+1, alphas.shape[0]) )
-    B[range(0,alphas.shape[0]), range(0,alphas.shape[0])] = alphas
-    B[range(1,alphas.shape[0]+1), range(0,alphas.shape[0])] = betas
+    S = np.zeros(shape=(alphas.shape[0]+1, alphas.shape[0]) )
+    S[range(0,alphas.shape[0]), range(0,alphas.shape[0])] = alphas
+    S[range(1,alphas.shape[0]+1), range(0,alphas.shape[0])] = betas
 
 
-    return (U,B,V)
+    return (U,S,V)
 
 
 def lanczos_biortho_pasha(A, guess, iter):
