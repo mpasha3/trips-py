@@ -11,9 +11,9 @@ import astra
 from os import mkdir
 from os.path import exists
 import scipy.sparse as sps
-# split into test problems
-# separate IO from test problem class implementation
 import os,sys
+
+
 """
 H image:
 """
