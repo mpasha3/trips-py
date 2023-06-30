@@ -49,16 +49,37 @@ def soft_thresh(x, mu):
     y = y * np.sign(x)
     return y
 
-def generate_noise(shape, noise_level, dist='normal'):
+
+def add_noise(self, x, noise_level, distribution='normal'):
+        
     """
-    Produces noise at the desired noise level.
+    Adds noise at the desired noise level.
     """
 
-    if dist == 'normal':
-        noise = np.random.randn(shape)
-    elif dist == 'poisson':
-        noise = np.random.poisson
-    e = noise_level * noise / la.norm(noise)
+    distribution = distribution.lower()
+    if (distribution in ['gaussian', 'normal']):
+
+        e = np.random.randn(shape=x.shape)
+        delta = np.linalg.norm(e)
+
+        x_with_noise = x + e * (noise_level * np.linalg.norm(x)/delta)
+        
+    if (distribution = 'poisson'):
+
+        gamma = 1 # background counts assumed known
+        x_with_noise = np.random.poisson(lam=x+gamma) 
+
+        e = 0
+        delta = np.linalg.norm(e)
+
+    if (distribution in ['laplace', 'laplacean']):
+
+        e = np.random.laplace(shape=x.shape)
+        delta = np.linalg.norm(e)
+
+        x_with_noise = x + e * (noise_level * np.linalg.norm(x)/delta)
+        
+        return x_with_noise
 
 
 def is_identity(A):
