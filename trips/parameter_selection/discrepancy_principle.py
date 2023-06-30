@@ -32,7 +32,10 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
 
     if not ( isinstance(delta, float) or isinstance(delta, int)):
 
-        raise TypeError('You must provide a value for the noise level delta.')
+        raise Warning("""A value for the noise level delta was not provided. A default value of 0.01 has been used. 
+                      Please supply a value of delta based on the estimated noise level of the problem.""")
+    
+        delta = 0.01
 
     U, S, V = la.svd(A, full_matrices=False)
     singular_values = S**2
