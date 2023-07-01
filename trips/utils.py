@@ -64,7 +64,7 @@ def add_noise(self, x, noise_level, distribution='normal'):
 
         x_with_noise = x + e * (noise_level * np.linalg.norm(x)/delta)
         
-    if (distribution = 'poisson'):
+    if (distribution == 'poisson'):
 
         gamma = 1 # background counts assumed known
         x_with_noise = np.random.poisson(lam=x+gamma) 
