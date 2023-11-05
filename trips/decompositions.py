@@ -50,10 +50,14 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
         sx = A.shape[0]
         sy = A.shape[0]
         shape = [sx, sy]
+
     # If eta is not in the arguments, set it to the default value 1.001
     eta = kwargs['gk_eta'] if ('gk_eta' in kwargs) else 1.001
     delta = kwargs['gk_delta'] if ('gk_delta' in kwargs) else 0.001
-
+    
+    if (A.shape[0] is not A.shape[1]):
+        raise ValueError("Arnoldi can not be used. The operator is not square")
+    
     (rows, cols) = A.shape
 
     # preallocate
