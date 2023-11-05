@@ -1,3 +1,2 @@
-# trips-py
-
-A package implementing techniques for regularization of ill-posed inverse problems in python.
+# psandqs
+A package implementing approaches for regularization of ill-posed inverse problems.

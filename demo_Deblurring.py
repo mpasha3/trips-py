@@ -42,7 +42,7 @@ from scipy.ndimage import convolve
 import scipy.special as spe
 from trips.testProblems import *
 from trips.operators import *
-from trips.solvers.gks import *
+from trips.solvers.GKS import *
 from trips.solvers.Tikhonov import *
 from trips.solvers.tSVD import *
 
