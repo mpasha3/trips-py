@@ -17,7 +17,7 @@ import numpy as np
 from scipy import linalg as la
 
 from tqdm import tqdm
-def MINRES(A, b, projection_dim=3, dp_stop = 0, **kwargs):
+def LSQR(A, b, projection_dim=3, dp_stop = 0, **kwargs):
     if A.shape[0] == A.shape[1]:
         b_vec = b.reshape((-1,1))
         (U, B, V) = generalized_golub_kahan(A, b_vec, n_iter = 10, projection_dim = projection_dim)
