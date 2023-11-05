@@ -39,8 +39,11 @@ def GMRES(A, b, n_iter = 3, dp_stop = 0, **kwargs):
     Example of calling the method: 
 
     xx = GMRES(A, b, 10, dp_stop = 0)
-
+    
     """
+    if (A.shape[0] is not A.shape[1]):
+        raise ValueError("Arnoldi can not be used. The operator is not square")
+    
     b_vec = b.reshape((-1,1))
     (Vdp1,H) = arnoldi(A, b_vec, n_iter = 5)
     Vd= Vdp1[:, 0:-1]
