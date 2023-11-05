@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+"""
+Definition of test problems
+--------------------------------------------------------------------------
+Created December 10, 2022 for TRIPs-Py library
+"""
+__authors__ = "Mirjeta Pasha and Connor Sanderford"
+__copyright__ = "Copyright 2022, TRIPs-Py library"
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
+
+
 from pylops import LinearOperator
 
 from scipy import linalg as la
@@ -49,37 +63,16 @@ def soft_thresh(x, mu):
     y = y * np.sign(x)
     return y
 
-
-def add_noise(self, x, noise_level, distribution='normal'):
-        
+def generate_noise(shape, noise_level, dist='normal'):
     """
-    Adds noise at the desired noise level.
+    Produces noise at the desired noise level.
     """
 
-    distribution = distribution.lower()
-    if (distribution in ['gaussian', 'normal']):
-
-        e = np.random.randn(shape=x.shape)
-        delta = np.linalg.norm(e)
-
-        x_with_noise = x + e * (noise_level * np.linalg.norm(x)/delta)
-        
-    if (distribution == 'poisson'):
-
-        gamma = 1 # background counts assumed known
-        x_with_noise = np.random.poisson(lam=x+gamma) 
-
-        e = 0
-        delta = np.linalg.norm(e)
-
-    if (distribution in ['laplace', 'laplacean']):
-
-        e = np.random.laplace(shape=x.shape)
-        delta = np.linalg.norm(e)
-
-        x_with_noise = x + e * (noise_level * np.linalg.norm(x)/delta)
-        
-        return x_with_noise
+    if dist == 'normal':
+        noise = np.random.randn(shape)
+    elif dist == 'poisson':
+        noise = np.random.poisson
+    e = noise_level * noise / la.norm(noise)
 
 
 def is_identity(A):
@@ -98,7 +91,45 @@ def is_identity(A):
     
     else:
         return False
-    
+
+def check_noise_type(noise_type):
+    if noise_type in ['g', 'p', 'l', 'gaussian', 'Gaussian', 'Poisson', 'poisson', 'Laplace', 'laplace']:
+        valid = True
+    else:
+        valid = False
+    if not valid:
+       raise TypeError('You must enter a valid name for the noise. For Gaussian noise input g or Gaussian or gaussian. For Poisson noise input p or Poisson or poisson. For Laplace noise input l or laplace or laplace.')
+
+def check_noise_level(noise_level):
+    valid  = False
+    if (isinstance(noise_level, float) or isinstance(noise_level, int)):
+        if int(noise_level) > 0 or int(noise_level) == 0:
+            valid = True
+    if not valid:
+        raise TypeError('You must enter a valid noise level! Choose 0 for 0 %, 1 for 1%, or other valid values acordingly.')
+
+def check_Regparam(Regparam = 1):
+    valid = False
+    case1 = False
+    # if str(Regparam).isnumeric():
+    if (isinstance(Regparam, float) or isinstance(Regparam, int)):
+        if int(Regparam) > 0:
+            valid = True
+        else:
+            valid = False
+            case1 = True
+    elif Regparam in ['gcv', 'GCV', 'Gcv', 'DP', 'dp', 'Dp', 'Discrepancy Principle', 'Discrepancy principle', 'discrepancy principle']:
+        valid = True
+    if not valid and case1 == True:
+        raise TypeError("You must specify a valid regularization parameter. Input a positive number!")
+    elif not valid:
+        raise TypeError("You must specify a valid regularization parameter. For Generalized Cross Validation type 'gcv'. For 'Discrepancy Principle type 'dp'.")
+
+def check_Positivescalar(value):
+    if int(value) > 0:
+        valid = True
+    else:
+        valid = False
 
 
 ### TODO: Add a general reweighting function

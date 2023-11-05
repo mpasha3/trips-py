@@ -1,36 +1,56 @@
+#!/usr/bin/env python
 """
-Functions which implement Krylov decompositions.
+Definition of test problems
+--------------------------------------------------------------------------
+Created December 10, 2022 for TRIPs-Py library
 """
-
+__authors__ = "Mirjeta Pasha and Connor Sanderford"
+__copyright__ = "Copyright 2022, TRIPs-Py library"
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
+"""
+Functions which implement decompositions based on Krylov subspaces.
+"""
 import numpy as np 
 import matplotlib.pyplot as plt
 from scipy.optimize import newton
+from scipy.sparse import diags
 
 from tqdm import tqdm
-
 def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, dp_stop=False, **kwargs ) -> 'Tuple[np.ndarray[np.float], np.ndarray[np.float]]':
     """
-    computes the rank-n Arnoldi factorization of A, with initial guess b.
+    Description: Computes the rank-n Arnoldi factorization of A, with initial guess a given vector b.
+    Input: 
+        A: the matrix to be factorized.
 
-    returns Q (m x n_iter+1), an orthonormal matrix, and H (n_iter+1 x n_iter), an upper Hessenberg matrix.
+        b: an initial guess for the first basis vector of the factorization.
 
-    A: the matrix to be factorized.
+        n_iter: the number of iterations over which to factorize A.
 
-    b: an initial guess for the first basis vector of the factorization.
-
-    n_iter: the number of iterations over which to factorize A.
-
-    dp_stop: whether or not to use the discrepancy principle to halt further factorization. Defaults to false.
+        dp_stop: whether or not to use the discrepancy principle to halt further factorization. Defaults to false.
+    Output:
+        Q (m x n_iter+1) an orthonormal matrix,
+        H (n_iter+1 x n_iter) an upper Hessenberg matrix.
 
     Calling with the minimal number of arguments:
 
-    (Q,H) = arnoldi(A, b, n_iter)
+        (Q,H) = arnoldi(A, b, n_iter)
 
     Calling with all the arguments necessary for discrepancy principle stopping:
 
-    (Q,H) = arnoldi(A, b, n_iter, dp_stop=True, gk_eta=1.001, gk_delta=0.001)
+        (Q,H) = arnoldi(A, b, n_iter, dp_stop=True, gk_eta=1.001, gk_delta=0.001)
     """
-
+    if ('shape' in kwargs):
+        shape = kwargs['shape'] 
+    elif type(A) == 'function' and shape not in kwargs['shape']:
+        raise ValueError("The observation matrix A is a function. The shape must be given as an input")
+    else:
+        sx = A.shape[0]
+        sy = A.shape[0]
+        shape = [sx, sy]
+    # If eta is not in the arguments, set it to the default value 1.001
     eta = kwargs['gk_eta'] if ('gk_eta' in kwargs) else 1.001
     delta = kwargs['gk_delta'] if ('gk_delta' in kwargs) else 0.001
 
@@ -63,7 +83,6 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
             Q = np.pad(Q, ((0,0), (0,1)) )  # at each iteration that doesn't satisfy the discrepancy principle,
             H = np.pad(H, ((0,1), (0,1)) )  # add an additional column to the bases and entry to the bidiagonal entries.
 
-
         b_nplus1  = A @ Q[:,ii] # generate the next vector in the Krylov subspace
 
         for jj in range(0,iterations): # for each iteration *that has been previously completed*:
@@ -92,57 +111,13 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
 
         iterations += 1
 
-
     return (Q,H)
 
-
-def arnoldi_1(A: 'np.ndarray[np.float]', n: int, q_0: 'np.ndarray[np.float]' ) -> 'Tuple[np.ndarray[np.float], np.ndarray[np.float]]':
+def golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
     """
-    computes the rank-n Arnoldi factorization of A, with initial guess q_0.
+    Description: Computes the rank-n Golub-Kahan factorization of A, with initial guess the given vector b.
 
-    returns Q (m x n), an orthonormal matrix, and H (n+1 x n), an upper Hessenberg matrix.
-    """
-
-    # preallocate
-
-    Q = np.zeros((A.shape[0], n+1))
-    H = np.zeros((n+1, n))
-
-    # normalize q_0
-    q_0 = q_0/np.linalg.norm(q_0, ord=2)
-
-    # q_0 is first basis vector
-    Q[:, 0] = q_0[:,0]
-
-    for ii in tqdm(range(0,n), desc = "generating basis..."): # for each iteration over the method:
-
-        q_nplus1  = A @ Q[:,ii] # generate the next vector in the Krylov subspace
-
-        for jj in range(0,n): # for each iteration *that has been previously completed*:
-
-            H[jj,ii] = np.dot( Q[:,jj], q_nplus1 ) # calculate projections of the new Krylov vector onto previous basis elements
-
-            q_nplus1 = q_nplus1 - H[jj,ii] * Q[:,jj] # and orthogonalize the new Krylov vector with respect to previous basis elements
-
-        if ii < n:
-            H[ii+1, ii] = np.linalg.norm(q_nplus1, 2)
-
-            if H[ii+1,ii] == 0:
-                return (Q,H)
-
-            Q[:, ii+1] = q_nplus1/H[ii+1,ii]
-
-
-    return (Q,H)
-
-
-
-def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
-    """
-    computes the rank-n Golub-Kahan factorization of A, with initial guess b.
-
-    returns U (m x n_iter+1), an orthonormal matrix, V (n x n_iter), an orthonormal matrix, and S (n_iter+1 x n_iter), a bidiagonal matrix.
-
+    Inputs:
     A: the matrix to be factorized.
 
     b: an initial guess for the first basis vector of the factorization.
@@ -151,6 +126,13 @@ def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
 
     dp_stop: whether or not to use the discrepancy principle to halt further factorization. Defaults to false.
 
+    Outputs:
+    U (m x n_iter+1) an orthonormal matrix
+
+    V (n x n_iter) an orthonormal matrix
+
+    S (n_iter+1 x n_iter) a bidiagonal matrix.
+    
     Calling with the minimal number of arguments:
 
     (U,S,V) = generalized_golub_kahan(A, b, n_iter)
@@ -158,6 +140,7 @@ def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
     Calling with all the arguments necessary for discrepancy principle stopping:
 
     (U,S,V) = generalized_golub_kahan(A, b, n_iter, dp_stop=True, gk_eta=1.001, gk_delta=0.001)
+    
     """
 
     eta = kwargs['gk_eta'] if ('gk_eta' in kwargs) else 1.001
@@ -219,60 +202,130 @@ def generalized_golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
 
     return (U,S,V)
 
+def arnoldi_update(A, V, H):
 
-def lanczos_biortho_pasha(A, guess, iter):
+    k = H.shape[0]
+    vtemp = V[:,-1]
 
-    # dimensions
-    N = len(guess)
-    M = len(A.T @ guess)
+    vtemp  = A @ vtemp # generate the next vector in the Krylov subspace
 
-    # preallocate
-    U = np.zeros(shape=(N, iter+1))
-    V = np.zeros(shape=(M, iter))
+    htemp = np.zeros((k,1))
 
-    v = np.zeros(shape=(M))
+    for jj in range(0,k): # for each iteration *that has been previously completed*:
+        htemp[jj] = np.dot( V[:,jj], vtemp ) # calculate projections of the new Krylov vector onto previous basis elements
+        vtemp = vtemp - htemp[jj] * V[:,jj] # and orthogonalize the new Krylov vector with respect to previous basis elements
 
+    if k == 1:
+        H = htemp
+    else:
+        H = np.hstack((H, htemp))
+    htemp = np.zeros((1,k))
+    htemp[:,-1] = np.linalg.norm(vtemp)
+    H = np.vstack((H, htemp))
+    V = np.hstack((V, vtemp.reshape((-1,1))/H[-1,-1]))
+    return (V, H)
 
-    # normalize initial guess
-    beta = np.linalg.norm(guess)
+def golub_kahan_update(A, U, S, V):
 
-    assert beta != 0
+    k = S.shape[0]
+    utemp = U[:,-1]
+    if k == 1:
+        v = A.T@utemp
+    else:
+        v = A.T@utemp - S[k-1,k-2]*V[:,k-2]
+    alpha = np.linalg.norm(v)   
+    v = v/alpha
+    u = A@v - alpha*utemp
+    beta = np.linalg.norm(u)
+    u = u/beta
+    U = np.hstack((U,u.reshape((-1,1))))
+    if k == 1:        
+        V = v.reshape((-1,1))
+    else:
+        V = np.hstack((V,v.reshape((-1,1))))
+    temp1 = np.zeros(k,); temp1[-1] = alpha
+    temp2 = np.zeros(k,); temp2[-1] = beta
+    if k == 1:
+        S = np.array([temp1,temp2])
+    else:
+        S = np.hstack((S, temp1.reshape((-1,1))))
+        S = np.vstack((S, temp2.reshape((1,-1))))
+    return (U,S,V)
 
-    u = guess/beta
-
-    U[:,0] = u
-
-    # begin bidiagonalization
-
-    for ii in range(0,iter):
-
-        r = A.T @ u
-        r = r - beta*v
-
-        for jj in range(0,ii-1): # reorthogonalization
-
-            r = r - (V[:,jj].T @ r) * V[:,jj]
-
-        alpha = np.linalg.norm(r)
-
-        v = r/alpha
-
-
-        V[:,ii] = v.flatten()
-
-        p = A @ v
-
-        p = p - alpha*u
-
-
-        for jj in range(0, ii):
-
-            p = p - (U[:,jj].T @ p) * U[:,jj]
-
-        beta = np.linalg.norm(p)
-
-        u = p / beta
-
-        U[:, ii+1] = u
-
-    return (U, beta, V)
+def gsvd(A, B):
+    vm1, p = A.shape
+    vm2, p = B.shape
+    if not (vm1 == vm2 and vm1 >= vm2 >= p):
+        raise ValueError("Invalid input dimensions. A should be of size mxp, and B should be of size nxp with m >= n >= p.")
+    QA, A = np.linalg.qr(A,'reduced')
+    m = p
+    QB, B = np.linalg.qr(B,'reduced')
+    n = p
+    Q, R = np.linalg.qr(np.concatenate((A, B),axis=0),'reduced')
+    U, V, Z, C, S = csd(Q[:m, :], Q[m:m+n, :])
+    X = R.T @ Z
+    U = QA @ U
+    V = QB @ V
+    return U, V, X, C, S
+def csd(Q1, Q2):
+    m, p = Q1.shape
+    n = Q2.shape[0]
+    U, C, Z = np.linalg.svd(Q1)
+    C = np.diag(C)
+    Z = Z.T
+    q = min(m, p)
+    i = np.arange(q)
+    j = np.arange(q-1, -1, -1)
+    C[i, i] = C[j, j]
+    U[:, i] = U[:, j]
+    Z[:, i] = Z[:, j]
+    S = Q2 @ Z
+    k = np.max(np.concatenate(([0], 1+np.where(np.diag(C) <= 1/np.sqrt(2))[0])))
+    V, _ = np.linalg.qr(S[:,:k],'complete')
+    S = V.T @ S
+    r = min(k, m)
+    S[:, :r] = diagf(S[:, :r])
+    if k < min(n, p):
+        r = min(n, p)
+        i = np.arange(k, n)
+        j = np.arange(k, r)
+        UT, ST, VT = np.linalg.svd(S[np.ix_(i, j)])
+        ST = np.diag(ST)
+        if k > 0:
+            S[:k, j] = 0
+        S[np.ix_(i,j)] = ST
+        C[:, j] = C[:, j] @ VT.T
+        V[:, i] = V[:, i] @ UT
+        Z[:, j] = Z[:, j] @ VT.T
+        i = np.arange(k, q)
+        Q, R = np.linalg.qr(C[np.ix_(i, j)])
+        C[np.ix_(i, j)] = diagf(R)
+        U[:, i] = U[:, i] @ Q
+    U, C = diagp(U, C, max(0, p - m))
+    C = np.real(C)
+    V, S = diagp(V, S, 0)
+    S = np.real(S)
+    return U, V, Z, C, S
+def diagk(X, k):
+    if not np.isscalar(X) and not np.isscalar(k):
+        m, n = X.shape
+        if k >= 0:
+            diag_len = min(n - k, m)
+            diag = X[:diag_len, k:k+diag_len]
+        else:
+            diag_len = min(m + k, n)
+            diag = X[-k:-k+diag_len, :diag_len]
+    else:
+        diag = np.diagonal(X, k)
+    return diag.flatten()
+def diagf(X):
+    return np.triu(np.tril(X))
+def diagp(Y, X, k):
+    D = diagk(X, k)
+    j = np.where(np.real(D) < 0) or np.where(np.imag(D) != 0)
+    j = np.asarray(j, dtype=int).flatten()
+    D = np.diag(np.conj(D[j]) / np.abs(D[j]))
+    Y[:, np.ix_(j)] = Y[:, np.ix_(j)] @ D.T
+    X[j, :] = D @ X[j, :]
+    X = X + 0  # Use "+0" to set possible -0 elements to 0
+    return Y, X

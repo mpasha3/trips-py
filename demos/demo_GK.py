@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from scipy.linalg import fractional_matrix_power
 from numpy import array, diag, dot, maximum, empty, repeat, ones, sum
 from numpy.linalg import inv
-from trips.solvers.gks import GKSClass
+from trips.solvers.GKS import GKSClass
 from trips.decompositions import *
 # from opera?tors import *
 ##Specify the font
@@ -41,7 +41,7 @@ from scipy import sparse
 from scipy.ndimage import convolve
 import scipy.special as spe
 from trips.testProblems import *
-from trips.solvers.gks import GKSClass
+from trips.solvers.GKS import GKSClass
 
 Deblur = Deblurring()
 imagesize_x = 128

@@ -4,12 +4,13 @@ Definition of test problems
 --------------------------------------------------------------------------
 Created December 10, 2022 for TRIPs-Py library
 """
-__author__ = "Mirjeta Pasha and Connor Sanderford"
+__authors__ = "Mirjeta Pasha and Connor Sanderford"
 __copyright__ = "Copyright 2022, TRIPs-Py library"
 __license__ = "GPL"
 __version__ = "0.1"
-__maintainer__ = "Mirjeta Pasha"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com"
+__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
+
 import os,sys
 sys.path.insert(0,'/Users/mirjetapasha/Documents/Research_Projects/TRIPSpy/TRIPSpy')
 import numpy as np
@@ -42,7 +43,7 @@ from scipy.ndimage import convolve
 import scipy.special as spe
 from trips.testProblems import *
 from trips.operators import *
-from trips.solvers.gks import *
+from trips.solvers.GKS import *
 from trips.solvers.Tikhonov import *
 from trips.solvers.tSVD import *
 

@@ -4,12 +4,13 @@ Definition of test problems
 --------------------------------------------------------------------------
 Created December 10, 2022 for TRIPs-Py library
 """
-__author__ = "Mirjeta Pasha and Connor Sanderford"
+__authors__ = "Mirjeta Pasha and Connor Sanderford"
 __copyright__ = "Copyright 2022, TRIPs-Py library"
 __license__ = "GPL"
 __version__ = "0.1"
-__maintainer__ = "Mirjeta Pasha"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com"
+__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
+
 from trips.io import *
 from trips.operators import *
 from trips.solvers.AnisoTV import *
@@ -18,6 +19,74 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 # from trips.cil_io import *
 from trips.testProblems import *
+
+def plot_singular_vectors_svd(Operator, size, parameter = 'A'):
+
+    if parameter == 'A':
+        U, S, V = np.linalg.svd(Operator)
+        V = V.T
+        n = 2
+        m = 6
+        fig, axes = plt.subplots(n, m)
+        v_i = [V[:, k] for k in range(m)]
+        v_i += [V[:, k] for k in range(130, 130+m)]
+        right_singular = np.array(v_i)
+        immax = np.max(right_singular)
+        immin = np.min(right_singular)
+        k = 0
+        for i in range(n):
+            for j in range(m):
+                image = axes[i][j].imshow(-V[:, k].reshape((size, size)), vmin=immin, vmax=immax, cmap='inferno')
+                axes[i][j].axis('off')
+                axes[i][j].set_title(r'$v_{' + str(k) + r'}$')
+                k += 1
+            k = 50
+        plt.subplots_adjust(bottom=0, top=0.7, left = 0, right=1)
+        fig.colorbar(image, ax=axes.ravel().tolist())
+        plt.savefig('v_vectors.png', bbox_inches='tight')
+        plt.show()
+    else:
+        n = 2
+        m = 6
+        fig, axes = plt.subplots(n, m)
+        v_i = [V[:, k] for k in range(m)]
+        v_i += [V[:, k] for k in range(130, 130+m)]
+        right_singular = np.array(v_i)
+        immax = np.max(right_singular)
+        immin = np.min(right_singular)
+        k = 0
+        for i in range(n):
+            for j in range(m):
+                image = axes[i][j].imshow(-V[:, k].reshape((size, size)), vmin=immin, vmax=immax, cmap='inferno')
+                axes[i][j].axis('off')
+                axes[i][j].set_title(r'$v_{' + str(k) + r'}$')
+                k += 1
+            k = 50
+        plt.subplots_adjust(bottom=0, top=0.7, left = 0, right=1)
+        fig.colorbar(image, ax=axes.ravel().tolist())
+        plt.savefig('v_vectors.png', bbox_inches='tight')
+        plt.show()
+
+def plot_singular_values_svd(Operator, parameter = 'A'):
+    if parameter == 'A':
+        U, S, V = np.linalg.svd(Operator.todense())
+        plt.plot(S)
+        plt.title('Singular values of $A$')
+        plt.xlabel('$\ell$')
+        plt.ylabel('$\sigma_{\ell}$')
+        plt.minorticks_on()
+        plt.grid(which='minor', linestyle=':', linewidth='0.2', color='black')
+        plt.savefig('singular_values.png', bbox_inches='tight')
+        plt.show()
+    else:
+        plt.plot(S)
+        plt.title('Singular values of $A$')
+        plt.xlabel('$\ell$')
+        plt.ylabel('$\sigma_{\ell}$')
+        plt.minorticks_on()
+        plt.grid(which='minor', linestyle=':', linewidth='0.2', color='black')
+        plt.savefig('singular_values.png', bbox_inches='tight')
+        plt.show()
 
 def check_imagesize_toreshape(existingimage, chooseimage, old_size, newsize):
     path_package = '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package'

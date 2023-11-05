@@ -39,7 +39,7 @@ from scipy import sparse
 from scipy.ndimage import convolve
 import scipy.special as spe
 from trips.testProblems import *
-from trips.solvers.gks import *
+from trips.solvers.GKS import *
 import requests
 from scipy import sparse
 import numpy as np

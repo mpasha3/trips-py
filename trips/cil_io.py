@@ -1,3 +1,16 @@
+#!/usr/bin/env python
+"""
+Definition of test problems
+--------------------------------------------------------------------------
+Created December 10, 2022 for TRIPs-Py library
+"""
+__authors__ = "Mirjeta Pasha and Connor Sanderford"
+__copyright__ = "Copyright 2022, TRIPs-Py library"
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
+
 import requests
 from scipy import sparse
 import scipy.io as spio

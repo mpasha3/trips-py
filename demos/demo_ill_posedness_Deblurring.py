@@ -33,7 +33,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import astra
-import phantoms as phantom
+# import phantoms as phantom
 from venv import create
 import pylops
 from scipy.ndimage import convolve
@@ -41,7 +41,7 @@ from scipy import sparse
 from scipy.ndimage import convolve
 import scipy.special as spe
 from trips.testProblems import *
-from trips.solvers.gks import *
+from trips.solvers.GKS import *
 import os,sys
 sys.path.insert(0,'/Users/mirjetapasha/Documents/Research_Projects/TRIPSpy/TRIPSpy')
 import numpy as np
@@ -74,7 +74,7 @@ from scipy.ndimage import convolve
 import scipy.special as spe
 from trips.testProblems import *
 from trips.operators import *
-from trips.solvers.gks import *
+from trips.solvers.GKS import *
 from trips.solvers.Tikhonov import *
 # Deblurring example test problem
 Deblur = Deblurring()

@@ -1,20 +1,35 @@
+#!/usr/bin/env python
+"""
+Definition of test problems
+--------------------------------------------------------------------------
+Created December 10, 2022 for TRIPs-Py library
+"""
+__authors__ = "Mirjeta Pasha and Connor Sanderford"
+__copyright__ = "Copyright 2022, TRIPs-Py library"
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
 """
 Functions which implement operators for measurement or regularization.
 """
-
 from venv import create
 import numpy as np
 import pylops
 from scipy.ndimage import convolve
-
 from scipy import sparse
 
-
-
-"""derivative operators"""
+"""regularization operators (derivatives)"""
 
 def first_derivative_operator(n):
+    """ 
+    Description: Defines a matrix that is the discretization of the first derivative operator
+    Inputs: 
+        n: The dimension of the image
 
+    Outputs: 
+        L: An operator of dimensions (n x n) 
+    """
     L = pylops.FirstDerivative(n, dtype="float32")
 
     return L
@@ -43,6 +58,7 @@ def spatial_derivative_operator(nx, ny, nt):
 
     return ID_spatial
 
+
 def time_derivative_operator(nx, ny, nt):
     
     D_time = first_derivative_operator(nt)
@@ -50,9 +66,50 @@ def time_derivative_operator(nx, ny, nt):
     D_timeI = pylops.Kronecker( D_time, pylops.Identity(nx**2, dtype='float32') )
 
     return D_timeI
+
+
+"""" Regularization operators as matrices here"""
+
+def generate_first_derivative_operator_matrix(n):
+
+    D = sparse.spdiags( data=np.ones(n-1) , diags=-1, m=n, n=n)
+    L = sparse.identity(n)-D
+    L = L[0:-1, :]
+
+    return L
+
+
+def generate_first_derivative_operator_2d_matrix(nx, ny):
+
+    D_x = generate_first_derivative_operator_matrix(nx)
+    D_y = generate_first_derivative_operator_matrix(ny)
+
+    IDx = sparse.kron( sparse.identity(nx), D_x)
+    DyI = sparse.kron(D_y, sparse.identity(ny))
+
+    L = sparse.vstack((IDx, DyI))
+
+    return L
+
+
+def generate_spatial_derivative_operator_matrix(nx, ny, nt):
     
+    D_spatial = generate_first_derivative_operator_2d_matrix(nx,ny)
+    
+    ID_spatial = sparse.kron( sparse.identity(nt), D_spatial)
+    
+    return ID_spatial
 
 
+def generate_time_derivative_operator_matrix(nx, ny, nt):
+    
+    D_time = generate_first_derivative_operator_2d_matrix(nt)[:-1, :]
+    
+    D_timeI = sparse.kron(D_time, sparse.identity(nx**2))
+    
+    return D_timeI
+
+    
 """blur operators"""
 
 def Gauss(dim, s): # Dr. Pasha's Gaussian PSF code

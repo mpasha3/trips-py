@@ -5,17 +5,18 @@ Definition of test problems
 --------------------------------------------------------------------------
 Created December 10, 2022 for TRIPs-Py library
 """
-__author__ = "Mirjeta Pasha and Connor Sanderford"
+__authors__ = "Mirjeta Pasha and Connor Sanderford"
 __copyright__ = "Copyright 2022, TRIPs-Py library"
 __license__ = "GPL"
 __version__ = "0.1"
-__maintainer__ = "Mirjeta Pasha"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com"
+__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
+
 from trips.io import *
 from trips.operators import *
 from matplotlib import transforms
 from scipy import ndimage
-from trips.solvers.gks import *
+from trips.solvers.gks_all import *
 
 def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, reg_param, testproblem, delta, **kwargs):
     """
