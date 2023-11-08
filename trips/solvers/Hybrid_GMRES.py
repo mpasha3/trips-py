@@ -20,6 +20,16 @@ from pylops import Identity
 
 def hybrid_gmres(A, b, n_iter, regparam = 'gcv', **kwargs): # what's the naming convention here?
 
+    delta = kwargs['delta'] if ('delta' in kwargs) else None
+
+    eta = kwargs['eta'] if ('eta' in kwargs) else 1.01
+
+    dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
+
+    if (regparam == 'dp' or dp_stop != False) and delta == None:
+        raise Exception("""A value for the noise level delta was not provided and the discrepancy principle cannot be applied. 
+                    Please supply a value of delta based on the estimated noise level of the problem, or choose the regularization parameter according to gcv or a different stopping criterion.""")
+
     n = A.shape[1]
     beta = np.linalg.norm(b)
     V = b.reshape((-1,1))/beta
@@ -31,6 +41,8 @@ def hybrid_gmres(A, b, n_iter, regparam = 'gcv', **kwargs): # what's the naming 
         (V, H) = arnoldi_update(A, V, H)
         bhat = np.zeros(ii+2,); bhat[0] = beta ###
         L = Identity(H.shape[1], H.shape[1])
+        y = la.lstsq(H,bhat)[0]
+        nrmr = np.linalg.norm(bhat - H@y)
         # print(H.shape)
         if ii == 0:
             lambdah = 0
@@ -39,7 +51,17 @@ def hybrid_gmres(A, b, n_iter, regparam = 'gcv', **kwargs): # what's the naming 
                 #lambdah = generalized_crossvalidation(B, bhat, L, **kwargs)['x'].item()
                 lambdah = generalized_crossvalidation(H, bhat, L)
             elif regparam == 'dp':
-                lambdah = discrepancy_principle(H, bhat, L, **kwargs)
+                if nrmr <= eta*delta:
+                    lambdah = discrepancy_principle(H, bhat, L, **kwargs)
+                    if (dp_stop==True):
+                        print('discrepancy principle satisfied, stopping early.')
+                        RegParam[ii] = lambdah
+                        L = L.todense() if isinstance(L, LinearOperator) else L
+                        y = np.linalg.lstsq(np.vstack((H, np.sqrt(lambdah)*L)), np.vstack((bhat.reshape((-1,1)), np.zeros((H.shape[1],1)))))[0]
+                        x = V[:,:-1] @ y
+                        break
+                else:
+                    lambdah = 0
             else:
                 lambdah = regparam
             RegParam[ii] = lambdah
