@@ -41,7 +41,7 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', **kwargs): # what's the naming c
         (U, B, V) = golub_kahan_update(A, U, B, V)
         bhat = np.zeros(ii+2,); bhat[0] = beta ###
         L = Identity(B.shape[1], B.shape[1])
-        y = la.lstsq(B,bhat)
+        y = la.lstsq(B,bhat)[0]
         nrmr = np.linalg.norm(bhat - B@y)
         if ii == 0:
             lambdah = 0
@@ -51,7 +51,7 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', **kwargs): # what's the naming c
                 lambdah = generalized_crossvalidation(B, bhat, L, **kwargs)
             elif regparam == 'dp':
                 if nrmr <= eta*delta:
-                    lambdah = discrepancy_principle(B, bhat, L, **kwargs)['x'].item()
+                    lambdah = discrepancy_principle(B, bhat, L, **kwargs)#['x'].item()
                 else:
                     lambdah = 0
             else:

@@ -77,12 +77,19 @@ def arnoldi_tikhonov(A, b, n_iter = 3, regparam = 'gcv', **kwargs):
 
     L = Identity(H.shape[1], H.shape[1])
 
+    delta = kwargs['delta'] if ('delta' in kwargs) else None
+    eta = kwargs['eta'] if ('eta' in kwargs) else 1.01
+
     if regparam == 'gcv':
         lambdah = generalized_crossvalidation(H, bhat, L, **kwargs)
 
     elif regparam == 'dp':
-        lambdah = discrepancy_principle(H, bhat, L, **kwargs)#['x'].item()
-
+        y = np.linalg.lstsq(H, bhat.reshape((-1,1)))[0]
+        nrmr = np.linalg.norm(H@y - bhat)
+        if nrmr <= eta*delta:
+            lambdah = discrepancy_principle(H, bhat, L, **kwargs)#['x'].item()
+        else:
+            lambdah = 0
     else:
         lambdah = regparam
 

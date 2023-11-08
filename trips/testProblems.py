@@ -735,7 +735,7 @@ class Deblurring1D:
         if (opt == 'Gaussian'):
             mu_obs = np.zeros(self.grid_points)      # mean of noise
             e = np.random.randn(self.grid_points)
-            delta = np.linalg.norm(e)
+            delta = noise_level * np.linalg.norm(b_true) #np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
         if (opt == 'Poisson'):
