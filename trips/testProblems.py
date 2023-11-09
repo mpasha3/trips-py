@@ -58,8 +58,8 @@ class Deblurring:
         return PSF, center.astype(int)
     def forward_Op(self, dim, spread, nx, ny):
         PSF, center = self.Gauss(dim, spread)
-        proj_forward = lambda X: convolve(X.reshape([nx,ny]), PSF, mode='constant').flatten()
-        proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='constant' ).flatten()
+        proj_forward = lambda X: convolve(X.reshape([nx,ny]), PSF, mode='constant').reshape((-1,1))
+        proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='constant' ).reshape((-1,1))
         blur = pylops.FunctionOperator(proj_forward, proj_backward, nx*ny)
         return blur
     def generate_true(self, choose_image):
@@ -70,25 +70,25 @@ class Deblurring:
             X = dataa['x_true']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
-            x_truef = X_true.flatten(order = 'F')
+            x_truef = X_true.reshape((-1,1))
         elif choose_image == 'satellite64':
             dataa = spio.loadmat(path_package + '/demos/data/images/satellite64.mat')
             X = dataa['x_new']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
-            x_truef = X_true.flatten(order = 'F')
+            x_truef = X_true.reshape((-1,1))
         elif choose_image == 'edges':
             dataa = spio.loadmat(path_package + '/demos/data/images/edges.mat')
             X = dataa['x']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
-            x_truef = X_true.flatten(order = 'F')
+            x_truef = X_true.reshape((-1,1))
         elif choose_image == 'pattern1':
             dataa = spio.loadmat(path_package + '/demos/data/images/shape1.mat')
             X = dataa['xtrue']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  
-            x_truef = X_true.flatten(order = 'F')
+            x_truef = X_true.reshape((-1,1))
         elif choose_image == 'Himage':
             dx = 10
             dy = 10
