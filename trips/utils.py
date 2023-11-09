@@ -131,5 +131,13 @@ def check_Positivescalar(value):
     else:
         valid = False
 
+def check_operator_type(A):
+    aa = str(type(A))
+    if 'array' in aa:
+        A = A
+    # elif 'sparse' in aa:
+    else:
+        A = A.todense()
+    return A
 
 ### TODO: Add a general reweighting function
