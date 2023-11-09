@@ -19,6 +19,7 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 # from trips.cil_io import *
 from trips.testProblems import *
+from trips.utils import *
 
 def plot_singular_vectors_svd(Operator, size, parameter = 'A'):
 
@@ -68,8 +69,9 @@ def plot_singular_vectors_svd(Operator, size, parameter = 'A'):
         plt.show()
 
 def plot_singular_values_svd(Operator, parameter = 'A'):
+    A = check_operator_type(Operator)
     if parameter == 'A':
-        U, S, V = np.linalg.svd(Operator.todense())
+        U, S, V = np.linalg.svd(Operator)
         plt.plot(S)
         plt.title('Singular values of $A$')
         plt.xlabel('$\ell$')
