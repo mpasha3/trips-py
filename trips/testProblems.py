@@ -36,6 +36,7 @@ import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
+
 class Deblurring:
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
@@ -171,58 +172,43 @@ class Deblurring:
         
     def add_noise(self, b_true, opt, noise_level):
         if (opt == 'Gaussian'):
-            mu_obs = np.zeros(self.nx*self.ny)      # mean of noise
-            e = np.random.randn(self.nx*self.ny)
+            e = np.random.randn(self.nx*self.ny, 1)
             delta = np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
-            b_meas_im = b_meas.reshape((self.nx, self.ny), order='F')
+            b_meas_im = b_meas.reshape((self.nx, self.ny))
         if (opt == 'Poisson'):
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
-            b_meas_im = b_meas.reshape((self.nx, self.ny), order='F')
+            b_meas_im = b_meas.reshape((self.nx, self.ny))
             e = 0
             delta = np.linalg.norm(e)
         if (opt == 'Laplace'):
-            mu_obs = np.zeros(self.nx*self.ny)      # mean of noise
-            e = np.random.laplace(self.nx*self.ny)
+            e = np.random.laplace(self.nx*self.ny, 1)
             delta = np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
             b_meas_im = b_meas.reshape((self.nx, self.ny), order='F')
         return (b_meas_im, delta)
-          
-    def Tikh_sol(A, b_vec, L, x_true):
-        lamb = 1/5
-        minerror = 100
-        while lamb > 1e-04:
-            xTik = np.linalg.solve(A.T@A + lamb**2*L.T@L, A.T@b_vec)
-            error = np.linalg.norm(xTik - x_true)/np.linalg.norm(x_true)
-            if error < minerror:
-                minerror = error
-                minlamb = lamb
-                mingTik = xTik
-            lamb /= 2
-        return mingTik  
-      
     def plot_rec(self, img, save_imgs = False, save_path='./saveImagesDeblurringReconstructions'):
-        plt.set_cmap('inferno')
-        if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-        # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
-        plt.imshow(img.reshape((self.nx, self.ny)))
-        plt.axis('off')
-        if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
-        plt.pause(.1)
-        plt.draw()
+            plt.set_cmap('inferno')
+            if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
+            # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
+            plt.imshow(img.reshape((self.nx, self.ny)))
+            plt.axis('off')
+            if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
+            plt.pause(.1)
+            plt.draw()
+
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesDeblurringData'):
-        plt.set_cmap('inferno')
-        if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-        # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
-        plt.imshow(img.reshape((self.nx, self.ny)))
-        plt.axis('off')
-        if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
-        plt.pause(.1)
-        plt.draw()    
+            plt.set_cmap('inferno')
+            if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
+            # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
+            plt.imshow(img.reshape((self.nx, self.ny)))
+            plt.axis('off')
+            if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
+            plt.pause(.1)
+            plt.draw() 
 
 class Tomography():
     def __init__(self,**kwargs):
