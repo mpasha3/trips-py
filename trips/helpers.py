@@ -22,7 +22,7 @@ from trips.testProblems import *
 from trips.utils import *
 
 def plot_singular_vectors_svd(Operator, size, parameter = 'A'):
-
+    Operator = check_operator_type(Operator)
     if parameter == 'A':
         U, S, V = np.linalg.svd(Operator)
         V = V.T
