@@ -37,12 +37,14 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's
     RegParam = np.zeros(n_iter,)
     x_history = []
     lambda_history = []
+    residual_history = []
     for ii in range(n_iter):
         (U, B, V) = golub_kahan_update(A, U, B, V)
         bhat = np.zeros(ii+2,); bhat[0] = beta ###
         L = Identity(B.shape[1], B.shape[1])
         y = la.lstsq(B,bhat)[0]
         nrmr = np.linalg.norm(bhat - B@y)
+        residual_history.append(nrmr)
         if ii == 0:
             lambdah = 0
         else:
@@ -62,7 +64,6 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's
             y = Tikhonov(B, bhat, L, regparam = lambdah)[0]
             x = V @ y
             x_history.append(x)
-        residual_history = [A@x - b for x in x_history]
         if x_true is not None:
             x_true_norm = la.norm(x_true)
             rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]

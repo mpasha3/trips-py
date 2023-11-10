@@ -37,13 +37,14 @@ def hybrid_gmres(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what'
     RegParam = np.zeros(n_iter,)
     x_history = []
     lambda_history = []
-
+    residual_history = []
     for ii in range(n_iter):
         (V, H) = arnoldi_update(A, V, H)
         bhat = np.zeros(ii+2,); bhat[0] = beta ###
         L = Identity(H.shape[1], H.shape[1])
         y = la.lstsq(H,bhat)[0]
         nrmr = np.linalg.norm(bhat - H@y)
+        residual_history.append(nrmr)
         # print(H.shape)
         if ii == 0:
             lambdah = 0
@@ -72,7 +73,6 @@ def hybrid_gmres(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what'
             y = np.linalg.lstsq(np.vstack((H, np.sqrt(lambdah)*L)), np.vstack((bhat.reshape((-1,1)), np.zeros((H.shape[1],1)))))[0]
             x = V[:,:-1] @ y
             x_history.append(x)
-        residual_history = [A@x - b for x in x_history]
         if x_true is not None:
             x_true_norm = la.norm(x_true)
             rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
