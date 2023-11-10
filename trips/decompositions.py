@@ -69,7 +69,7 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
     b = b/np.linalg.norm(b)
 
     # b is first basis vector
-    Q[:, 0] = b.flatten()
+    Q[:, 0] = b.reshape((-1,1))
 
     iterations = 0
 

@@ -18,7 +18,7 @@ from trips.parameter_selection.gcv import *
 from trips.parameter_selection.discrepancy_principle import *
 from pylops import Identity
 
-def hybrid_gmres(A, b, n_iter, regparam = 'gcv', **kwargs): # what's the naming convention here?
+def hybrid_gmres(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's the naming convention here?
 
     delta = kwargs['delta'] if ('delta' in kwargs) else None
 
@@ -35,6 +35,8 @@ def hybrid_gmres(A, b, n_iter, regparam = 'gcv', **kwargs): # what's the naming 
     V = b.reshape((-1,1))/beta
     H = np.empty(1)
     RegParam = np.zeros(n_iter,)
+    x_history = []
+    lambda_history = []
 
     for ii in range(n_iter):
         print(ii)
@@ -64,12 +66,22 @@ def hybrid_gmres(A, b, n_iter, regparam = 'gcv', **kwargs): # what's the naming 
                     lambdah = 0
             else:
                 lambdah = regparam
-            RegParam[ii] = lambdah
+            # RegParam[ii] = lambdah
+            lambda_history.append(lambdah)
             L = L.todense() if isinstance(L, LinearOperator) else L
             #y = la.lstsq(np.matmul(H.T,H) + lambdah*np.matmul(L.T,L), np.matmul(H.T,bhat))[0] ## SG: potentially needs L.T*L; also why lstsq? May just need a solver for linear system; also: you may need np.matmul; also: these are not the normal eqs (you need B'*b)
             y = np.linalg.lstsq(np.vstack((H, np.sqrt(lambdah)*L)), np.vstack((bhat.reshape((-1,1)), np.zeros((H.shape[1],1)))))[0]
             x = V[:,:-1] @ y
-    return x, V, H, RegParam
+            x_history.append(x)
+        residual_history = [A@x - b for x in x_history]
+        if x_true is not None:
+            x_true_norm = la.norm(x_true)
+            rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
+            info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'relResidual': residual_history, 'its': ii}
+        else:
+            info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relResidual': residual_history, 'its': ii}
+    return (x, info)
+    # return x, V, H, RegParam
 
     
 
