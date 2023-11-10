@@ -61,7 +61,8 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's
             RegParam[ii] = lambdah
             L = L.todense() if isinstance(L, LinearOperator) else L
             #y = la.lstsq(np.matmul(B.T,B) + lambdah*np.matmul(L.T,L), np.matmul(B.T,bhat))[0] ## SG: potentially needs L.T*L; also why lstsq? May just need a solver for linear system; also: you may need np.matmul; also: these are not the normal eqs (you need B'*b)
-            y = Tikhonov(B, bhat, L, regparam = lambdah)[0]
+            # y = Tikhonov(B, bhat, L, regparam = lambdah)[0]
+            y = np.linalg.solve(B.T@B + lambdah*L.T@L, B.T@bhat)
             x = V @ y
             x_history.append(x)
         if x_true is not None:
