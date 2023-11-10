@@ -98,8 +98,8 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         normed_r = r / la.norm(r) # normalize residual
         V = np.hstack([V, normed_r]) # add residual to basis
         V, _ = la.qr(V, mode='economic') # orthonormalize basis using QR
-    if x_true is not None:
-        if x_true.shape[1] is not 1:
+    if (x_true != None).all():
+        if (x_true.shape[1] != 1):
             x_true = x_true.reshape(-1,1)
         x_true_norm = la.norm(x_true)
         rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
