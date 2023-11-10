@@ -141,12 +141,12 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         temp = q * (L @ V)
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
         if regparam == 'gcv':
-            lambdah = generalized_crossvalidation(p * (A @ V), b, q * (L @ V), **kwargs )['x'].item() # find ideal lambda by crossvalidation
+            lambdah = generalized_crossvalidation(p * (A @ V), b, q * (L @ V), **kwargs )#['x'].item() # find ideal lambda by crossvalidation
         elif regparam == 'dp':
-            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), **kwargs )['x'].item()
+            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), **kwargs )#['x'].item()
         elif regparam == 'gcv+sequence':
             if ii == 0:
-                lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambda by crossvalidation
+                lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
             else:
                 lambdah = lambda_history[0] * regparam_sequence[ii]
         elif isinstance(regparam, Iterable):
