@@ -129,14 +129,14 @@ def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
 
         # compute reweighting for p-norm approximation
         v = A @ x - b
-        z = smoothed_holder_weights(v, epsilon=epsilon, p=pnorm).flatten()**(1/2)
+        z = smoothed_holder_weights(v, epsilon=epsilon, p=pnorm).reshape((-1,1))**(1/2)
         p = z[:, np.newaxis]
         temp = p * (A @ V)
         (Q_A, R_A) = la.qr(temp, mode='economic') # Project A into V, separate into Q and R
     
         # Compute reweighting for q-norm approximation
         u = L @ x
-        z = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).flatten()**(1/2)
+        z = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).reshape((-1,1))**(1/2)
         q = z[:, np.newaxis]
         temp = q * (L @ V)
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
@@ -396,14 +396,14 @@ class MMGKSClass:
         for ii in tqdm(range(n_iter), 'running MMGKS...'):
 
             v = A @ x - b
-            z = smoothed_holder_weights(v, epsilon=self.epsilon, p=self.pnorm).flatten()**(1/2)
+            z = smoothed_holder_weights(v, epsilon=self.epsilon, p=self.pnorm).reshape((-1,1))**(1/2)
             p = z[:, np.newaxis]
             temp = p * (A @ self.basis)
 
             (Q_A, R_A) = la.qr(temp, mode='economic') # Project A into V, separate into Q and R
             
             u = L @ x
-            z = smoothed_holder_weights(u, epsilon=self.epsilon, p=self.qnorm).flatten()**(1/2)
+            z = smoothed_holder_weights(u, epsilon=self.epsilon, p=self.qnorm).reshape((-1,1))**(1/2)
             q = z[:, np.newaxis]
             temp = q * (L @ self.basis) 
         
