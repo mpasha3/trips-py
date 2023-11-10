@@ -35,9 +35,10 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 
     x_history = []
     lambda_history = []
-
+    residual_history = []
+    rel_error = []
     for ii in tqdm(range(n_iter), 'running GKS...'):
-
+        
         if is_identity(L):
 
             Q_A, R_A, _ = la.svd(A @ V, full_matrices=False)
@@ -86,31 +87,28 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         x = V @ y # project y back
 
         x_history.append(x)
-
+        # resid = la.norm(A@x - b)
         r = (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
+        residual_history.append(la.norm(r))
         ra = A.T@r
         rb = lambdah * L.T @ (L @ x)
         r = ra + rb
         r = r - V@(V.T@r)
         r = r - V@(V.T@r)
-
         normed_r = r / la.norm(r) # normalize residual
         V = np.hstack([V, normed_r]) # add residual to basis
         V, _ = la.qr(V, mode='economic') # orthonormalize basis using QR
-
-    residual_history = [A@x - b for x in x_history]
-    if x_true is not None:
-        if x_true.shape[1] is not 1:
+    if x_true != None:
+        if x_true.shape[1] != 1:
             x_true = x_true.reshape(-1,1)
         x_true_norm = la.norm(x_true)
         rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
         info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'relResidual': residual_history, 'its': ii}
     else:
         info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relResidual': residual_history, 'its': ii}
-    
     return (x, info)
 
-def MMGKS(A, b, L, pnorm=1, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv', x_true=None, **kwargs):
+def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
