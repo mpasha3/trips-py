@@ -69,7 +69,7 @@ def arnoldi(A: 'np.ndarray[np.float]', b: 'np.ndarray[np.float]', n_iter: int, d
     b = b/np.linalg.norm(b)
 
     # b is first basis vector
-    Q[:, 0] = b.reshape((-1,1))
+    Q[:, 0] = b.flatten()#reshape((-1,1))
 
     iterations = 0
 
@@ -158,7 +158,7 @@ def golub_kahan(A, b, n_iter, dp_stop=False, **kwargs):
     U = np.zeros((rows, 1+1)) # start the bases at dimension of iter and iter+1
     V = np.zeros((cols, 1))
 
-    U[:,0] = (b/np.linalg.norm(b)).reshape((-1,1)) # initialize U with the normalized guess
+    U[:,0] = (b/np.linalg.norm(b)).flatten()#reshape((-1,1)) # initialize U with the normalized guess
                                        
     iterations = 0
                                        
