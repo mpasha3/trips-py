@@ -39,7 +39,6 @@ def hybrid_gmres(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what'
     lambda_history = []
 
     for ii in range(n_iter):
-        print(ii)
         (V, H) = arnoldi_update(A, V, H)
         bhat = np.zeros(ii+2,); bhat[0] = beta ###
         L = Identity(H.shape[1], H.shape[1])

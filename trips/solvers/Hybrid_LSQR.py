@@ -38,7 +38,6 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's
     x_history = []
     lambda_history = []
     for ii in range(n_iter):
-        print(ii)
         (U, B, V) = golub_kahan_update(A, U, B, V)
         bhat = np.zeros(ii+2,); bhat[0] = beta ###
         L = Identity(B.shape[1], B.shape[1])
