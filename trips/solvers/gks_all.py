@@ -15,7 +15,7 @@ from ..decompositions import golub_kahan, arnoldi
 from ..parameter_selection.gcv import generalized_crossvalidation
 from ..parameter_selection.discrepancy_principle import discrepancy_principle
 from ..utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
-
+from scipy import sparse
 import numpy as np
 from scipy import linalg as la
 from pylops import Identity
@@ -28,7 +28,6 @@ from collections.abc import Iterable
 def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
-
     regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
 
     (U, B, V) = golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
@@ -112,7 +111,8 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
-
+    isoTV = kwargs['isoTV'] if ('isoTV' in kwargs) else False
+    GS = kwargs['GS'] if ('GS' in kwargs) else False
     epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.1
 
     regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
@@ -134,7 +134,13 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         (Q_A, R_A) = la.qr(temp, mode='economic') # Project A into V, separate into Q and R
         # Compute reweighting for q-norm approximation
         u = L @ x
-        z = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).reshape((-1,1))**(1/2)
+        if isoTV == True:
+            print('compute weights for ISOTV')
+        elif GS == True:
+            print('compute weights for GS')
+        else:
+            print('Regular weights')
+            z = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).reshape((-1,1))**(1/2)
         # q = z[:, np.newaxis]
         q = sparse.spdiags(data = z.flatten() , diags=0, m=z.shape[0], n=z.shape[0])
         temp = q @ (L @ V)
