@@ -13,7 +13,7 @@ __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.
 
 
 from pylops import LinearOperator
-from operators import *
+from tripe.operators import *
 from scipy import linalg as la
 from scipy.sparse._arrays import _sparray
 from scipy import sparse
