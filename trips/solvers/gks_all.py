@@ -19,7 +19,7 @@ from scipy import sparse
 import numpy as np
 from scipy import linalg as la
 from pylops import Identity
-
+from trips.utils import *
 from tqdm import tqdm
 
 from collections.abc import Iterable
@@ -57,21 +57,8 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 
         elif regparam == 'dp':
             lambdah = discrepancy_principle(A @ V, b, L @ V, **kwargs)#['x'].item() # find ideal lambdas by crossvalidation
-
-        elif regparam == 'gcv+sequence':
-            if ii == 0:
-                lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambda by crossvalidation
-            else:
-                lambdah = lambda_history[0] * regparam_sequence[ii]
-        elif isinstance(regparam, Iterable):
-            lambdah = regparam[ii]
         else:
             lambdah = regparam
-
-        if (regparam in ['gcv', 'dp']) and (ii > 1):
-
-            if abs(lambdah - lambda_history[-1]) > (1)*lambda_history[-1]:
-                lambdah = lambda_history[-1]
 
         lambda_history.append(lambdah)
 
@@ -86,7 +73,6 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         x = V @ y # project y back
 
         x_history.append(x)
-        # resid = la.norm(A@x - b)
         r = (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
         residual_history.append(la.norm(r))
         ra = A.T@r
@@ -102,21 +88,20 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
             x_true = x_true.reshape(-1,1)
         x_true_norm = la.norm(x_true)
         rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
-        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'relResidual': residual_history, 'its': ii}
+        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'Residual': residual_history, 'its': ii}
     else:
-        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relResidual': residual_history, 'its': ii}
+        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'Residual': residual_history, 'its': ii}
     return (x, info)
 
 
 def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
-    isoTV = kwargs['isoTV'] if ('isoTV' in kwargs) else False
-    GS = kwargs['GS'] if ('GS' in kwargs) else False
+    isoTV_option = kwargs['isoTV'] if ('isoTV' in kwargs) else False
+    GS_option = kwargs['GS'] if ('GS' in kwargs) else False
     epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.1
-
+    prob_dims = kwargs['prob_dims'] if ('prob_dims' in kwargs) else False
     regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
-
     (U, B, V) = golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
     
     x_history = []
@@ -134,14 +119,22 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         (Q_A, R_A) = la.qr(temp, mode='economic') # Project A into V, separate into Q and R
         # Compute reweighting for q-norm approximation
         u = L @ x
-        if isoTV == True:
-            print('compute weights for ISOTV')
-        elif GS == True:
-            print('compute weights for GS')
+        if isoTV_option in ['isoTV', 'ISOTV', 'IsoTV']:
+            if prob_dims == False:
+                raise TypeError("For Isotropic TV you must enter the dimension of the dynamic problem! Example: (x_mmgks, info_mmgks) = MMGKS(A, data_vec, L, pnorm=2, qnorm=1, projection_dim=2, n_iter =3, regparam = 0.005, x_true = None, isoTV = 'isoTV', prob_dims = (nx,ny, nt))")
+            else:
+                nx = prob_dims[0]
+                ny = prob_dims[1]
+            z = iso_TV_weights(x, nx, ny, epsilon, qnorm)
+        elif GS_option in  ['GS', 'gs', 'Gs']:
+            if prob_dims == False:
+                raise TypeError("For Isotropic TV you must enter the dimension of the dynamic problem. (x_mmgks, info_mmgks) = MMGKS(A, data_vec, L, pnorm=2, qnorm=1, projection_dim=2, n_iter =3, regparam = 0.005, x_true = None, isoTV = 'isoTV', prob_dims = (nx,ny, nt))")
+            else:
+                nx = prob_dims[0]
+                ny = prob_dims[1]
+            z = GS_weights(x, nx, ny, epsilon, qnorm)
         else:
-            print('Regular weights')
             z = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).reshape((-1,1))**(1/2)
-        # q = z[:, np.newaxis]
         q = sparse.spdiags(data = z.flatten() , diags=0, m=z.shape[0], n=z.shape[0])
         temp = q @ (L @ V)
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
@@ -151,9 +144,6 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
             lambdah = discrepancy_principle(p @ (A @ V), b, q @ (L @ V), **kwargs )#['x'].item()
         else:
             lambdah = regparam
-        if (regparam in ['gcv', 'dp']) and (ii > 1):
-            if abs(lambdah - lambda_history[-1]) > (1)*lambda_history[-1]:
-                lambdah = lambda_history[-1]
         lambda_history.append(lambdah)
         bhat = (Q_A.T @ b).reshape(-1,1) # Project b
         R_stacked = np.vstack( [R_A]+ [lambdah*R_L] ) # Stack projected operators
@@ -179,6 +169,8 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relResidual': residual_history, 'its': ii}
     
     return (x, info)
+
+
 """
 Classes which implement GKS. 
 """
