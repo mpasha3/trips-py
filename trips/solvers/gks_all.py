@@ -108,11 +108,12 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relResidual': residual_history, 'its': ii}
     return (x, info)
 
+
 def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
-    epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.001
+    epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.1
 
     regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
 
@@ -128,27 +129,20 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         # compute reweighting for p-norm approximation
         v = A @ x - b
         z = smoothed_holder_weights(v, epsilon=epsilon, p=pnorm).reshape((-1,1))**(1/2)
-        p = z[:, np.newaxis]
-        temp = p * (A @ V)
+        p = sparse.spdiags(data = z.flatten() , diags=0, m=z.shape[0], n=z.shape[0])
+        temp = p @ (A @ V)
         (Q_A, R_A) = la.qr(temp, mode='economic') # Project A into V, separate into Q and R
-    
         # Compute reweighting for q-norm approximation
         u = L @ x
         z = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).reshape((-1,1))**(1/2)
-        q = z[:, np.newaxis]
-        temp = q * (L @ V)
+        # q = z[:, np.newaxis]
+        q = sparse.spdiags(data = z.flatten() , diags=0, m=z.shape[0], n=z.shape[0])
+        temp = q @ (L @ V)
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
         if regparam == 'gcv':
-            lambdah = generalized_crossvalidation(p * (A @ V), b, q * (L @ V), **kwargs )#['x'].item() # find ideal lambda by crossvalidation
+            lambdah = generalized_crossvalidation(p @ (A @ V), b, q @ (L @ V), **kwargs )#['x'].item() # find ideal lambda by crossvalidation
         elif regparam == 'dp':
-            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), **kwargs )#['x'].item()
-        elif regparam == 'gcv+sequence':
-            if ii == 0:
-                lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
-            else:
-                lambdah = lambda_history[0] * regparam_sequence[ii]
-        elif isinstance(regparam, Iterable):
-            lambdah = regparam[ii]
+            lambdah = discrepancy_principle(p @ (A @ V), b, q @ (L @ V), **kwargs )#['x'].item()
         else:
             lambdah = regparam
         if (regparam in ['gcv', 'dp']) and (ii > 1):
@@ -161,9 +155,9 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         y, _,_,_ = la.lstsq(R_stacked, b_stacked) # get least squares solution
         x = V @ y # project y back
         x_history.append(x)
-        r = p * (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
+        r = p @ (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
         ra = A.T @ r
-        rb = lambdah * L.T @ (q * (L @ x))
+        rb = lambdah * L.T @ (q @ (L @ x))
         r = ra  + rb
         r = r - V@(V.T@r)
         r = r - V@(V.T@r)
