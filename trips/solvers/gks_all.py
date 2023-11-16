@@ -28,6 +28,8 @@ from collections.abc import Iterable
 def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
+
+    # do you ever use this below?
     regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
 
     (U, B, V) = golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
@@ -44,25 +46,36 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 
             R_A = np.diag(R_A)
 
-            (Q_L, R_L) = (Identity(L.shape[0]) @ V, Identity(L.shape[0]) @ V)
+            R_L = Identity(V.shape[1])
 
         else:
 
+            # should we use operator_qr ?
             (Q_A, R_A) = la.qr(A @ V, mode='economic') # Project A into V, separate into Q and R
         
-            (Q_L, R_L) = la.qr(L @ V, mode='economic') # Project L into V, separate into Q and R
+            _, R_L = la.qr(L @ V, mode='economic') # Project L into V, separate into Q and R
+
+        bhat = (Q_A.T@b).reshape(-1,1) 
 
         if regparam == 'gcv':
-            lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
+            # lambdah = generalized_crossvalidation(Q_A, R_A, R_L, Q_A@bhat, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
+            # called in this way to have GCV work in a general framework
+            lambdah = generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
 
         elif regparam == 'dp':
+            y = la.lstsq(R_A,bhat)[0]
+            nrmr = np.linalg.norm(bhat - R_A@y)
+            # condition on the residual -- check where it should be added
+            # ytemp = la.lstsq(R_A, Q_)
             lambdah = discrepancy_principle(A @ V, b, L @ V, **kwargs)#['x'].item() # find ideal lambdas by crossvalidation
+        elif isinstance(regparam, Iterable):
+            lambdah = regparam[ii]
         else:
             lambdah = regparam
 
         lambda_history.append(lambdah)
 
-        bhat = (Q_A.T @ b).reshape(-1,1) # Project b
+        # bhat = (Q_A.T @ b).reshape(-1,1) # Project b
 
         R_stacked = np.vstack( [R_A]+ [lambdah*R_L] ) # Stack projected operators
 
@@ -83,6 +96,7 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         normed_r = r / la.norm(r) # normalize residual
         V = np.hstack([V, normed_r]) # add residual to basis
         V, _ = la.qr(V, mode='economic') # orthonormalize basis using QR
+
     if (x_true != None).all():
         if (x_true.shape[1] != 1):
             x_true = x_true.reshape(-1,1)
@@ -138,14 +152,22 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         q = sparse.spdiags(data = z.flatten() , diags=0, m=z.shape[0], n=z.shape[0])
         temp = q @ (L @ V)
         (Q_L, R_L) = la.qr(temp, mode='economic') # Project L into V, separate into Q and R
+
+        # Compute the projected rhs
+        bhat = (Q_A.T @ b).reshape(-1,1)
         if regparam == 'gcv':
-            lambdah = generalized_crossvalidation(p @ (A @ V), b, q @ (L @ V), **kwargs )#['x'].item() # find ideal lambda by crossvalidation
+            # find ideal lambda by crossvalidation
+            lambdah = generalized_crossvalidation(p*Q_A, p*R_A, q*R_L, b, **kwargs ) # should bhat be reweighted?
         elif regparam == 'dp':
-            lambdah = discrepancy_principle(p @ (A @ V), b, q @ (L @ V), **kwargs )#['x'].item()
+            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), **kwargs )#['x'].item()
+        elif isinstance(regparam, Iterable):
+            lambdah = regparam[ii]
         else:
             lambdah = regparam
+        # if (regparam in ['gcv', 'dp']) and (ii > 1):
+        #     if abs(lambdah - lambda_history[-1]) > (1)*lambda_history[-1]:
+        #         lambdah = lambda_history[-1]
         lambda_history.append(lambdah)
-        bhat = (Q_A.T @ b).reshape(-1,1) # Project b
         R_stacked = np.vstack( [R_A]+ [lambdah*R_L] ) # Stack projected operators
         b_stacked = np.vstack([bhat] + [np.zeros(shape=(R_L.shape[0], 1))]) # pad with zeros
         y, _,_,_ = la.lstsq(R_stacked, b_stacked) # get least squares solution

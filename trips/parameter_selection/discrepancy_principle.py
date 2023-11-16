@@ -31,7 +31,6 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
     else: ### MORE CASES TO BE CONSIDERED
         UL, SL, VL = la.svd(L)
         if L.shape[0] >= L.shape[1] and SL[-1] != 0:
-            print('here')
             Anew = A@(VL.T@np.diag((SL)**(-1)))
             bnew = b
         elif L.shape[0] >= L.shape[1] and SL[-1] == 0:
@@ -60,38 +59,47 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
 
     U, S, V = la.svd(Anew)
     singular_values = S**2
-    if Anew.shape[0] > Anew.shape[1]:
-        singular_values = np.append(singular_values.reshape((-1,1)), np.zeros((Anew.shape[0]-Anew.shape[1],1)))
-    singular_values.shape = (singular_values.shape[0], 1)
     bhat = U.T @ bnew
+    if Anew.shape[0] > Anew.shape[1]:
+        print('here')
+        singular_values = np.append(singular_values.reshape((-1,1)), np.zeros((Anew.shape[0]-Anew.shape[1],1)))
+        testzero = la.norm(bhat[Anew.shape[1]-Anew.shape[0]:,:])**2  - (eta*delta)**2
+    else:
+        testzero = - (eta*delta)**2
+    singular_values.shape = (singular_values.shape[0], 1)
+
+    testzero = -1 ###
     
     beta = 1e-8
     iterations = 0
 
-    while (iterations < 30) or ((iterations <= 100) and (np.abs(alpha) < 10**(-16))):
-        print(iterations)
-        zbeta = (((singular_values*beta + 1)**(-1))*bhat.reshape((-1,1))).reshape((-1,1))
-        f = la.norm(zbeta)**2 - (eta*delta)**2
-        wbeta = (((singular_values*beta + 1)**(-1))*zbeta).reshape((-1,1))
-        f_prime = 2/beta*zbeta.T@(wbeta - zbeta)
+    if testzero < 0:
+        while (iterations < 30) or ((iterations <= 100) and (np.abs(alpha) < 10**(-16))):
+            # print(iterations)
+            zbeta = (((singular_values*beta + 1)**(-1))*bhat.reshape((-1,1))).reshape((-1,1))
+            f = la.norm(zbeta)**2 - (eta*delta)**2
+            wbeta = (((singular_values*beta + 1)**(-1))*zbeta).reshape((-1,1))
+            f_prime = 2/beta*zbeta.T@(wbeta - zbeta)
 
         # tikh_sol = lambda reg_param: np.linalg.lstsq(np.vstack((Anew, (1/np.sqrt(reg_param))*np.eye(Anew.shape[1]))), np.vstack((bnew.reshape((-1,1)), np.zeros((Anew.shape[1],1)))))[0]
         # discr_func_zero = lambda reg_param: (np.linalg.norm(np.matmul(Anew,tikh_sol(reg_param)).reshape((-1,1)) - (bnew.reshape((-1,1))))**2 - (eta*delta)**2)
         # tikh_sol = lambda reg_param: np.linalg.lstsq(np.vstack((A, (1/np.sqrt(reg_param))*L)), np.vstack((b.reshape((-1,1)), np.zeros((L.shape[0],1)))))[0]
         # discr_func_zero = lambda reg_param: (np.linalg.norm(np.matmul(A,tikh_sol(reg_param)).reshape((-1,1)) - (b.reshape((-1,1))))**2 - (eta*delta)**2)
 
-        print(f)
+        # print(f)
         # print(discr_func_zero(beta))
 
-        beta_new = beta - f/f_prime
+            beta_new = beta - f/f_prime
 
-        if abs(beta_new - beta) < 10**(-12)* beta:
-            break
+            if abs(beta_new - beta) < 10**(-12)* beta:
+                break
 
-        beta = beta_new
-        alpha = 1/beta_new
+            beta = beta_new
+            alpha = 1/beta_new
 
-        iterations += 1
+            iterations += 1
+    else:
+        alpha = 0
 
 
     return alpha#{'x':alpha}

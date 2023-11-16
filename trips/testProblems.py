@@ -74,7 +74,8 @@ class Deblurring:
             self.nx, self.ny = X_true.shape  
             x_truef = X_true.reshape((-1,1))
         elif choose_image == 'satellite64':
-            dataa = spio.loadmat(path_package + '/demos/data/images/satellite64.mat')
+            # dataa = spio.loadmat(path_package + '/demos/data/images/satellite64.mat')
+            dataa = spio.loadmat('../demos/data/images/satellite64.mat')
             X = dataa['x_new']
             X_true = X/X.max()
             self.nx, self.ny = X_true.shape  

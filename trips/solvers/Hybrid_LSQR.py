@@ -21,6 +21,8 @@ from trips.solvers import Tikhonov
 
 def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's the naming convention here?
 
+    print('local on the notebook')
+
     delta = kwargs['delta'] if ('delta' in kwargs) else None
 
     eta = kwargs['eta'] if ('eta' in kwargs) else 1.01
@@ -34,7 +36,6 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's
     U = b.reshape((-1,1))/beta
     B = np.empty(1)
     V = np.empty((n,1))
-    RegParam = np.zeros(n_iter,)
     x_history = []
     lambda_history = []
     residual_history = []
@@ -49,8 +50,12 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's
             lambdah = 0
         else:
             if regparam == 'gcv':
-                #lambdah = generalized_crossvalidation(B, bhat, L, **kwargs)['x'].item()
-                lambdah = generalized_crossvalidation(B, bhat, L, **kwargs)
+                # this is a factorization of the projected matrix!!!
+                Q_A, R_A, _ = la.svd(B, full_matrices=False)
+                R_A = np.diag(R_A)
+                R_L = Identity(B.shape[1])
+                lambdah = generalized_crossvalidation(Q_A, R_A, R_L, bhat, variant = 'modified', fullsize = A.shape[0], **kwargs)
+                # lambdah = generalized_crossvalidation(B, bhat, L, **kwargs)
             elif regparam == 'dp':
                 if nrmr <= eta*delta:
                     lambdah = discrepancy_principle(B, bhat, L, **kwargs)#['x'].item()
@@ -58,21 +63,22 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's
                     lambdah = 0
             else:
                 lambdah = regparam
-            RegParam[ii] = lambdah
+            lambda_history.append(lambdah)    
             L = L.todense() if isinstance(L, LinearOperator) else L
-            #y = la.lstsq(np.matmul(B.T,B) + lambdah*np.matmul(L.T,L), np.matmul(B.T,bhat))[0] ## SG: potentially needs L.T*L; also why lstsq? May just need a solver for linear system; also: you may need np.matmul; also: these are not the normal eqs (you need B'*b)
             # y = Tikhonov(B, bhat, L, regparam = lambdah)[0]
             y = np.linalg.solve(B.T@B + lambdah*L.T@L, B.T@bhat)
             x = V @ y
+            x = x.reshape((-1,1))
             x_history.append(x)
-        if x_true is not None:
+        if (x_true != None).all():
+            if (x_true.shape[1] != 1):
+                x_true = x_true.reshape(-1,1)
             x_true_norm = la.norm(x_true)
             rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
             info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'relResidual': residual_history, 'its': ii}
         else:
             info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relResidual': residual_history, 'its': ii}
     return (x, info)
-    # return x, U, B, V, RegParam
 
     
 

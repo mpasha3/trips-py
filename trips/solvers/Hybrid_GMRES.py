@@ -50,15 +50,18 @@ def hybrid_gmres(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what'
             lambdah = 0
         else:
             if regparam == 'gcv':
+                Q_A, R_A, _ = la.svd(H, full_matrices=False)
+                R_A = np.diag(R_A)
+                R_L = Identity(H.shape[1])
                 #lambdah = generalized_crossvalidation(B, bhat, L, **kwargs)['x'].item()
-                lambdah = generalized_crossvalidation(H, bhat, L)
+                lambdah = generalized_crossvalidation(Q_A, R_A, R_L, bhat, **kwargs)
             elif regparam == 'dp':
                 if nrmr <= eta*delta:
                     lambdah = discrepancy_principle(H, bhat, L, **kwargs)
                     if (dp_stop==True):
                         print('discrepancy principle satisfied, stopping early.')
                         RegParam[ii] = lambdah
-                        L = L.todense() if isinstance(L, LinearOperator) else L
+                        L = L.todense() if isinstance(L, LinearOperator) else L # I am actually defining it, so check what is the case
                         y = np.linalg.lstsq(np.vstack((H, np.sqrt(lambdah)*L)), np.vstack((bhat.reshape((-1,1)), np.zeros((H.shape[1],1)))))[0]
                         x = V[:,:-1] @ y
                         break
