@@ -17,14 +17,17 @@ import scipy.linalg as la
 from trips.utils import operator_qr, operator_svd, is_identity
 import warnings
 
-def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
+def discrepancy_principle(Q, A, L, b, delta = None, eta = 1.01, **kwargs):
 
     if not ( isinstance(delta, float) or isinstance(delta, int)):
-
         # raise TypeError('You must provide a value for the noise level delta.')
         raise Exception("""A value for the noise level delta was not provided and the discrepancy principle cannot be applied. 
                     Please supply a value of delta based on the estimated noise level of the problem, or choose the regularization parameter according to gcv.""")
+    
+    explicitProj = kwargs['explicitProj'] if ('explicitProj' in kwargs) else False
 
+    bfull = b
+    b = Q.T@b
     if is_identity(L):
         Anew = A
         bnew = b
@@ -35,7 +38,6 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
             bnew = b
         elif L.shape[0] >= L.shape[1] and SL[-1] == 0:
             zeroind = np.where(SL == 0)
-            #W = VL[:,zeroind]
             W = VL[zeroind,:].reshape((-1,1))
             AW = A@W
             Q_AW, R_AW = np.linalg.qr(AW, mode='reduced')
@@ -45,13 +47,10 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
             xnull = W@np.linalg.inv(R_AW)@Q_AW.T@b
             bnew = b - A@xnull
         elif (L.shape[0] < L.shape[1]):
-            # print(L.shape[0]-L.shape[1])
             W = VL[L.shape[0]-L.shape[1]:,:].T
-            print(W.shape)
             AW = A@W
             Q_AW, R_AW = np.linalg.qr(AW, mode='reduced')
             Q_LT, R_LT = np.linalg.qr(L.T, mode='reduced')
-            # print((W@np.linalg.inv(R_AW)@Q_AW.T@A).shape)
             LAwpinv = (np.eye(L.shape[1]) - (W@np.linalg.inv(R_AW)@Q_AW.T@A))@Q_LT@np.linalg.inv(R_LT.T)
             Anew = A@LAwpinv
             xnull = W@np.linalg.inv(R_AW)@Q_AW.T@b
@@ -60,15 +59,15 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
     U, S, V = la.svd(Anew)
     singular_values = S**2
     bhat = U.T @ bnew
-    if Anew.shape[0] > Anew.shape[1]:
-        print('here')
+    if Anew.shape[0] > Anew.shape[1]: # check if we can get rid of this condition (keep only the first)
         singular_values = np.append(singular_values.reshape((-1,1)), np.zeros((Anew.shape[0]-Anew.shape[1],1)))
-        testzero = la.norm(bhat[Anew.shape[1]-Anew.shape[0]:,:])**2  - (eta*delta)**2
+        if explicitProj: # try to recompute QR fact of Q, for instance
+            testzero = la.norm(bhat[Anew.shape[1]-Anew.shape[0]:,:])**2 + la.norm(bfull - Q@b)**2 - (eta*delta)**2 # this is OK but need reorthogonalization
+        else:
+            testzero = la.norm(bhat[Anew.shape[1]-Anew.shape[0]:,:])**2 - (eta*delta)**2
     else:
-        testzero = - (eta*delta)**2
+        testzero = la.norm(bfull - Q@b)**2 - (eta*delta)**2
     singular_values.shape = (singular_values.shape[0], 1)
-
-    testzero = -1 ###
     
     beta = 1e-8
     iterations = 0
@@ -77,17 +76,12 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
         while (iterations < 30) or ((iterations <= 100) and (np.abs(alpha) < 10**(-16))):
             # print(iterations)
             zbeta = (((singular_values*beta + 1)**(-1))*bhat.reshape((-1,1))).reshape((-1,1))
-            f = la.norm(zbeta)**2 - (eta*delta)**2
+            if explicitProj:
+                f = la.norm(zbeta)**2 + la.norm(bfull - Q@b)**2 - (eta*delta)**2 # this is OK but need reorthogonalization
+            else:
+                f = la.norm(zbeta)**2 - (eta*delta)**2
             wbeta = (((singular_values*beta + 1)**(-1))*zbeta).reshape((-1,1))
             f_prime = 2/beta*zbeta.T@(wbeta - zbeta)
-
-        # tikh_sol = lambda reg_param: np.linalg.lstsq(np.vstack((Anew, (1/np.sqrt(reg_param))*np.eye(Anew.shape[1]))), np.vstack((bnew.reshape((-1,1)), np.zeros((Anew.shape[1],1)))))[0]
-        # discr_func_zero = lambda reg_param: (np.linalg.norm(np.matmul(Anew,tikh_sol(reg_param)).reshape((-1,1)) - (bnew.reshape((-1,1))))**2 - (eta*delta)**2)
-        # tikh_sol = lambda reg_param: np.linalg.lstsq(np.vstack((A, (1/np.sqrt(reg_param))*L)), np.vstack((b.reshape((-1,1)), np.zeros((L.shape[0],1)))))[0]
-        # discr_func_zero = lambda reg_param: (np.linalg.norm(np.matmul(A,tikh_sol(reg_param)).reshape((-1,1)) - (b.reshape((-1,1))))**2 - (eta*delta)**2)
-
-        # print(f)
-        # print(discr_func_zero(beta))
 
             beta_new = beta - f/f_prime
 
@@ -95,14 +89,13 @@ def discrepancy_principle(A, b, L, delta = None, eta = 1.01, **kwargs):
                 break
 
             beta = beta_new
-            alpha = 1/beta_new
+            alpha = 1/beta_new[0,0]
 
             iterations += 1
     else:
         alpha = 0
 
-
-    return alpha#{'x':alpha}
+    return alpha
 
 ##### OLD VERSION #####
 

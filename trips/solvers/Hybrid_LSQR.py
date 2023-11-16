@@ -57,10 +57,7 @@ def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's
                 lambdah = generalized_crossvalidation(Q_A, R_A, R_L, bhat, variant = 'modified', fullsize = A.shape[0], **kwargs)
                 # lambdah = generalized_crossvalidation(B, bhat, L, **kwargs)
             elif regparam == 'dp':
-                if nrmr <= eta*delta:
-                    lambdah = discrepancy_principle(B, bhat, L, **kwargs)#['x'].item()
-                else:
-                    lambdah = 0
+                lambdah = discrepancy_principle(U, B, L, b, **kwargs)
             else:
                 lambdah = regparam
             lambda_history.append(lambdah)    

@@ -63,11 +63,16 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
             lambdah = generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
 
         elif regparam == 'dp':
-            y = la.lstsq(R_A,bhat)[0]
-            nrmr = np.linalg.norm(bhat - R_A@y)
-            # condition on the residual -- check where it should be added
-            # ytemp = la.lstsq(R_A, Q_)
-            lambdah = discrepancy_principle(A @ V, b, L @ V, **kwargs)#['x'].item() # find ideal lambdas by crossvalidation
+            ## THESE ARE NATURAL CONDITIONS, NOW EMBEDDED IN THE discrepancy_principle FCN
+            # y = la.lstsq(R_A,bhat)[0]
+            # nrmr = np.linalg.norm(bhat - R_A@y)
+            # print(nrmr**2)
+            # print(la.norm(b - Q_A@bhat)**2)
+            # delta = kwargs['delta']
+            # eta = kwargs['eta'] if ('eta' in kwargs) else 1.01
+            # print((eta*delta)**2)
+            lambdah = discrepancy_principle(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambdas by crossvalidation
+
         elif isinstance(regparam, Iterable):
             lambdah = regparam[ii]
         else:
