@@ -54,7 +54,7 @@ Images for 2D Deblurring
 """
 def get_image_data(dataset = 'satellite'):
 
-    assert dataset in ['satellite', 'hubble', 'edges', 'star']
+    assert dataset in ['satellite', 'hubble', 'star']
 
     if exists(f'./data/image_data/{dataset}.mat'):
         print('data already downloaded.')
@@ -65,28 +65,31 @@ def get_image_data(dataset = 'satellite'):
         if not exists('./data'):
             mkdir("./data")
 
-        if not exists('./data/emoji_data'):
-            mkdir("./data/emoji_data")
+        if not exists('./data/image_data'):
+            mkdir("./data/image_data")
 
-        r = requests.get(f'https://zenodo.org/record/1183532/files/DataDynamic_128x{dataset}.mat')
+        r = requests.get(f'https://drive.google.com/drive/folders/1uexAAYKRnSy0YTXMisk6IxcmwQ66H2by?usp=share_link/{dataset}.mat')
 
-        with open(f'./data/emoji_data/DataDynamic_128x{dataset}.mat', "wb") as file:
+        with open(f'./data/image_data/{dataset}.mat', "wb") as file:
 
             file.write(r.content)
 
         print("downloaded.")
+
+
 """
 Generate image data
 """
 def generate_image_dat(im):
     get_image_data(im)
     currentpath = os.getcwd()
-    f = spio.loadmat(f'./data/image_data/image_{im}.mat')
+    f = spio.loadmat(f'./data/image_data/{im}.mat')
     X = f['x_true']
     X_true = X/X.max()
     nx, ny = X_true.shape  
     x_truef = X_true.reshape((-1,1))
     return X_true
+
 
 """
 Emoji data and operator:
