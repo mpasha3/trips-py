@@ -160,13 +160,22 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
 
         # Compute the projected rhs
         bhat = (Q_A.T @ b).reshape(-1,1)
+       
         if regparam == 'gcv':
-            # find ideal lambda by crossvalidation
-            lambdah = generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs ) # should bhat be reweighted?
+            # lambdah = generalized_crossvalidation(Q_A, R_A, R_L, Q_A@bhat, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
+            # called in this way to have GCV work in a general framework
+            lambdah = generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
         elif regparam == 'dp':
-            lambdah = discrepancy_principle((A @ V), b, (L @ V), **kwargs )#['x'].item()
-        elif isinstance(regparam, Iterable):
-            lambdah = regparam[ii]
+            ## THESE ARE NATURAL CONDITIONS, NOW EMBEDDED IN THE discrepancy_principle FCN
+            # y = la.lstsq(R_A,bhat)[0]
+            # nrmr = np.linalg.norm(bhat - R_A@y)
+            # print(nrmr**2)
+            # print(la.norm(b - Q_A@bhat)**2)
+            # delta = kwargs['delta']
+            # eta = kwargs['eta'] if ('eta' in kwargs) else 1.01
+            # print((eta*delta)**2)
+            lambdah = discrepancy_principle(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambdas by crossvalidation
+
         else:
             lambdah = regparam
         # if (regparam in ['gcv', 'dp']) and (ii > 1):
