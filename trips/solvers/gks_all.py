@@ -103,13 +103,14 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         V, _ = la.qr(V, mode='economic') # orthonormalize basis using QR
 
     if (x_true is not None):
-        if (x_true.shape[1] is not 1):
+        if x_true.shape[1] is not 1:
             x_true = x_true.reshape(-1,1)
         x_true_norm = la.norm(x_true)
         rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
         info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'Residual': residual_history, 'its': ii}
     else:
         info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'Residual': residual_history, 'its': ii}
+    # info = {}
     return (x, info)
 
 
@@ -200,9 +201,9 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
     if x_true is not None:
         x_true_norm = la.norm(x_true)
         rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
-        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'relResidual': residual_history, 'its': ii}
+        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'Residual': residual_history, 'its': ii}
     else:
-        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relResidual': residual_history, 'its': ii}
+        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'Residual': residual_history, 'its': ii}
     
     return (x, info)
 
