@@ -72,7 +72,6 @@ def gcv_denominator(reg_param, R_A, R_L, b, **kwargs):
     
     return trace_term**2
 
-
 def generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs):
 
     if 'tol' in kwargs:
