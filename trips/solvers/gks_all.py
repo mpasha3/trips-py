@@ -162,9 +162,9 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         bhat = (Q_A.T @ b).reshape(-1,1)
         if regparam == 'gcv':
             # find ideal lambda by crossvalidation
-            lambdah = generalized_crossvalidation(p*Q_A, p*R_A, q*R_L, b, **kwargs ) # should bhat be reweighted?
+            lambdah = generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs ) # should bhat be reweighted?
         elif regparam == 'dp':
-            lambdah = discrepancy_principle(p * (A @ V), b, q * (L @ V), **kwargs )#['x'].item()
+            lambdah = discrepancy_principle((A @ V), b, (L @ V), **kwargs )#['x'].item()
         elif isinstance(regparam, Iterable):
             lambdah = regparam[ii]
         else:

@@ -48,7 +48,7 @@ def gcv_numerator(reg_param, Q_A, R_A, R_L, b):
 def gcv_denominator(reg_param, R_A, R_L, b, **kwargs):
 
     variant = kwargs['variant'] if ('variant' in kwargs) else 'standard'
-    print(variant)
+    # print(variant)
     # the observation term:
 
     R_A_2 = R_A.T @ R_A
