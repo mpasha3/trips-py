@@ -77,13 +77,16 @@ class Deblurring:
         X = f['x_true']
         return X
 
-    def forward_Op_matrix(self, spread, shape):
+    def forward_Op_matrix(self, spread, nx, ny):
             ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
             #normalize = get_column_sum(spread)
+            shape = (nx, ny)
             m = shape[0]
             n = shape[1]
             self.nx = shape[0]
             self.ny = shape[1]
+            print('MP:')
+            print(self.nx)
             A = np.zeros((m*n, m*n))
             count = 0
             self.spread = spread
