@@ -59,6 +59,8 @@ class Deblurring:
         center = np.array([mm[0], nn[0]])   
         return PSF, center.astype(int)
     def forward_Op(self, dim, spread, nx, ny):
+        self.nx = nx
+        self.ny = ny
         PSF, center = self.Gauss(dim, spread)
         proj_forward = lambda X: convolve(X.reshape([nx,ny]), PSF, mode='constant').reshape((-1,1))
         proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='constant' ).reshape((-1,1))

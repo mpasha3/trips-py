@@ -185,6 +185,7 @@ def get_input_image_size(image):
 def image_to_new_size(image, n):
     X, Y = np.meshgrid(np.linspace(1, image.shape[1], n[0]), np.linspace(1, image.shape[0], n[1]))
     im = interp2linear(image, X, Y, extrapval=np.nan)
+    return im
 
 def interp2linear(z, xi, yi, extrapval=np.nan):
     """
