@@ -173,6 +173,7 @@ class Deblurring:
             delta = np.linalg.norm(sig_obs*e)
             b_meas_im = b_meas.reshape((self.nx, self.ny))
         return (b_meas_im, delta)
+    
     def plot_rec(self, img, save_imgs = False, save_path='./saveImagesDeblurringReconstructions'):
             plt.set_cmap('inferno')
             if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
