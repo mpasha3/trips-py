@@ -170,7 +170,8 @@ def check_operator_type(A):
 #         spio.savemat(path_package + '/demos/data/images/'+chooseimage+'_'+str(newsize[0])+'.mat', mdict={'x_true': image_new})
 #     return image_new
 
-def check_imput_image_size(image):
+
+def get_imput_image_size(image):
     imshape = image.shape
     if imshape[1] == 1:
         nx = int(np.sqrt(imshape[0]))
