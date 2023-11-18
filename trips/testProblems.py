@@ -85,8 +85,6 @@ class Deblurring:
             n = shape[1]
             self.nx = shape[0]
             self.ny = shape[1]
-            print('MP:')
-            print(self.nx)
             A = np.zeros((m*n, m*n))
             count = 0
             self.spread = spread
@@ -101,7 +99,13 @@ class Deblurring:
             return A
 
 
-    def gen_true(self, im):
+    def gen_true(self, im, **kwargs):
+        print(self.nx)
+        if (('nx' in kwargs) and ('ny' in kwargs) and self.nx is None):
+            nx = kwargs['nx'] 
+            ny = kwargs['ny'] 
+            if ((nx is not self.nx) or (ny is not self.ny)):
+                raise Warning("The dimension of the image you choose are different from the dimension of the operator you defined.")
         if im in ['satellite', 'hubble', 'h_im']:
             image = self.im_image_dat(im)
             current_shape = get_input_image_size(image)
