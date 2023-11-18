@@ -151,6 +151,7 @@ class Deblurring:
             A = self.forward_Op_matrix(self.spread, self.shape, self.nx, self.ny)
             x = check_if_vector(x, self.nx, self.ny)
             b = A@x
+        return b
         
     def add_noise(self, b_true, opt, noise_level):
         if (opt == 'Gaussian'):
