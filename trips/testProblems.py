@@ -80,12 +80,12 @@ class Deblurring:
     #     im = interp2linear(image, X, Y, extrapval=np.nan)
     #     return im
 
-    def gen_true(self, im, required_shape):
+    def gen_true(self, im):
         if im in ['satellite', 'hubble', 'h_im']:
             image = self.im_image_dat(im)
             current_shape = get_input_image_size(image)
-            if ((current_shape[0] is not required_shape[0]) and (current_shape[1] is not required_shape[1])):
-                newimage = image_to_new_size(image, required_shape)
+            if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
+                newimage = image_to_new_size(image, (self.nx, self.ny))
         else:
             raise ValueError("The image you requested does not exist! Specify the right name. Options are 'satellite', 'hubble', 'h_im")
         return newimage
@@ -143,7 +143,8 @@ class Deblurring:
             A = self.forward_Op(self.dim, self.spread, self.nx, self.ny)
             b = A*x
         else:
-            A = self.forward_O
+            A = self.forward_Op_matrix(self.spread, self.shape, self.nx, self.ny)
+            b = A@x
         
     def add_noise(self, b_true, opt, noise_level):
         if (opt == 'Gaussian'):
