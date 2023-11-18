@@ -88,6 +88,7 @@ class Deblurring:
             current_shape = get_input_image_size(image)
             if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
                 newimage = image_to_new_size(image, (self.nx, self.ny))
+                newimage[np.isnan(newimage)] = 0
         else:
             raise ValueError("The image you requested does not exist! Specify the right name. Options are 'satellite', 'hubble', 'h_im")
         return newimage
