@@ -89,6 +89,36 @@ class Deblurring:
         else:
             raise ValueError("The image you requested does not exist! Specify the right name. Options are 'satellite', 'hubble', 'h_im")
         return newimage
+   
+        ## convert a 2-d image into a 1-d vector
+    def vec(self, image):
+        sh = image.shape
+        return image.reshape((sh[0]*sh[1]))
+    ## convert a 1-d vector into a 2-d image of the given shape
+    def im(self, x, shape):
+        return x.reshape(shape)
+    ## display a 1-d vector as a 2-d image
+    def display_vec(self, vec, shape, scale = 1):
+        image = self.im(vec, shape)
+        plt.imshow(image, vmin=0, vmax=scale * np.max(vec), cmap='gray')
+        plt.axis('off')
+        plt.show()
+        ## a helper function for creating the blurring operator
+    def get_column_sum(self, spread):
+        length = 40
+        raw = np.array([np.exp(-(((i-length/2)/spread[0])**2 + ((j-length/2)/spread[1])**2)/2) 
+                        for i in range(length) for j in range(length)])
+        return np.sum(raw[raw > 0.0001])
+    ## blurs a single pixel at center with a specified Gaussian spread
+    def P(self, spread, center, shape):
+        image = np.zeros(shape)
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                v = np.exp(-(((i-center[0])/spread[0])**2 + ((j-center[1])/spread[1])**2)/2)
+                if v < 0.0001:
+                    continue
+                image[i,j] = v
+        return image
 
     def forward_Op_matrix(self, spread, shape, nx, ny):
         ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
@@ -113,9 +143,7 @@ class Deblurring:
             A = self.forward_Op(self.dim, self.spread, self.nx, self.ny)
             b = A*x
         else:
-            A = self.forward_Op_matrix(self.spread, self.shape, self.nx, self.ny)
-            b = A@x
-        return b
+            A = self.forward_O
         
     def add_noise(self, b_true, opt, noise_level):
         if (opt == 'Gaussian'):
