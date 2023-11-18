@@ -155,9 +155,9 @@ class Deblurring:
     def add_noise(self, b_true, opt, noise_level):
         if (opt == 'Gaussian'):
             e = np.random.randn(self.nx*self.ny, 1)
-            delta = np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
+            delta = np.linalg.norm(sig_obs*e)
             b_meas_im = b_meas.reshape((self.nx, self.ny))
         if (opt == 'Poisson'):
             gamma = 1 # background counts assumed known
@@ -167,15 +167,14 @@ class Deblurring:
             delta = np.linalg.norm(e)
         if (opt == 'Laplace'):
             e = np.random.laplace(self.nx*self.ny, 1)
-            delta = np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
-            b_meas_im = b_meas.reshape((self.nx, self.ny), order='F')
+            delta = np.linalg.norm(sig_obs*e)
+            b_meas_im = b_meas.reshape((self.nx, self.ny))
         return (b_meas_im, delta)
     def plot_rec(self, img, save_imgs = False, save_path='./saveImagesDeblurringReconstructions'):
             plt.set_cmap('inferno')
             if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-            # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
             plt.imshow(img.reshape((self.nx, self.ny)))
             plt.axis('off')
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
@@ -185,7 +184,6 @@ class Deblurring:
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesDeblurringData'):
             plt.set_cmap('inferno')
             if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-            # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
             plt.imshow(img.reshape((self.nx, self.ny)))
             plt.axis('off')
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
@@ -350,7 +348,7 @@ class Tomography():
             # Add Poisson Noise 
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
-            b_meas_i = b_meas.reshape((self.p, self.q), order='F')
+            b_meas_i = b_meas.reshape((self.p, self.q))
         else:
             mu_obs = np.zeros(self.p*self.q)      # mean of noise
             e = np.random.laplace(self.p*self.q)
@@ -362,7 +360,7 @@ class Tomography():
     def plot_rec(self, img, save_imgs=True, save_path='./saveImagesTomo'):
             plt.set_cmap('inferno')
             if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-            plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
+            plt.imshow(img.reshape((self.nx, self.ny)))
             plt.axis('off')
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
             plt.pause(.1)
@@ -371,7 +369,7 @@ class Tomography():
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesData'):
         plt.set_cmap('inferno')
         if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-        plt.imshow(img.reshape((self.p, self.q), order = 'F'))
+        plt.imshow(img.reshape((self.p, self.q)))
         plt.axis('off')
         if save_imgs:  plt.savefig(save_path+'/sino'+'.png',bbox_inches='tight')
         plt.pause(.1)
@@ -540,7 +538,7 @@ class Tomography():
             # Add Poisson Noise 
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
-            b_meas_i = b_meas.reshape((self.p, self.q), order='F')
+            b_meas_i = b_meas.reshape((self.p, self.q))
         else:
             mu_obs = np.zeros(self.p*self.q)      # mean of noise
             e = np.random.laplace(self.p*self.q)
@@ -552,7 +550,7 @@ class Tomography():
     def plot_rec(self, img, save_imgs=True, save_path='./saveImagesTomo'):
             plt.set_cmap('inferno')
             if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-            plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
+            plt.imshow(img.reshape((self.nx, self.ny)))
             plt.axis('off')
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
             plt.pause(.1)
@@ -561,7 +559,7 @@ class Tomography():
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesData'):
         plt.set_cmap('inferno')
         if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-        plt.imshow(img.reshape((self.p, self.q), order = 'F'))
+        plt.imshow(img.reshape((self.p, self.q)))
         plt.axis('off')
         if save_imgs:  plt.savefig(save_path+'/sino'+'.png',bbox_inches='tight')
         plt.pause(.1)
@@ -730,7 +728,6 @@ class Deblurring1D:
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesDeblurring1DData'):
         plt.set_cmap('inferno')
         if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-        # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
         plt.plot(img)
         plt.axis('off')
         if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
