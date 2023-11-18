@@ -145,11 +145,11 @@ class Deblurring:
     def gen_data(self, x, matrix):
         if matrix == False:
             A = self.forward_Op(self.dim, self.spread, self.nx, self.ny)
-            x = check_if_vector(x_true, self.nx, self.ny)
+            x = check_if_vector(x, self.nx, self.ny)
             b = A*x
         else:
             A = self.forward_Op_matrix(self.spread, self.shape, self.nx, self.ny)
-            x = check_if_vector(x_true, self.nx, self.ny)
+            x = check_if_vector(x, self.nx, self.ny)
             b = A@x
         
     def add_noise(self, b_true, opt, noise_level):
