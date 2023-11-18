@@ -171,7 +171,7 @@ def check_operator_type(A):
 #     return image_new
 
 
-def get_imput_image_size(image):
+def get_input_image_size(image):
     imshape = image.shape
     if imshape[1] == 1:
         nx = int(np.sqrt(imshape[0]))
