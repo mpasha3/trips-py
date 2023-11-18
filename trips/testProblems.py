@@ -125,6 +125,8 @@ class Deblurring:
         #normalize = get_column_sum(spread)
         m = shape[0]
         n = shape[1]
+        self.nx = nx
+        self.ny = ny
         A = np.zeros((m*n, m*n))
         count = 0
         self.spread = spread
