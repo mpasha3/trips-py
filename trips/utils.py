@@ -182,7 +182,7 @@ def get_input_image_size(image):
     newshape = (nx, ny)
     return newshape
 
-def image_to_right_size(image, n):
+def image_to_new_size(image, n):
     X, Y = np.meshgrid(np.linspace(1, image.shape[1], n[0]), np.linspace(1, image.shape[0], n[1]))
     im = interp2linear(image, X, Y, extrapval=np.nan)
 
