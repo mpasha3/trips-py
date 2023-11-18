@@ -148,7 +148,7 @@ class Deblurring:
             x = check_if_vector(x, self.nx, self.ny)
             b = A*x
         else:
-            A = self.forward_Op_matrix(self.spread, self.shape, self.nx, self.ny)
+            A = self.forward_Op_matrix(self.spread, self.nx, self.ny)
             x = check_if_vector(x, self.nx, self.ny)
             b = A@x
         return b
