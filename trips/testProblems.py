@@ -36,6 +36,7 @@ import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
+from trips.utils import *
 
 class Deblurring:
     def __init__(self,**kwargs):
@@ -63,87 +64,31 @@ class Deblurring:
         proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='constant' ).reshape((-1,1))
         blur = pylops.FunctionOperator(proj_forward, proj_backward, nx*ny)
         return blur
-    def generate_true(self, choose_image):
-        # Specify the path
-        path_package = '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package'
-        if choose_image == 'satellite128':
-            dataa = spio.loadmat(path_package + '/demos/data/images/satellite128.mat')
-            # dataa = spio.loadmat('../demos/data/images/satellite128.mat')
-            X = dataa['x_true']
-            X_true = X/X.max()
-            self.nx, self.ny = X_true.shape  
-            x_truef = X_true.reshape((-1,1))
-        elif choose_image == 'satellite64':
-            # dataa = spio.loadmat(path_package + '/demos/data/images/satellite64.mat')
-            dataa = spio.loadmat(path_package + '/demos/data/images/satellite64.mat')
-            X = dataa['x_new']
-            X_true = X/X.max()
-            self.nx, self.ny = X_true.shape  
-            x_truef = X_true.reshape((-1,1))
-        elif choose_image == 'edges':
-            dataa = spio.loadmat(path_package + '/demos/data/images/edges.mat')
-            X = dataa['x']
-            X_true = X/X.max()
-            self.nx, self.ny = X_true.shape  
-            x_truef = X_true.reshape((-1,1))
-        elif choose_image == 'pattern1':
-            dataa = spio.loadmat(path_package + '/demos/data/images/shape1.mat')
-            X = dataa['xtrue']
-            X_true = X/X.max()
-            self.nx, self.ny = X_true.shape  
-            x_truef = X_true.reshape((-1,1))
-        elif choose_image == 'Himage':
-            dx = 10
-            dy = 10
-            up_width = 10
-            bar_width= 5
-            size = 64
-            self.nx, self.ny = 64, 64
-            h_im = np.zeros((size, size))
-            for i in range(size):
-                if i < dy or i > size-dy:
-                    continue
-                for j in range(size):
-                    if j < dx or j > size - dx:
-                        continue
-                    if j < dx + up_width or j > size - dx - up_width:
-                        h_im[i, j] = 1
-                    if abs(i - size/2) < bar_width:
-                        h_im[i, j] = 1
-            x_truef = self.vec(h_im)
-            # X_true = h_im
+    
+    def im_image_dat(self, im):
+        assert im in ['satellite', 'hubble', 'star', 'h_im']
+        if exists(f'./data/image_data/{im}.mat'):
+            print('data already in the path.')
         else:
-            raise ValueError("The image you requested does not exist! Specify the right name.")
-        return (x_truef, self.nx, self.ny)
-        ## convert a 2-d image into a 1-d vector
-    def vec(self, image):
-        sh = image.shape
-        return image.reshape((sh[0]*sh[1]))
-    ## convert a 1-d vector into a 2-d image of the given shape
-    def im(self, x, shape):
-        return x.reshape(shape)
-    ## display a 1-d vector as a 2-d image
-    def display_vec(self, vec, shape, scale = 1):
-        image = self.im(vec, shape)
-        plt.imshow(image, vmin=0, vmax=scale * np.max(vec), cmap='gray')
-        plt.axis('off')
-        plt.show()
-        ## a helper function for creating the blurring operator
-    def get_column_sum(self, spread):
-        length = 40
-        raw = np.array([np.exp(-(((i-length/2)/spread[0])**2 + ((j-length/2)/spread[1])**2)/2) 
-                        for i in range(length) for j in range(length)])
-        return np.sum(raw[raw > 0.0001])
-    ## blurs a single pixel at center with a specified Gaussian spread
-    def P(self, spread, center, shape):
-        image = np.zeros(shape)
-        for i in range(shape[0]):
-            for j in range(shape[1]):
-                v = np.exp(-(((i-center[0])/spread[0])**2 + ((j-center[1])/spread[1])**2)/2)
-                if v < 0.0001:
-                    continue
-                image[i,j] = v
-        return image
+            print("Please make sure your data are on the data folder!")
+        f = spio.loadmat(f'./data/image_data/{im}.mat')
+        X = f['x_true']
+        return X
+
+    def image_to_new_size(image, n):
+        X, Y = np.meshgrid(np.linspace(1, image.shape[1], n[0]), np.linspace(1, image.shape[0], n[1]))
+        im = interp2linear(image, X, Y, extrapval=np.nan)
+        return im
+
+    def gen_true(self, im, required_shape):
+        if im in ['satellite', 'hubble', 'h_im']:
+            image = self.im_image_dat(im)
+            current_shape = get_input_image_size(image)
+            if ((current_shape[0] is not required_shape[0]) and (current_shape[1] is not required_shape[1])):
+                newimage = image_to_new_size(image, required_shape)
+        else:
+            raise ValueError("The image you requested does not exist! Specify the right name. Options are 'satellite', 'hubble', 'h_im")
+        return newimage
 
     def forward_Op_matrix(self, spread, shape, nx, ny):
         ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
