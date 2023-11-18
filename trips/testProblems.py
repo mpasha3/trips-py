@@ -26,13 +26,13 @@ from venv import create
 import pylops
 from scipy.ndimage import convolve
 from scipy import sparse
-from scipy.ndimage import convolve
 import scipy.special as spe
 from trips.operators import *
 from PIL import Image
 from resizeimage import resizeimage
-import matplotlib.pyplot as plt
-import os, sys
+import requests
+from os import mkdir
+from os.path import exists
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
@@ -75,10 +75,10 @@ class Deblurring:
         X = f['x_true']
         return X
 
-    def image_to_new_size(image, n):
-        X, Y = np.meshgrid(np.linspace(1, image.shape[1], n[0]), np.linspace(1, image.shape[0], n[1]))
-        im = interp2linear(image, X, Y, extrapval=np.nan)
-        return im
+    # def image_to_new_size(self, image, n):
+    #     X, Y = np.meshgrid(np.linspace(1, image.shape[1], n[0]), np.linspace(1, image.shape[0], n[1]))
+    #     im = interp2linear(image, X, Y, extrapval=np.nan)
+    #     return im
 
     def gen_true(self, im, required_shape):
         if im in ['satellite', 'hubble', 'h_im']:
