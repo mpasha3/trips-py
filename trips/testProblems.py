@@ -41,6 +41,8 @@ from trips.utils import *
 class Deblurring:
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
+        self.nx = None
+        self.ny = None
     def Gauss(self, PSFdim, PSFspread):
         self.m = PSFdim[0]
         self.n = PSFdim[1]
