@@ -77,10 +77,26 @@ class Deblurring:
         X = f['x_true']
         return X
 
-    # def image_to_new_size(self, image, n):
-    #     X, Y = np.meshgrid(np.linspace(1, image.shape[1], n[0]), np.linspace(1, image.shape[0], n[1]))
-    #     im = interp2linear(image, X, Y, extrapval=np.nan)
-    #     return im
+    def forward_Op_matrix(self, spread, shape):
+            ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
+            #normalize = get_column_sum(spread)
+            m = shape[0]
+            n = shape[1]
+            self.nx = shape[0]
+            self.ny = shape[1]
+            A = np.zeros((m*n, m*n))
+            count = 0
+            self.spread = spread
+            self.shape = shape
+            for i in range(m):
+                for j in range(n):
+                    column = self.vec(self.P(spread, [i, j],  shape))
+                    A[:, count] = column
+                    count += 1
+            normalize = np.sum(A[:, int(m*n/2 + n/2)])
+            A = 1/normalize * A
+            return A
+
 
     def gen_true(self, im):
         if im in ['satellite', 'hubble', 'h_im']:
@@ -122,26 +138,6 @@ class Deblurring:
                     continue
                 image[i,j] = v
         return image
-
-    def forward_Op_matrix(self, spread, shape, nx, ny):
-        ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
-        #normalize = get_column_sum(spread)
-        m = shape[0]
-        n = shape[1]
-        self.nx = nx
-        self.ny = ny
-        A = np.zeros((m*n, m*n))
-        count = 0
-        self.spread = spread
-        self.shape = shape
-        for i in range(m):
-            for j in range(n):
-                column = self.vec(self.P(spread, [i, j],  shape))
-                A[:, count] = column
-                count += 1
-        normalize = np.sum(A[:, int(m*n/2 + n/2)])
-        A = 1/normalize * A
-        return A
 
     def gen_data(self, x, matrix):
         if matrix == False:
