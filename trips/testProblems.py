@@ -142,7 +142,7 @@ class Deblurring:
         A = 1/normalize * A
         return A
 
-    def generate_data(self, x, matrix):
+    def gen_data(self, x, matrix):
         if matrix == False:
             A = self.forward_Op(self.dim, self.spread, self.nx, self.ny)
             x = check_if_vector(x_true, self.nx, self.ny)
