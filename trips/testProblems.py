@@ -100,14 +100,13 @@ class Deblurring:
             A = 1/normalize * A
             return A
 
-
     def gen_true(self, im, **kwargs):
-        print(self.nx)
-        if (('nx' in kwargs) and ('ny' in kwargs) and self.nx is None):
-            nx = kwargs['nx'] 
-            ny = kwargs['ny'] 
-            if ((nx is not self.nx) or (ny is not self.ny)):
-                raise Warning("The dimension of the image you choose are different from the dimension of the operator you defined.")
+        if (self.nx is None or self.ny is None):
+            if (('nx' in kwargs) and ('ny' in kwargs)):
+                self.nx = kwargs['nx'] 
+                self.ny = kwargs['ny'] 
+            else:
+                raise TypeError("The dimension of the image is not specified. You can input nx and ny as gen_true(im, nx, ny) or first define the forward operator through A = Deblur.forward_Op_matrix([11,11], nx, ny) or A = Deblur.forward_Op([11,11], 0.7, nx, ny) ")
         if im in ['satellite', 'hubble', 'h_im']:
             image = self.im_image_dat(im)
             current_shape = get_input_image_size(image)
@@ -117,8 +116,7 @@ class Deblurring:
         else:
             raise ValueError("The image you requested does not exist! Specify the right name. Options are 'satellite', 'hubble', 'h_im")
         return newimage
-   
-        ## convert a 2-d image into a 1-d vector
+
     def vec(self, image):
         sh = image.shape
         return image.reshape((sh[0]*sh[1]))
