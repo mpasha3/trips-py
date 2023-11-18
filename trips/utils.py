@@ -182,6 +182,14 @@ def get_input_image_size(image):
     newshape = (nx, ny)
     return newshape
 
+
+def check_if_vector(im, nx, ny):
+    if im.shape[1] == 1:
+        im_vec = im
+    else:
+        im_vec = im.reshape((nx*ny, 1)) 
+    return im_vec
+
 def image_to_new_size(image, n):
     X, Y = np.meshgrid(np.linspace(1, image.shape[1], n[0]), np.linspace(1, image.shape[0], n[1]))
     im = interp2linear(image, X, Y, extrapval=np.nan)
