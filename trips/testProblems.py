@@ -26,20 +26,23 @@ from venv import create
 import pylops
 from scipy.ndimage import convolve
 from scipy import sparse
-from scipy.ndimage import convolve
 import scipy.special as spe
 from trips.operators import *
 from PIL import Image
 from resizeimage import resizeimage
-import matplotlib.pyplot as plt
-import os, sys
+import requests
+from os import mkdir
+from os.path import exists
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
+from trips.utils import *
 
 class Deblurring:
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
+        self.nx = None
+        self.ny = None
     def Gauss(self, PSFdim, PSFspread):
         self.m = PSFdim[0]
         self.n = PSFdim[1]
@@ -58,64 +61,62 @@ class Deblurring:
         center = np.array([mm[0], nn[0]])   
         return PSF, center.astype(int)
     def forward_Op(self, dim, spread, nx, ny):
+        self.nx = nx
+        self.ny = ny
         PSF, center = self.Gauss(dim, spread)
         proj_forward = lambda X: convolve(X.reshape([nx,ny]), PSF, mode='constant').reshape((-1,1))
         proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='constant' ).reshape((-1,1))
         blur = pylops.FunctionOperator(proj_forward, proj_backward, nx*ny)
         return blur
-    def generate_true(self, choose_image):
-        # Specify the path
-        path_package = '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package'
-        if choose_image == 'satellite128':
-            dataa = spio.loadmat('../demos/data/images/satellite128.mat')
-            # dataa = spio.loadmat('../demos/data/images/satellite128.mat')
-            X = dataa['x_true']
-            X_true = X/X.max()
-            self.nx, self.ny = X_true.shape  
-            x_truef = X_true.reshape((-1,1))
-        elif choose_image == 'satellite64':
-            # dataa = spio.loadmat(path_package + '/demos/data/images/satellite64.mat')
-            dataa = spio.loadmat('../demos/data/images/satellite64.mat')
-            X = dataa['x_new']
-            X_true = X/X.max()
-            self.nx, self.ny = X_true.shape  
-            x_truef = X_true.reshape((-1,1))
-        elif choose_image == 'edges':
-            dataa = spio.loadmat(path_package + '/demos/data/images/edges.mat')
-            X = dataa['x']
-            X_true = X/X.max()
-            self.nx, self.ny = X_true.shape  
-            x_truef = X_true.reshape((-1,1))
-        elif choose_image == 'pattern1':
-            dataa = spio.loadmat(path_package + '/demos/data/images/shape1.mat')
-            X = dataa['xtrue']
-            X_true = X/X.max()
-            self.nx, self.ny = X_true.shape  
-            x_truef = X_true.reshape((-1,1))
-        elif choose_image == 'Himage':
-            dx = 10
-            dy = 10
-            up_width = 10
-            bar_width= 5
-            size = 64
-            self.nx, self.ny = 64, 64
-            h_im = np.zeros((size, size))
-            for i in range(size):
-                if i < dy or i > size-dy:
-                    continue
-                for j in range(size):
-                    if j < dx or j > size - dx:
-                        continue
-                    if j < dx + up_width or j > size - dx - up_width:
-                        h_im[i, j] = 1
-                    if abs(i - size/2) < bar_width:
-                        h_im[i, j] = 1
-            x_truef = self.vec(h_im)
-            # X_true = h_im
+    
+    def im_image_dat(self, im):
+        assert im in ['satellite', 'hubble', 'star', 'h_im']
+        if exists(f'./data/image_data/{im}.mat'):
+            print('data already in the path.')
         else:
-            raise ValueError("The image you requested does not exist! Specify the right name.")
-        return (x_truef, self.nx, self.ny)
-        ## convert a 2-d image into a 1-d vector
+            print("Please make sure your data are on the data folder!")
+        f = spio.loadmat(f'./data/image_data/{im}.mat')
+        X = f['x_true']
+        return X
+
+    def forward_Op_matrix(self, spread, nx, ny):
+            ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
+            #normalize = get_column_sum(spread)
+            shape = (nx, ny)
+            m = shape[0]
+            n = shape[1]
+            self.nx = shape[0]
+            self.ny = shape[1]
+            A = np.zeros((m*n, m*n))
+            count = 0
+            self.spread = spread
+            self.shape = shape
+            for i in range(m):
+                for j in range(n):
+                    column = self.vec(self.P(spread, [i, j],  shape))
+                    A[:, count] = column
+                    count += 1
+            normalize = np.sum(A[:, int(m*n/2 + n/2)])
+            A = 1/normalize * A
+            return A
+
+    def gen_true(self, im, **kwargs):
+        if (self.nx is None or self.ny is None):
+            if (('nx' in kwargs) and ('ny' in kwargs)):
+                self.nx = kwargs['nx'] 
+                self.ny = kwargs['ny'] 
+            else:
+                raise TypeError("The dimension of the image is not specified. You can input nx and ny as gen_true(im, nx, ny) or first define the forward operator through A = Deblur.forward_Op_matrix([11,11], nx, ny) or A = Deblur.forward_Op([11,11], 0.7, nx, ny) ")
+        if im in ['satellite', 'hubble', 'h_im']:
+            image = self.im_image_dat(im)
+            current_shape = get_input_image_size(image)
+            if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
+                newimage = image_to_new_size(image, (self.nx, self.ny))
+                newimage[np.isnan(newimage)] = 0
+        else:
+            raise ValueError("The image you requested does not exist! Specify the right name. Options are 'satellite', 'hubble', 'h_im")
+        return newimage
+
     def vec(self, image):
         sh = image.shape
         return image.reshape((sh[0]*sh[1]))
@@ -145,39 +146,23 @@ class Deblurring:
                 image[i,j] = v
         return image
 
-    def forward_Op_matrix(self, spread, shape, nx, ny):
-        ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
-        #normalize = get_column_sum(spread)
-        m = shape[0]
-        n = shape[1]
-        A = np.zeros((m*n, m*n))
-        count = 0
-        self.spread = spread
-        self.shape = shape
-        for i in range(m):
-            for j in range(n):
-                column = self.vec(self.P(spread, [i, j],  shape))
-                A[:, count] = column
-                count += 1
-        normalize = np.sum(A[:, int(m*n/2 + n/2)])
-        A = 1/normalize * A
-        return A
-
-    def generate_data(self, x, matrix):
+    def gen_data(self, x, matrix):
         if matrix == False:
             A = self.forward_Op(self.dim, self.spread, self.nx, self.ny)
+            x = check_if_vector(x, self.nx, self.ny)
             b = A*x
         else:
-            A = self.forward_Op_matrix(self.spread, self.shape, self.nx, self.ny)
+            A = self.forward_Op_matrix(self.spread, self.nx, self.ny)
+            x = check_if_vector(x, self.nx, self.ny)
             b = A@x
         return b
         
     def add_noise(self, b_true, opt, noise_level):
         if (opt == 'Gaussian'):
             e = np.random.randn(self.nx*self.ny, 1)
-            delta = np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
+            delta = np.linalg.norm(sig_obs*e)
             b_meas_im = b_meas.reshape((self.nx, self.ny))
         if (opt == 'Poisson'):
             gamma = 1 # background counts assumed known
@@ -187,15 +172,15 @@ class Deblurring:
             delta = np.linalg.norm(e)
         if (opt == 'Laplace'):
             e = np.random.laplace(self.nx*self.ny, 1)
-            delta = np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
-            b_meas_im = b_meas.reshape((self.nx, self.ny), order='F')
+            delta = np.linalg.norm(sig_obs*e)
+            b_meas_im = b_meas.reshape((self.nx, self.ny))
         return (b_meas_im, delta)
+    
     def plot_rec(self, img, save_imgs = False, save_path='./saveImagesDeblurringReconstructions'):
             plt.set_cmap('inferno')
             if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-            # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
             plt.imshow(img.reshape((self.nx, self.ny)))
             plt.axis('off')
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
@@ -205,7 +190,6 @@ class Deblurring:
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesDeblurringData'):
             plt.set_cmap('inferno')
             if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-            # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
             plt.imshow(img.reshape((self.nx, self.ny)))
             plt.axis('off')
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
@@ -370,7 +354,7 @@ class Tomography():
             # Add Poisson Noise 
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
-            b_meas_i = b_meas.reshape((self.p, self.q), order='F')
+            b_meas_i = b_meas.reshape((self.p, self.q))
         else:
             mu_obs = np.zeros(self.p*self.q)      # mean of noise
             e = np.random.laplace(self.p*self.q)
@@ -382,7 +366,7 @@ class Tomography():
     def plot_rec(self, img, save_imgs=True, save_path='./saveImagesTomo'):
             plt.set_cmap('inferno')
             if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-            plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
+            plt.imshow(img.reshape((self.nx, self.ny)))
             plt.axis('off')
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
             plt.pause(.1)
@@ -391,7 +375,7 @@ class Tomography():
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesData'):
         plt.set_cmap('inferno')
         if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-        plt.imshow(img.reshape((self.p, self.q), order = 'F'))
+        plt.imshow(img.reshape((self.p, self.q)))
         plt.axis('off')
         if save_imgs:  plt.savefig(save_path+'/sino'+'.png',bbox_inches='tight')
         plt.pause(.1)
@@ -560,7 +544,7 @@ class Tomography():
             # Add Poisson Noise 
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
-            b_meas_i = b_meas.reshape((self.p, self.q), order='F')
+            b_meas_i = b_meas.reshape((self.p, self.q))
         else:
             mu_obs = np.zeros(self.p*self.q)      # mean of noise
             e = np.random.laplace(self.p*self.q)
@@ -572,7 +556,7 @@ class Tomography():
     def plot_rec(self, img, save_imgs=True, save_path='./saveImagesTomo'):
             plt.set_cmap('inferno')
             if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-            plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
+            plt.imshow(img.reshape((self.nx, self.ny)))
             plt.axis('off')
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
             plt.pause(.1)
@@ -581,7 +565,7 @@ class Tomography():
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesData'):
         plt.set_cmap('inferno')
         if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-        plt.imshow(img.reshape((self.p, self.q), order = 'F'))
+        plt.imshow(img.reshape((self.p, self.q)))
         plt.axis('off')
         if save_imgs:  plt.savefig(save_path+'/sino'+'.png',bbox_inches='tight')
         plt.pause(.1)
@@ -750,7 +734,6 @@ class Deblurring1D:
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesDeblurring1DData'):
         plt.set_cmap('inferno')
         if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
-        # plt.imshow(img.reshape((self.nx, self.ny), order = 'F'))
         plt.plot(img)
         plt.axis('off')
         if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
