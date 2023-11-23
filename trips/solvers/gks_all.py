@@ -27,17 +27,22 @@ from collections.abc import Iterable
 
 def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
 
+    delta = kwargs['delta'] if ('delta' in kwargs) else None
+
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
-    # do you ever use this below?
-    regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
+    if (regparam == 'dp' or dp_stop != False) and delta == None:
+        raise Exception("""A value for the noise level delta was not provided and the discrepancy principle cannot be applied. 
+                    Please supply a value of delta based on the estimated noise level of the problem, or choose the regularization parameter according to gcv or a different stopping criterion.""")
+
+    # # do you ever use this below? ## PROBABLY YOU PASS THIS AS REGULARIZATION PARAMETER (regparam)
+    # regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
 
     (U, B, V) = golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
 
     x_history = []
     lambda_history = []
     residual_history = []
-    rel_error = []
     for ii in tqdm(range(n_iter), 'running GKS...'):
         
         if is_identity(L):
