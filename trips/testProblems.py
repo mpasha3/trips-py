@@ -37,7 +37,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
 from trips.utils import *
-
+import scipy.linalg as la
 class Deblurring:
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
@@ -346,6 +346,7 @@ class Tomography():
             noise = np.random.randn(b_true.shape[0]).reshape((-1,1))
             e = noise_level * np.linalg.norm(b_true) / np.linalg.norm(noise) * noise
             e = e.reshape((-1,1))
+            delta = la.norm(e)
             b_true = b_true.reshape((-1,1))
             b = b_true + e # add noise
             b_meas = b_true + e
@@ -355,13 +356,15 @@ class Tomography():
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
             b_meas_i = b_meas.reshape((self.p, self.q))
+            delta = 0
         else:
             mu_obs = np.zeros(self.p*self.q)      # mean of noise
             e = np.random.laplace(self.p*self.q)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
+            delta = la.norm(sig_obs*e)
             b_meas_i = b_meas.reshape((self.p, self.q))
-        return (b_meas_i , e)
+        return (b_meas_i , delta)
 
     def plot_rec(self, img, save_imgs=True, save_path='./saveImagesTomo'):
             plt.set_cmap('inferno')
@@ -537,6 +540,7 @@ class Tomography():
             e = noise_level * np.linalg.norm(b_true) / np.linalg.norm(noise) * noise
             e = e.reshape((-1,1))
             b_true = b_true.reshape((-1,1))
+            delta = la.norm(e)
             b = b_true + e # add noise
             b_meas = b_true + e
             b_meas_i = b_meas.reshape((self.p, self.q))
@@ -545,13 +549,15 @@ class Tomography():
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
             b_meas_i = b_meas.reshape((self.p, self.q))
+            delta = 0
         else:
             mu_obs = np.zeros(self.p*self.q)      # mean of noise
             e = np.random.laplace(self.p*self.q)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
+            delta = la.norm(sig_obs*e)
             b_meas_i = b_meas.reshape((self.p, self.q))
-        return (b_meas_i , e)
+        return (b_meas_i , delta)
 
     def plot_rec(self, img, save_imgs=True, save_path='./saveImagesTomo'):
             plt.set_cmap('inferno')
@@ -707,20 +713,22 @@ class Deblurring1D:
         if (opt == 'Gaussian'):
             mu_obs = np.zeros(self.grid_points)      # mean of noise
             e = np.random.randn(self.grid_points)
-            delta = noise_level * np.linalg.norm(b_true) #np.linalg.norm(e)
+            # delta = noise_level * np.linalg.norm(b_true) #np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
+            delta = la.norm(sig_obs*e)
         if (opt == 'Poisson'):
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
             e = 0
-            delta = np.linalg.norm(e)
+            # delta = np.linalg.norm(e)
+            delta = 0
         if (opt == 'Laplace'):
             mu_obs = np.zeros(self.grid_points)      # mean of noise
             e = np.random.laplace(self.grid_points)
-            delta = np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
+            delta = la.norm(sig_obs*e)
         return (b_meas, delta)
     
     def plot_rec(self, img, save_imgs = False, save_path='./saveImagesDeblurring1DReconstructions'):

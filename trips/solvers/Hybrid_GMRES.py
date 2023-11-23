@@ -53,7 +53,8 @@ def hybrid_gmres(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what'
                 Q_A, R_A, _ = la.svd(H, full_matrices=False)
                 R_A = np.diag(R_A)
                 R_L = Identity(H.shape[1])
-                lambdah = generalized_crossvalidation(Q_A, R_A, R_L, bhat, variant = 'modified', fullsize = A.shape[0], **kwargs)
+                # lambdah = generalized_crossvalidation(Q_A, R_A, R_L, bhat, variant = 'standard', fullsize = A.shape[0], **kwargs)
+                lambdah = generalized_crossvalidation(Q_A, R_A, R_L, bhat, fullsize = A.shape[0], **kwargs)
             elif regparam == 'dp':
                 lambdah = discrepancy_principle(V, H, L, b, **kwargs)
                 if (dp_stop==True):
