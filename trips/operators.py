@@ -142,9 +142,9 @@ def gaussian_blur_operator(dim, spread, nx, ny):
 
     PSF, center = Gauss(dim, spread)
 
-    proj_forward = lambda X: convolve(X.reshape([nx,ny]), PSF, mode='constant').flatten()
+    proj_forward = lambda X: convolve(X.reshape([nx,ny]), PSF, mode='reflect').flatten()
 
-    proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='constant' ).flatten()
+    proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='reflect').flatten()
     
     blur = pylops.FunctionOperator(proj_forward, proj_backward, nx*ny)
 
