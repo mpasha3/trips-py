@@ -753,6 +753,7 @@ class DeblurringNoCrime:
         seed = kwargs.pop('seed',2022)
         self.nx = None
         self.ny = None
+
     def Gauss(self, PSFdim, PSFspread):
         self.m = PSFdim[0]
         self.n = PSFdim[1]
@@ -778,6 +779,26 @@ class DeblurringNoCrime:
         proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='reflect' ).reshape((-1,1))
         blur = pylops.FunctionOperator(proj_forward, proj_backward, nx*ny)
         return blur
+    def forward_Op_matrix(self, spread, nx, ny):
+        ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
+        #normalize = get_column_sum(spread)
+        shape = (nx, ny)
+        m = shape[0]
+        n = shape[1]
+        self.nx = shape[0]
+        self.ny = shape[1]
+        A = np.zeros((m*n, m*n))
+        count = 0
+        self.spread = spread
+        self.shape = shape
+        for i in range(m):
+            for j in range(n):
+                column = self.vec(self.P(spread, [i, j],  shape))
+                A[:, count] = column
+                count += 1
+        normalize = np.sum(A[:, int(m*n/2 + n/2)])
+        A = 1/normalize * A
+        return A
     
     def im_image_dat(self, im):
         assert im in ['satellite', 'hubble', 'star', 'h_im']
@@ -787,29 +808,7 @@ class DeblurringNoCrime:
             print("Please make sure your data are on the data folder!")
         f = spio.loadmat(f'./data/image_data/{im}.mat')
         X = f['x_true']
-        return X
-
-    def forward_Op_matrix(self, spread, nx, ny):
-            ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
-            #normalize = get_column_sum(spread)
-            shape = (nx, ny)
-            m = shape[0]
-            n = shape[1]
-            self.nx = shape[0]
-            self.ny = shape[1]
-            A = np.zeros((m*n, m*n))
-            count = 0
-            self.spread = spread
-            self.shape = shape
-            for i in range(m):
-                for j in range(n):
-                    column = self.vec(self.P(spread, [i, j],  shape))
-                    A[:, count] = column
-                    count += 1
-            normalize = np.sum(A[:, int(m*n/2 + n/2)])
-            A = 1/normalize * A
-            return A
-
+        return X    
     def gen_true(self, im, **kwargs):
         if (self.nx is None or self.ny is None):
             if (('nx' in kwargs) and ('ny' in kwargs)):
@@ -827,6 +826,43 @@ class DeblurringNoCrime:
             raise ValueError("The image you requested does not exist! Specify the right name. Options are 'satellite', 'hubble', 'h_im")
         return newimage
 
+    def gen_data(self, x):
+        nxbig = 2*self.nx
+        nybig = 2*self.ny
+        im = x.reshape((self.nx, self.ny)) # check the shape
+        padim = np.zeros((nxbig, nybig))
+        putidx = self.nx//2
+        putidy = self.ny//2
+        # check the indeces
+        padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)] = im
+        PSF, _ = Gauss(self.dim, self.spread)
+        A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
+        b = A0(padim)
+        x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+        b = b[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+        return b
+        
+    def add_noise(self, b_true, opt, noise_level):
+        if (opt == 'Gaussian'):
+            e = np.random.randn(self.nx*self.ny, 1)
+            sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
+            b_meas = b_true + sig_obs*e
+            delta = np.linalg.norm(sig_obs*e)
+            b_meas_im = b_meas.reshape((self.nx, self.ny))
+        if (opt == 'Poisson'):
+            gamma = 1 # background counts assumed known
+            b_meas = np.random.poisson(lam=b_true+gamma) 
+            b_meas_im = b_meas.reshape((self.nx, self.ny))
+            e = 0
+            delta = np.linalg.norm(e)
+        if (opt == 'Laplace'):
+            e = np.random.laplace(self.nx*self.ny, 1)
+            sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
+            b_meas = b_true + sig_obs*e
+            delta = np.linalg.norm(sig_obs*e)
+            b_meas_im = b_meas.reshape((self.nx, self.ny))
+        return (b_meas_im, delta)
+    
     def vec(self, image):
         sh = image.shape
         return image.reshape((sh[0]*sh[1]))
@@ -855,45 +891,6 @@ class DeblurringNoCrime:
                     continue
                 image[i,j] = v
         return image
-
-    def gen_data(self, x):
-        nxbig = 2*self.nx
-        nybig = 2*self.ny
-        im = x.reshape((self.nx, self.ny)) # check the shape
-        padim = np.zeros((nxbig, nybig))
-        putidx = self.nx//2
-        putidy = self.ny//2
-        # check the indeces
-        padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)] = im
-
-        #PSF, center = Gauss(self.dim, self.spread)
-        PSF, center = Gauss(self.dim, self.spread)
-        A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
-        b = A0(padim)
-        x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
-        b = b[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
-        return b
-        
-    def add_noise(self, b_true, opt, noise_level):
-        if (opt == 'Gaussian'):
-            e = np.random.randn(self.nx*self.ny, 1)
-            sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
-            b_meas = b_true + sig_obs*e
-            delta = np.linalg.norm(sig_obs*e)
-            b_meas_im = b_meas.reshape((self.nx, self.ny))
-        if (opt == 'Poisson'):
-            gamma = 1 # background counts assumed known
-            b_meas = np.random.poisson(lam=b_true+gamma) 
-            b_meas_im = b_meas.reshape((self.nx, self.ny))
-            e = 0
-            delta = np.linalg.norm(e)
-        if (opt == 'Laplace'):
-            e = np.random.laplace(self.nx*self.ny, 1)
-            sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
-            b_meas = b_true + sig_obs*e
-            delta = np.linalg.norm(sig_obs*e)
-            b_meas_im = b_meas.reshape((self.nx, self.ny))
-        return (b_meas_im, delta)
     
     def plot_rec(self, img, save_imgs = False, save_path='./saveImagesDeblurringReconstructions'):
             plt.set_cmap('inferno')
