@@ -38,11 +38,13 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
 from trips.utils import *
 import scipy.linalg as la
-class Deblurring:
+
+class Deblurring():
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
         self.nx = None
         self.ny = None
+        self.myImage = None
     def Gauss(self, PSFdim, PSFspread):
         self.m = PSFdim[0]
         self.n = PSFdim[1]
@@ -69,8 +71,8 @@ class Deblurring:
         blur = pylops.FunctionOperator(proj_forward, proj_backward, nx*ny)
         return blur
     
-    def im_image_dat(self, im):
-        assert im in ['satellite', 'hubble', 'star', 'h_im']
+    def im_image_dat(self, im, **kwargs): 
+        # assert im in ['satellite', 'hubble', 'star', 'h_im']
         if exists(f'./data/image_data/{im}.mat'):
             print('data already in the path.')
         else:
@@ -78,6 +80,13 @@ class Deblurring:
         f = spio.loadmat(f'./data/image_data/{im}.mat')
         X = f['x_true']
         return X
+        #     if (('myImage' in kwargs) and ('myImage' is not None)):
+        #     self.im = kwargs['myImage']
+        # if exists(f'./data/image_data/{self.im}.mat'):
+        #     print('data already in the path.')
+        # else:
+        #     print("Please make sure your data are on the data folder!")
+           
 
     def forward_Op_matrix(self, spread, nx, ny):
             ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
@@ -100,6 +109,23 @@ class Deblurring:
             A = 1/normalize * A
             return A
 
+    def gen_true_mydata(self, im, **kwargs):
+        if (self.nx is None or self.ny is None):
+            if (('nx' in kwargs) and ('ny' in kwargs)):
+                self.nx = kwargs['nx'] 
+                self.ny = kwargs['ny'] 
+            else:
+                raise TypeError("The dimension of the image is not specified. You can input nx and ny as gen_true(im, nx, ny) or first define the forward operator through A = Deblur.forward_Op_matrix([11,11], nx, ny) or A = Deblur.forward_Op([11,11], 0.7, nx, ny) ")
+        image = self.im_image_dat(im)
+        current_shape = get_input_image_size(image)
+        if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
+            newimage = image_to_new_size(image, (self.nx, self.ny))
+            newimage[np.isnan(newimage)] = 0
+        else:
+            newimage = image
+            
+        return newimage
+
     def gen_true(self, im, **kwargs):
         if (self.nx is None or self.ny is None):
             if (('nx' in kwargs) and ('ny' in kwargs)):
@@ -113,6 +139,8 @@ class Deblurring:
             if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
                 newimage = image_to_new_size(image, (self.nx, self.ny))
                 newimage[np.isnan(newimage)] = 0
+            else:
+                newimage = image
         else:
             raise ValueError("The image you requested does not exist! Specify the right name. Options are 'satellite', 'hubble', 'h_im")
         return newimage
@@ -577,7 +605,7 @@ class Tomography():
         plt.pause(.1)
         plt.draw()
 
-class Deblurring1D:
+class Deblurring1D():
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
     def operator(self, x, projection, PSF, boundary_condition):
@@ -655,6 +683,22 @@ class Deblurring1D:
         b = self.operator(x, 'forward', self.PSF, boundary_condition)
         return b
     
+    def gen_data(self, x):
+        nxbig = 2*self.nx
+        nybig = 2*self.ny
+        im = x.reshape((self.nx, self.ny)) # check the shape
+        padim = np.zeros((nxbig, nybig))
+        putidx = self.nx//2
+        putidy = self.ny//2
+        # check the indeces
+        padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)] = im
+        PSF, _ = Gauss(self.dim, self.spread)
+        A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
+        b = A0(padim)
+        x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+        b = b[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+        return b
+
     def gen_xtrue(self, N, test):
         self.grid_points = N
         if test == 'sigma':
