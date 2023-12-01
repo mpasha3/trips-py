@@ -863,6 +863,8 @@ class DeblurringNoCrime:
             else:
                 raise TypeError("The dimension of the image is not specified. You can input nx and ny as gen_true(im, nx, ny) or first define the forward operator through A = Deblur.forward_Op_matrix([11,11], nx, ny) or A = Deblur.forward_Op([11,11], 0.7, nx, ny) ")
         image = self.im_image_dat(im)
+        print('MP')
+        print(image.shape)
         current_shape = get_input_image_size(image)
         if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
             newimage = image_to_new_size(image, (self.nx, self.ny))
