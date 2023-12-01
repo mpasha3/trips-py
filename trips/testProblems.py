@@ -850,6 +850,9 @@ class DeblurringNoCrime:
             print("Please make sure your data are on the data folder!")
         f = spio.loadmat(f'./data/image_data/{im}.mat')
         X = f['x_true']
+        im_shape = X.shape
+        if len(im_shape) == 3:
+             X = 0.4*X[:, :, 0] + 0.4*X[:, :, 1] + 0.1*X[:, :, 2]
         return X    
     def gen_true(self, im, **kwargs):
         if (self.nx is None or self.ny is None):
