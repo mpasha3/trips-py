@@ -853,7 +853,23 @@ class DeblurringNoCrime:
         im_shape = X.shape
         if len(im_shape) == 3:
              X = 0.4*X[:, :, 0] + 0.4*X[:, :, 1] + 0.1*X[:, :, 2]
-        return X    
+        return X  
+
+    def gen_true_mydata(self, im, **kwargs):
+        if (self.nx is None or self.ny is None):
+            if (('nx' in kwargs) and ('ny' in kwargs)):
+                self.nx = kwargs['nx'] 
+                self.ny = kwargs['ny'] 
+            else:
+                raise TypeError("The dimension of the image is not specified. You can input nx and ny as gen_true(im, nx, ny) or first define the forward operator through A = Deblur.forward_Op_matrix([11,11], nx, ny) or A = Deblur.forward_Op([11,11], 0.7, nx, ny) ")
+        image = self.im_image_dat(im)
+        current_shape = get_input_image_size(image)
+        if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
+            newimage = image_to_new_size(image, (self.nx, self.ny))
+            newimage[np.isnan(newimage)] = 0
+
+        return newimage
+
     def gen_true(self, im, **kwargs):
         if (self.nx is None or self.ny is None):
             if (('nx' in kwargs) and ('ny' in kwargs)):
