@@ -86,7 +86,6 @@ class Deblurring():
         #     print('data already in the path.')
         # else:
         #     print("Please make sure your data are on the data folder!")
-           
 
     def forward_Op_matrix(self, spread, nx, ny):
             ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
@@ -123,7 +122,6 @@ class Deblurring():
             newimage[np.isnan(newimage)] = 0
         else:
             newimage = image
-            
         return newimage
 
     def gen_true(self, im, **kwargs):
