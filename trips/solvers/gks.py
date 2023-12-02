@@ -26,231 +26,84 @@ from tqdm import tqdm
 from collections.abc import Iterable
 
 
-"""
-Variants of GKS.
-"""
+def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
 
-def TP_gks(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
+    delta = kwargs['delta'] if ('delta' in kwargs) else None
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
-    projection_method = kwargs['projection_method'] if ('projection_method' in kwargs) else 'auto'
+    if (regparam == 'dp' or dp_stop != False) and delta == None:
+        raise Exception("""A value for the noise level delta was not provided and the discrepancy principle cannot be applied. 
+                    Please supply a value of delta based on the estimated noise level of the problem, or choose the regularization parameter according to gcv or a different stopping criterion.""")
 
-    regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
-
-
-    if ((projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (projection_method == 'arnoldi'):
-
-        (V,H) = arnoldi(A, b, projection_dim, dp_stop, **kwargs)
-
-    else:
-
-        (U, B, V) = golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
-
-    
+    (U, B, V) = golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
+    AV = A@V
+    LV = L@V
     x_history = []
     lambda_history = []
-
+    residual_history = []
     for ii in tqdm(range(n_iter), 'running GKS...'):
-
+        
         if is_identity(L):
 
-            Q_A, R_A, _ = la.svd(A @ V, full_matrices=False)
+            Q_A, R_A, _ = la.svd(AV, full_matrices=False)
 
             R_A = np.diag(R_A)
 
-            (Q_L, R_L) = (Identity(L.shape[0]) @ V, Identity(L.shape[0]) @ V)
+            R_L = Identity(V.shape[1])
 
         else:
 
-            (Q_A, R_A) = la.qr(A @ V, mode='economic') # Project A into V, separate into Q and R
+            (Q_A, R_A) = la.qr(AV, mode='economic') # Project A into V, separate into Q and R
         
-            (Q_L, R_L) = la.qr(L @ V, mode='economic') # Project L into V, separate into Q and R
+            _, R_L = la.qr(LV, mode='economic') # Project L into V, separate into Q and R
+
+        bhat = (Q_A.T@b).reshape(-1,1) 
 
         if regparam == 'gcv':
-            lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambda by crossvalidation
+            # lambdah = generalized_crossvalidation(Q_A, R_A, R_L, Q_A@bhat, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
+            # called in this way to have GCV work in a general framework
+            lambdah = generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
 
         elif regparam == 'dp':
-            lambdah = discrepancy_principle(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambdas by crossvalidation
+            lambdah = discrepancy_principle(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambdas by crossvalidation
 
-        elif regparam == 'gcv+sequence':
-            if ii == 0:
-                lambdah = generalized_crossvalidation(A @ V, b, L @ V, **kwargs)['x'].item() # find ideal lambda by crossvalidation
-            else:
-                lambdah = lambda_history[0] * regparam_sequence[ii]
-        
         elif isinstance(regparam, Iterable):
             lambdah = regparam[ii]
         else:
             lambdah = regparam
-        if (regparam in ['gcv', 'dp']) and (ii > 1):
 
-            if abs(lambdah - lambda_history[-1]) > (1)*lambda_history[-1]:
-                lambdah = lambda_history[-1]
         lambda_history.append(lambdah)
-        bhat = (Q_A.T @ b).reshape(-1,1) # Project b
-        R_stacked = np.vstack( [R_A]+ [lambdah*R_L] ) # Stack projected operators
-        b_stacked = np.vstack([bhat] + [np.zeros(shape=(R_L.shape[0], 1))]) # pad with zeros
-        y, _,_,_ = la.lstsq(R_stacked, b_stacked) # get least squares solution
+
+        # bhat = (Q_A.T @ b).reshape(-1,1) # Project b
+        y,_,_,_ = np.linalg.lstsq(np.concatenate((R_A, np.sqrt(lambdah) * R_L)), np.concatenate((Q_A.T@ b, np.zeros((R_L.shape[0],1)))),rcond=None)
+
         x = V @ y # project y back
         x_history.append(x)
-        r = (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
-        ra = A.T@r
-        rb = lambdah * L.T @ (L @ x)
-        r = ra + rb
-        r = r - V@(V.T@r)
-        r = r - V@(V.T@r)
-        normed_r = r / la.norm(r) # normalize residual
-        V = np.hstack([V, normed_r]) # add residual to basis
-        V, _ = la.qr(V, mode='economic') # orthonormalize basis using QR
-
-    if x_true is not None:
+        v = AV@y
+        v = v - b
+        u = LV @ y
+        ra = AV @ y - b
+        ra = A.T @ ra
+        rb = (LV @ y)
+        rb = L.T @ rb
+        r = ra + lambdah * rb
+        r = r - V @ (V.T @ r)
+        r = r - V @ (V.T @ r)
+        vn = r / np.linalg.norm(r)
+        V = np.column_stack((V, vn))
+        Avn = A @ vn
+        AV = np.column_stack((AV, Avn))
+        Lvn = vn
+        Lvn = L*vn
+        LV = np.column_stack((LV, Lvn))
+    if (x_true is not None):
+        if x_true.shape[1] is not 1:
+            x_true = x_true.reshape(-1,1)
         x_true_norm = la.norm(x_true)
-        residual_history = [A@x - b for x in x_history]
         rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
-
-        return (x, x_history, lambdah, lambda_history, residual_history, rre_history)
-    
+        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'Residual': residual_history, 'its': ii}
     else:
-        return (x, x_history, lambdah, lambda_history)
-
-
-"""
-Classes which implement GKS. 
-"""
-
-class GKSClass:
-
-    def __init__(self, projection_dim=3, regparam='gcv', projection_method='auto', **kwargs):
-
-        self.projection_dim = projection_dim
-        self.projection_method = projection_method
-        self.regparam = regparam
-        self.kwargs = kwargs
-        self.dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
-        self.x_history = []
-        self.lambda_history = []
-    def change_regparam(self, regparam='gcv'):
-        self.regparam = regparam
-    def _project(self, A, b, projection_dim=None, **kwargs):
-        if projection_dim is not None:
-
-            if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
-
-
-                (basis,_) = arnoldi(A, b, projection_dim, self.dp_stop, **kwargs)
-
-            else:
-                (_, _, basis) = golub_kahan(A, b, projection_dim, self.dp_stop, **kwargs)
-        
-        else:
-            
-            if ((self.projection_method == 'auto') and (A.shape[0] == A.shape[1])) or (self.projection_method == 'arnoldi'):
-
-                if A.shape[0] == A.shape[1]:
-                    (basis,_) = arnoldi(A, b, projection_dim, self.dp_stop, **kwargs)
-
-                else:
-                    (_, _, basis) = golub_kahan(A, b, self.projection_dim, self.dp_stop, **kwargs)
-
-        self.basis = basis
-
-        return basis
-    
-    def restart(self):
-        self.basis = None
-
-    def run(self, A, b, L, n_iter=50, warm_start=False, x_true=None, **kwargs):
-
-        self.regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
-
-        if warm_start == False:
-
-            self._project(A, b, self.projection_dim)
-
-            x = A.T @ b # initialize x to b for reweighting
-            self.x = x
-
-        x = self.x
-
-        for ii in tqdm(range(n_iter), 'running GKS...'):
-
-            if is_identity(L):
-
-                Q_A, R_A, _ = la.svd(A @ self.basis, full_matrices=False)
-
-                (Q_L, R_L) = (Identity(L.shape[0]) @ self.basis, Identity(L.shape[0]) @ self.basis)
-
-                R_A = np.diag(R_A)
-
-            else:
-
-                (Q_A, R_A) = la.qr(A @ self.basis, mode='economic') # Project A into V, separate into Q and R
-        
-                (Q_L, R_L) = la.qr(L @ self.basis, mode='economic') # Project L into V, separate into Q and R
-            
-            if self.regparam == 'gcv':
-                lambdah = generalized_crossvalidation(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
-            
-            elif self.regparam == 'dp':
-                lambdah = discrepancy_principle(A @ self.basis, b, L @ self.basis, **self.kwargs)['x'].item() # find ideal lambdas by crossvalidation
-            
-            elif self.regparam == 'gcv+sequence':
-                if ii == 0:
-                    lambdah = generalized_crossvalidation(A @ V, b, L @ V, **self.kwargs)['x'].item() # find ideal lambda by crossvalidation
-                else:
-                    lambdah = self.lambda_history[0] * self.regparam_sequence[ii]
-
-            elif isinstance(self.regparam, Iterable):
-                lambdah = self.regparam[ii]
-            
-            else:
-                lambdah = self.regparam
-
-            if (self.regparam in ['gcv', 'dp']) and (ii > 1):
-
-                if abs(lambdah - self.lambda_history[-1]) > (1)*self.lambda_history[-1]:
-                    lambdah = self.lambda_history[-1]
-
-
-            self.lambda_history.append(lambdah)
-
-            bhat = (Q_A.T @ b).reshape(-1,1) # Project b
-
-            R_stacked = np.vstack( [R_A]+ [lambdah*R_L] ) # Stack projected operators
-
-            b_stacked = np.vstack([bhat] + [np.zeros(shape=(R_L.shape[0], 1))]) # pad with zeros
-
-            y, _,_,_ = la.lstsq(R_stacked, b_stacked) # get least squares solution
-
-            x = self.basis @ y # project y back
-
-            self.x_history.append(x)
-
-            r = (A @ x).reshape(-1,1) - b.reshape(-1,1) # get residual
-            ra = A.T@r
-
-            rb = lambdah * L.T @ (L @ x)
-            r = ra + rb
-
-
-            normed_r = r / la.norm(r) # normalize residual
-
-            self.basis = np.hstack([self.basis, normed_r]) # add residual to basis
-
-            self.basis, _ = la.qr(self.basis, mode='economic') # orthonormalize basis using QR
-
-            self.x = x
-
-        if x_true is not None:
-            x_true_norm = la.norm(x_true)
-            residual_history = [A@x - b for x in self.x_history]
-            rre_history = [la.norm(x - x_true)/x_true_norm for x in self.x_history]
-
-            self.residual_history = residual_history
-            self.rre_history = rre_history
-
-            return x
-        
-        else:
-            return x
+        info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'Residual': residual_history, 'its': ii}
+    # info = {}
+    return (x, info)
