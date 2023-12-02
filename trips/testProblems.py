@@ -79,6 +79,9 @@ class Deblurring():
             print("Please make sure your data are on the data folder!")
         f = spio.loadmat(f'./data/image_data/{im}.mat')
         X = f['x_true']
+        x_shape = X.shape
+        if len(x_shape) == 3:
+            X = 0.4*X[:, :, 0]  + 0.4*X[:, :, 1] + 0.2*X[:, :, 2]
         return X
         #     if (('myImage' in kwargs) and ('myImage' is not None)):
         #     self.im = kwargs['myImage']
