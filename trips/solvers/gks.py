@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 """
-Definition of test problems
+Demo for handling your own data
 --------------------------------------------------------------------------
-Created Jun 7, 2023 for TRIPs-Py library
+Created in 2023 for TRIPs-Py library
 """
-__authors__ = "Mirjeta Pasha and Connor Sanderford"
-__copyright__ = "Copyright 2022, TRIPs-Py library"
+__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna"
+__affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
+__copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"
-__version__ = "0.1"
-__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
+__version__ = "1.0"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
-
-from ..decompositions import golub_kahan, arnoldi
-from ..parameter_selection.gcv import generalized_crossvalidation
-from ..parameter_selection.discrepancy_principle import discrepancy_principle
-from ..utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
+from trips.decompositions import golub_kahan, arnoldi
+from trips.parameter_selection.gcv import generalized_crossvalidation
+from trips.parameter_selection.discrepancy_principle import discrepancy_principle
+from trips.utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
 
 import numpy as np
 from scipy import linalg as la
@@ -88,6 +87,7 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         rb = (LV @ y)
         rb = L.T @ rb
         r = ra + lambdah * rb
+        r = r - V @ (V.T @ r)
         r = r - V @ (V.T @ r)
         r = r - V @ (V.T @ r)
         vn = r / np.linalg.norm(r)

@@ -11,7 +11,7 @@ __version__ = "0.1"
 __maintainer__ = "Mirjeta Pasha and Connor Sanderford"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
 """
-Functions which implement operators for measurement or regularization.
+Functions which implement regularization operators.
 """
 from venv import create
 import numpy as np
@@ -109,46 +109,6 @@ def generate_time_derivative_operator_matrix(nx, ny, nt):
     
     return D_timeI
 
-    
-"""blur operators"""
-
-def Gauss(dim, s): # Dr. Pasha's Gaussian PSF code
-
-    if hasattr(dim, "__len__"):
-        m, n = dim[0], dim[1]
-    else:
-        m, n = dim, dim
-    s1, s2 = s, s
-    
-    # Set up grid points to evaluate the Gaussian function
-    x = np.arange(-np.fix(n/2), np.ceil(n/2))
-    y = np.arange(-np.fix(m/2), np.ceil(m/2))
-    X, Y = np.meshgrid(x, y)
-
-    # Compute the Gaussian, and normalize the PSF.
-    PSF = np.exp( -0.5* ((X**2)/(s1**2) + (Y**2)/(s2**2)) )
-    PSF /= PSF.sum()
-
-    # find the center
-    mm, nn = np.where(PSF == PSF.max())
-    center = np.array([mm[0], nn[0]])
-
-    return PSF, center.astype(int)
-
-
-def gaussian_blur_operator(dim, spread, nx, ny):
-
-
-
-    PSF, center = Gauss(dim, spread)
-
-    proj_forward = lambda X: convolve(X.reshape([nx,ny]), PSF, mode='reflect').flatten()
-
-    proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='reflect').flatten()
-    
-    blur = pylops.FunctionOperator(proj_forward, proj_backward, nx*ny)
-
-    return blur
 
 
 """Framelet operators"""
@@ -243,8 +203,6 @@ if __name__ == "__main__":
 
     print(L_spatial @ arr)
 
-    blur = gaussian_blur_operator([5,5], 2, 1000, 1000)
-
     thing = create_framelet_operator(10, 10, 2)
 
     out = thing @ np.eye(10).reshape(-1,1, order='F')
@@ -254,6 +212,5 @@ if __name__ == "__main__":
     (H0, H1, H2) = construct_H(2,10)
 
     output = H2 @ np.eye(10)
-
 
     breakpoint()
