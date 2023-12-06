@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""
+""" 
 Helper functions
 --------------------------------------------------------------------------
 Created in 2023 for TRIPs-Py library

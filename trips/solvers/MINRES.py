@@ -12,7 +12,7 @@ __maintainer__ = "Mirjeta Pasha and Connor Sanderford"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
 
 from select import select
-from ..decompositions import generalized_golub_kahan
+from ..utilities.decompositions import generalized_golub_kahan
 import numpy as np
 from scipy import linalg as la
 

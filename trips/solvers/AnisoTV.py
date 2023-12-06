@@ -12,8 +12,8 @@ __version__ = "0.1"
 __maintainer__ = "Mirjeta Pasha and Connor Sanderford"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
 
-from trips.io import *
-from trips.operators import *
+from trips.utilities.io import *
+from trips.utilities.operators import *
 from matplotlib import transforms
 from scipy import ndimage
 from trips.solvers.gks_all import *

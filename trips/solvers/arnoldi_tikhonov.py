@@ -14,7 +14,7 @@ import os, sys
 import numpy as np
 sys.path.insert(0, '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package')
 
-from ..decompositions import arnoldi
+from ..utilities.decompositions import arnoldi
 import numpy as np
 from scipy import linalg as la
 from trips.parameter_selection.gcv import *
