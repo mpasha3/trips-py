@@ -11,15 +11,15 @@ __version__ = "0.1"
 __maintainer__ = "Mirjeta Pasha and Connor Sanderford"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
 
-from ..decompositions import golub_kahan, arnoldi
+from ..utilities.decompositions import golub_kahan, arnoldi
 from ..parameter_selection.gcv import generalized_crossvalidation
 from ..parameter_selection.discrepancy_principle import discrepancy_principle
-from ..utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
+from ..utilities.utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
 from scipy import sparse
 import numpy as np
 from scipy import linalg as la
 from pylops import Identity
-from trips.utils import *
+from trips.utilities.weights import *
 from tqdm import tqdm
 
 from collections.abc import Iterable

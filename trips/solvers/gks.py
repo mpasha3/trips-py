@@ -11,10 +11,10 @@ __license__ = "GPL"
 __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
-from trips.decompositions import golub_kahan, arnoldi
+from trips.utilities.decompositions import golub_kahan, arnoldi
 from trips.parameter_selection.gcv import generalized_crossvalidation
 from trips.parameter_selection.discrepancy_principle import discrepancy_principle
-from trips.utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
+from trips.utilities.utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
 
 import numpy as np
 from scipy import linalg as la
@@ -105,5 +105,4 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'relError': rre_history, 'Residual': residual_history, 'its': ii}
     else:
         info = {'xHistory': x_history, 'regParam': lambdah, 'regParam_history': lambda_history, 'Residual': residual_history, 'its': ii}
-    # info = {}
     return (x, info)

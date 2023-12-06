@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Demo illustrating the deblurring problem
+Defines weights for different methods
 --------------------------------------------------------------------------
 Created in 2023 for TRIPs-Py library
 """
@@ -10,7 +10,6 @@ __copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"
 __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
-
 
 
 from pylops import LinearOperator

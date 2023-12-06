@@ -13,8 +13,7 @@ __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk
 
 import numpy as np 
 import scipy.linalg as la
-
-from trips.utils import operator_qr, operator_svd, is_identity
+from trips.utilities.utils import operator_qr, operator_svd, is_identity
 import warnings
 
 def discrepancy_principle(Q, A, L, b, delta = None, eta = 1.01, **kwargs):
