@@ -50,10 +50,10 @@ class Deblurring():
         self.n = PSFdim[1]
         self.dim = PSFdim
         self.spread = PSFspread
-        if len(PSFspread.shape) == 1:
+        if len(PSFspread) == 1:
             # Symmetric Gaussian kernel, both directions the same spread
             self.s1, self.s2 = PSFspread, PSFspread
-        elif len(PSFspread.shape) == 2:
+        elif len(PSFspread) == 2:
             # Potentially nonsymmetric Gaussian kernel (if PSFspread[0] is not PSFspread[1])
             self.s1, self.s2 = PSFspread[0], PSFspread[1]
         # Set up grid points to evaluate the Gaussian function

@@ -15,7 +15,6 @@ import numpy as np
 from ..utilities.decompositions import golub_kahan, arnoldi
 from ..parameter_selection.gcv import generalized_crossvalidation
 from ..parameter_selection.discrepancy_principle import discrepancy_principle
-from ..utilities.utils import smoothed_holder_weights
 from collections.abc import Iterable
 def Tikhonov(A, b, L, x_true, regparam = 'gcv', **kwargs):
     if regparam in ['gcv', 'GCV', 'Gcv']:
