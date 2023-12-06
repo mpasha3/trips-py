@@ -14,7 +14,7 @@ __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.
 from ..utilities.decompositions import golub_kahan, arnoldi
 from ..parameter_selection.gcv import generalized_crossvalidation
 from ..parameter_selection.discrepancy_principle import discrepancy_principle
-from ..utilities.utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
+from ..utilities.utils import *#smoothed_holder_weights, operator_qr, operator_svd, is_identity
 from scipy import sparse
 import numpy as np
 from scipy import linalg as la
