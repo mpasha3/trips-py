@@ -1,19 +1,19 @@
 #!/usr/bin/env python
-"""
-Definition of test problems
+""" 
+Utility functions
 --------------------------------------------------------------------------
-Created December 10, 2022 for TRIPs-Py library
+Created in 2023 for TRIPs-Py library
 """
-__authors__ = "Mirjeta Pasha and Connor Sanderford"
-__copyright__ = "Copyright 2022, TRIPs-Py library"
+__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu"
+__affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
+__copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"
-__version__ = "0.1"
-__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
+__version__ = "1.0"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
 
 from pylops import LinearOperator
-from trips.operators import *
+from trips.utilities.operators import *
 from scipy import linalg as la
 from scipy.sparse._arrays import _sparray
 from scipy import sparse
@@ -25,57 +25,6 @@ from pylops import Identity, LinearOperator
 """
 Utility functions.
 """
-
-# Define IsoTV weights      
-def iso_TV_weights(x, nx, ny, epsilon, qnorm):
-    nt = int((x.reshape((-1,1)).shape[0])/(nx*ny))
-    Ls = first_derivative_operator_2d(nx, ny)
-    utemp = np.reshape(x, (nx*ny, nt))
-    Dutemp = Ls.dot(utemp)
-    wr = np.exp(2) * np.ones((2*nx*(ny), 1))
-    for i in range(2*nx*(ny)):
-        wr[i] = (np.linalg.norm(Dutemp[i,:])**2 + wr[i])**(qnorm/2-1)
-    wr = np.kron(np.ones((nt, 1)), wr)
-    return wr
-# Define GS weights
-def GS_weights(x, nx, ny, epsilon, qnorm):
-    nt = int((x.reshape((-1,1)).shape[0])/(nx*ny))
-    utemp = np.reshape(x, (nx*ny, nt))
-    Ls = first_derivative_operator_2d(nx, ny)
-    Dutemp = Ls.dot(utemp)
-    wr = np.exp(2) * np.ones((2*nx*(ny), 1))
-    for i in range(2*nx*(ny)):
-        wr[i] = (np.linalg.norm(Dutemp[i,:])**2 + wr[i])**(qnorm/2-1)
-    wr = np.kron(np.ones((nt, 1)), wr)
-    return wr
-# Define regular weights for MMGKS
-def smoothed_holder_weights(x, epsilon, p):
-    z = (x**2 + epsilon**2)**(p/2 - 1)
-    return z
-
-def operator_qr(A):
-
-    """
-    Handles QR decomposition for an operator A of any form: dense or sparse array, or a pylops LinearOperator.
-    """
-
-    if isinstance(A, LinearOperator):
-        return la.qr(A.todense(), mode='economic')
-    else:
-        return la.qr(A, mode='economic')
-    
-
-def operator_svd(A):
-
-    """
-    Handles QR decomposition for an operator A of any form: dense or sparse array, or a pylops LinearOperator.
-    """
-
-    if isinstance(A, LinearOperator):
-        return la.svd(A.todense(), full_matrices=False)
-    else:
-        return la.svd(A, full_matrices=False)
-    
 
 def soft_thresh(x, mu):
     #y = np.sign(x)*np.max([np.abs(x)-mu], 0)

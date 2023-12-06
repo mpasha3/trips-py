@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 """
-Definition of test problems
+Functions that define the regularization parameters
 --------------------------------------------------------------------------
-Created December 10, 2022 for TRIPs-Py library
+Created in 2023 for TRIPs-Py library
 """
-__authors__ = "Mirjeta Pasha and Connor Sanderford"
-__copyright__ = "Copyright 2022, TRIPs-Py library"
+__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu"
+__affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
+__copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"
-__version__ = "0.1"
-__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
-"""
-Functions which implement regularization operators.
-"""
+__version__ = "1.0"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
+
 from venv import create
 import numpy as np
 import pylops
@@ -34,8 +32,6 @@ def first_derivative_operator(n):
 
     return L
 
-
-
 def first_derivative_operator_2d(nx, ny):
 
     D_x = first_derivative_operator(nx)
@@ -48,8 +44,6 @@ def first_derivative_operator_2d(nx, ny):
 
     return D_spatial
 
-
-
 def spatial_derivative_operator(nx, ny, nt):
 
     D_spatial = first_derivative_operator_2d(nx,ny)
@@ -57,7 +51,6 @@ def spatial_derivative_operator(nx, ny, nt):
     ID_spatial = pylops.Kronecker( pylops.Identity(nt, dtype='float32'), D_spatial)
 
     return ID_spatial
-
 
 def time_derivative_operator(nx, ny, nt):
     
@@ -108,8 +101,6 @@ def generate_time_derivative_operator_matrix(nx, ny, nt):
     D_timeI = sparse.kron(D_time, sparse.identity(nx**2))
     
     return D_timeI
-
-
 
 """Framelet operators"""
 
@@ -183,6 +174,33 @@ def create_framelet_operator(n,m,l):
 
     return W
 
+""" 
+Other operators
+"""
+
+def operator_qr(A):
+
+    """
+    Handles QR decomposition for an operator A of any form: dense or sparse array, or a pylops LinearOperator.
+    """
+
+    if isinstance(A, LinearOperator):
+        return la.qr(A.todense(), mode='economic')
+    else:
+        return la.qr(A, mode='economic')
+    
+
+def operator_svd(A):
+
+    """
+    Handles QR decomposition for an operator A of any form: dense or sparse array, or a pylops LinearOperator.
+    """
+
+    if isinstance(A, LinearOperator):
+        return la.svd(A.todense(), full_matrices=False)
+    else:
+        return la.svd(A, full_matrices=False)
+    
 
 
 if __name__ == "__main__":

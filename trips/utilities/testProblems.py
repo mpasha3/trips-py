@@ -21,13 +21,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import astra
-import trips.phantoms as phantom
+import trips.utilities.phantoms as phantom
 from venv import create
 import pylops
 from scipy.ndimage import convolve
 from scipy import sparse
 import scipy.special as spe
-from trips.operators import *
+from trips.utilities.operators import *
 from PIL import Image
 from resizeimage import resizeimage
 import requests
@@ -36,7 +36,7 @@ from os.path import exists
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
-from trips.utils import *
+from trips.utilities.utils import *
 import scipy.linalg as la
 
 class Deblurring():
@@ -67,6 +67,7 @@ class Deblurring():
         mm, nn = np.where(PSF == PSF.max())
         center = np.array([mm[0], nn[0]])   
         return PSF, center.astype(int)
+    
     def forward_Op(self, dim, spread, nx, ny):
         self.nx = nx
         self.ny = ny
@@ -786,7 +787,6 @@ class DeblurringNoCrime:
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
             plt.pause(.1)
             plt.draw() 
-
 
 if __name__ == '__main__':
     # Test Deblurring class
