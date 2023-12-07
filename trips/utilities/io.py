@@ -148,6 +148,8 @@ def generate_emoji(noise_level, dataset):
     sig_obs = noise_level * np.linalg.norm(b)/np.linalg.norm(e)
     b = b + sig_obs*e
     delta = np.linalg.norm(sig_obs*e)
+    print('MP')
+    print(delta)
     # delta = 0 # np.linalg.norm() # no added noise for this dataset, change to allow added noise.
     for ii in range(T):
         AA[ii] = A_small[ 2170*(ii):2170*(ii+1), 16384*ii:16384*(ii+1) ]
