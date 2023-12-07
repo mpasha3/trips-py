@@ -12,7 +12,7 @@ __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
 import numpy as np
-from ..utilities.decompositions import golub_kahan, arnoldi
+# from ..utilities.decompositions import golub_kahan, arnoldi
 from ..parameter_selection.gcv import generalized_crossvalidation
 from ..parameter_selection.discrepancy_principle import discrepancy_principle
 from collections.abc import Iterable

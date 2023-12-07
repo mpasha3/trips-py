@@ -21,13 +21,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import astra
-import trips.utilities.phantoms as phantom
+# import utilities.phantoms as phantom
 from venv import create
 import pylops
 from scipy.ndimage import convolve
 from scipy import sparse
 import scipy.special as spe
-from trips.utilities.operators import *
+# from trips.utilities.operators import *
 from PIL import Image
 from resizeimage import resizeimage
 import requests
@@ -36,10 +36,10 @@ from os.path import exists
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
-from trips.utilities.utils import *
+# from trips.utilities.utils import *
 import scipy.linalg as la
 
-class Deblurring():
+class DeblurringCrime():
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
         self.nx = None
@@ -606,18 +606,29 @@ class Deblurring1D():
         plt.pause(.1)
         plt.draw()    
 
-class DeblurringNoCrime:
+class Deblurring:
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
         self.nx = None
         self.ny = None
+        self.CommitCrime = kwargs['CommitCrime'] if ('CommitCrime' in kwargs) else False
+
+    # def __init__(self,CommitCrime=False):
+    #     self.nx = None
+    #     self.ny = None
+    #     self.CommitCrime = CommitCrime
 
     def Gauss(self, PSFdim, PSFspread):
         self.m = PSFdim[0]
         self.n = PSFdim[1]
         self.dim = PSFdim
         self.spread = PSFspread
-        self.s1, self.s2 = PSFspread, PSFspread # only symmetric Gaussian
+        if len(PSFspread) == 1:
+            # Symmetric Gaussian kernel, both directions the same spread
+            self.s1, self.s2 = PSFspread, PSFspread
+        elif len(PSFspread) == 2:
+            # Potentially nonsymmetric Gaussian kernel (if PSFspread[0] is not PSFspread[1])
+            self.s1, self.s2 = PSFspread[0], PSFspread[1]
         # Set up grid points to evaluate the Gaussian function
         x = np.arange(-np.fix(self.n/2), np.ceil(self.n/2))
         y = np.arange(-np.fix(self.m/2), np.ceil(self.m/2))
@@ -629,6 +640,7 @@ class DeblurringNoCrime:
         mm, nn = np.where(PSF == PSF.max())
         center = np.array([mm[0], nn[0]])   
         return PSF, center.astype(int)
+    
     def forward_Op(self, dim, spread, nx, ny):
         self.nx = nx
         self.ny = ny
@@ -637,26 +649,6 @@ class DeblurringNoCrime:
         proj_backward = lambda B: convolve(B.reshape([nx,ny]), np.flipud(np.fliplr(PSF)), mode='reflect' ).reshape((-1,1))
         blur = pylops.FunctionOperator(proj_forward, proj_backward, nx*ny)
         return blur
-    def forward_Op_matrix(self, spread, nx, ny):
-        ## construct our blurring matrix with a Gaussian spread and zero boundary conditions
-        #normalize = get_column_sum(spread)
-        shape = (nx, ny)
-        m = shape[0]
-        n = shape[1]
-        self.nx = shape[0]
-        self.ny = shape[1]
-        A = np.zeros((m*n, m*n))
-        count = 0
-        self.spread = spread
-        self.shape = shape
-        for i in range(m):
-            for j in range(n):
-                column = self.vec(self.P(spread, [i, j],  shape))
-                A[:, count] = column
-                count += 1
-        normalize = np.sum(A[:, int(m*n/2 + n/2)])
-        A = 1/normalize * A
-        return A
     
     def im_image_dat(self, im):
         assert im in ['satellite', 'hubble', 'star', 'h_im']
@@ -706,19 +698,29 @@ class DeblurringNoCrime:
         return newimage
 
     def gen_data(self, x):
-        nxbig = 2*self.nx
-        nybig = 2*self.ny
-        im = x.reshape((self.nx, self.ny)) # check the shape
-        padim = np.zeros((nxbig, nybig))
-        putidx = self.nx//2
-        putidy = self.ny//2
-        # check the indeces
-        padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)] = im
-        PSF, _ = Gauss(self.dim, self.spread)
-        A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
-        b = A0(padim)
-        x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
-        b = b[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+        im = x.reshape((self.nx, self.ny))
+        if self.CommitCrime == False:
+            # nxbig = 2*self.nx
+            # nybig = 2*self.ny
+            # im = x.reshape((self.nx, self.ny))
+            # padim = np.zeros((nxbig, nybig))
+            # putidx = self.nx//2
+            # putidy = self.ny//2
+            # # check the indeces
+            # padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)] = im
+            # PSF, _ = Gauss(self.dim, self.spread)
+            # A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
+            # b = A0(padim)
+            # x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+            # b = b[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+            PSF, _ = self.Gauss(self.dim, self.spread)
+            A0 = lambda X: convolve(X, PSF, mode='constant')
+            b = A0(im)
+            b = b.reshape((-1,1))
+        else:
+            A = lambda X: convolve(X, PSF, mode='reflect')
+            b = A(im)
+            b = b.reshape((-1,1))
         return b
         
     def add_noise(self, b_true, opt, noise_level):
