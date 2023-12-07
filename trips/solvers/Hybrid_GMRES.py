@@ -19,7 +19,7 @@ from trips.parameter_selection.discrepancy_principle import *
 from pylops import Identity
 from tqdm import tqdm
 
-def hybrid_gmres(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's the naming convention here?
+def Hybrid_GMRES(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's the naming convention here?
 
     delta = kwargs['delta'] if ('delta' in kwargs) else None
 
