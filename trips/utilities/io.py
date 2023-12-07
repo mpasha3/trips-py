@@ -204,13 +204,13 @@ def generate_crossPhantom(noise_level, dataset): # use noise_level
     b = b.reshape(-1, 1, order='F').squeeze()
     AA = list(range(T))
     B = list(range(T))
-    e = np.random.randn((b.shape[0], 1))
+    e = np.random.randn(b.shape[0], 1)
     sig_obs = noise_level * np.linalg.norm(b)/np.linalg.norm(e)
     b = b + sig_obs*e
     delta = np.linalg.norm(sig_obs*e)
     for ii in range(T):
         AA[ii] = A_small[ 700*(ii):700*(ii+1), 16384*ii:16384*(ii+1) ] # 217 projections of size 128x128 at each of 10 selected angles
-        B[ii] = b[ 700*(ii) : 700*(ii+1) ]
+        B[ii] = b[700*(ii) : 700*(ii+1) ]
     return A_small, b, AA, B, nx, ny, nt, delta
 
 
