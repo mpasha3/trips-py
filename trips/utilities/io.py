@@ -153,7 +153,7 @@ def generate_emoji(noise_level, dataset):
     # delta = 0 # np.linalg.norm() # no added noise for this dataset, change to allow added noise.
     for ii in range(T):
         AA[ii] = A_small[ 2170*(ii):2170*(ii+1), 16384*ii:16384*(ii+1) ]
-        B[ii] = b[ 2170*(ii) : 2170*(ii+1) ]
+        B[ii] = b[2170*(ii) : 2170*(ii+1)]
     return (A_small, b, AA, B, nx, ny, nt, delta)
 
 

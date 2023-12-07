@@ -623,12 +623,13 @@ class Deblurring:
         self.n = PSFdim[1]
         self.dim = PSFdim
         self.spread = PSFspread
-        if len(PSFspread) == 1:
-            # Symmetric Gaussian kernel, both directions the same spread
-            self.s1, self.s2 = PSFspread, PSFspread
-        elif len(PSFspread) == 2:
-            # Potentially nonsymmetric Gaussian kernel (if PSFspread[0] is not PSFspread[1])
-            self.s1, self.s2 = PSFspread[0], PSFspread[1]
+        self.s1, self.s2 = PSFspread, PSFspread
+        # if len(PSFspread) == 1:
+        #     # Symmetric Gaussian kernel, both directions the same spread
+        #     self.s1, self.s2 = PSFspread, PSFspread
+        # elif len(PSFspread) == 2:
+        #     # Potentially nonsymmetric Gaussian kernel (if PSFspread[0] is not PSFspread[1])
+        #     self.s1, self.s2 = PSFspread[0], PSFspread[1]
         # Set up grid points to evaluate the Gaussian function
         x = np.arange(-np.fix(self.n/2), np.ceil(self.n/2))
         y = np.arange(-np.fix(self.m/2), np.ceil(self.m/2))
