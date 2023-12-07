@@ -1,29 +1,27 @@
 #!/usr/bin/env python
 """
-Demo for handling your own data
+Builds function for GKS
 --------------------------------------------------------------------------
 Created in 2023 for TRIPs-Py library
 """
-__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna"
+__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu"
 __affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
 __copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"
 __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
-from trips.utilities.decompositions import golub_kahan, arnoldi
-from trips.parameter_selection.gcv import generalized_crossvalidation
-from trips.parameter_selection.discrepancy_principle import discrepancy_principle
-from trips.utilities.utils import smoothed_holder_weights, operator_qr, operator_svd, is_identity
-
+from ..utilities.decompositions import golub_kahan, arnoldi
+from ..parameter_selection.gcv import generalized_crossvalidation
+from ..parameter_selection.discrepancy_principle import discrepancy_principle
+from ..utilities.utils import *#smoothed_holder_weights, operator_qr, operator_svd, is_identity
+from scipy import sparse
 import numpy as np
 from scipy import linalg as la
 from pylops import Identity
-
+from trips.utilities.weights import *
 from tqdm import tqdm
-
 from collections.abc import Iterable
-
 
 def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
 
