@@ -21,7 +21,7 @@ from trips.solvers import Tikhonov
 from tqdm import tqdm
 from collections.abc import Iterable
 
-def hybrid_lsqr(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's the naming convention here?
+def Hybrid_LSQR(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's the naming convention here?
 
     delta = kwargs['delta'] if ('delta' in kwargs) else None
 
