@@ -144,7 +144,11 @@ def generate_emoji(noise_level, dataset):
     b = b.reshape(-1, 1, order='F').squeeze()
     AA = list(range(T))
     B = list(range(T))
-    delta = 0 # np.linalg.norm() # no added noise for this dataset, change to allow added noise.
+    e = np.random.randn((b.shape[0], 1))
+    sig_obs = noise_level * np.linalg.norm(b)/np.linalg.norm(e)
+    b_meas = b + sig_obs*e
+    delta = np.linalg.norm(sig_obs*e)
+    # delta = 0 # np.linalg.norm() # no added noise for this dataset, change to allow added noise.
     for ii in range(T):
         AA[ii] = A_small[ 2170*(ii):2170*(ii+1), 16384*ii:16384*(ii+1) ]
         B[ii] = b[ 2170*(ii) : 2170*(ii+1) ]
