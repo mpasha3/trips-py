@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from scipy.linalg import fractional_matrix_power
 from numpy import array, diag, dot, maximum, empty, repeat, ones, sum
 from numpy.linalg import inv
-from trips.operators import *
+from trips.utilities.operators import *
 ##Specify the font
 ##Latex needs to be installed! If not installed, please comment the following 5 lines
 # parameters = {'xtick.labelsize': 12, 'ytick.labelsize': 12,
@@ -40,8 +40,8 @@ from scipy.ndimage import convolve
 from scipy import sparse
 from scipy.ndimage import convolve
 import scipy.special as spe
-from trips.testProblems import *
-from trips.operators import *
+from trips.utilities.testProblems import *
+from trips.utilities.operators import *
 # from trips.solvers.gks_all import *
 from trips.solvers.Tikhonov import *
 from trips.solvers.tSVD import *

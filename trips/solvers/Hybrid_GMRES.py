@@ -11,7 +11,7 @@ __version__ = "0.1"
 __maintainer__ = "Silvia Gazzola, Mirjeta Pasha and Connor Sanderford"
 __email__ = "S.Gazzola@bath.ac.uk; mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
 
-from ..decompositions import arnoldi_update
+from ..utilities.decompositions import arnoldi_update
 import numpy as np
 from scipy import linalg as la
 from trips.parameter_selection.gcv import *

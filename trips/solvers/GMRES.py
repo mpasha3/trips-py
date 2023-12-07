@@ -11,7 +11,7 @@ __version__ = "0.1"
 __maintainer__ = "Mirjeta Pasha and Connor Sanderford"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
 
-from ..decompositions import arnoldi
+from ..utilities.decompositions import arnoldi
 import numpy as np
 from scipy import linalg as la
 from tqdm import tqdm

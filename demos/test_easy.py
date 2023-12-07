@@ -1,6 +1,6 @@
-from trips.testProblems import *
+from trips.utilities.testProblems import *
 from trips.solvers.Hybrid_LSQR_new import *
-from trips.decompositions import golub_kahan_SG
+from trips.utilities.decompositions import golub_kahan_SG
 D1D = Deblurring1D()
 N = 64
 A = D1D.forward_Op_matrix_1D(3, N)

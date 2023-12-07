@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 """
-Definition of test problems
+Hybrif LSQR method
 --------------------------------------------------------------------------
-Created August 30th, 2023 for TRIPs-Py library
+Created December 1, 2023 for TRIPs-Py library
 """
-__authors__ = "Silvia Gazzola, Mirjeta Pasha and Connor Sanderford"
-__copyright__ = "Copyright 2022, TRIPs-Py library"
+__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna"
+__affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
+__copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"
-__version__ = "0.1"
-__maintainer__ = "Silvia Gazzola, Mirjeta Pasha and Connor Sanderford"
-__email__ = "S.Gazzola@bath.ac.uk; mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
+__version__ = "1.0"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
-from ..decompositions import golub_kahan_update
+from ..utilities.decompositions import golub_kahan_update
 import numpy as np
 from scipy import linalg as la
 from trips.parameter_selection.gcv import *

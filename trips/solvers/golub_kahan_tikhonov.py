@@ -8,7 +8,7 @@ from pylops import Identity
 from trips.parameter_selection.discrepancy_principle import *
 from trips.parameter_selection.gcv import *
 from scipy import linalg as la
-from ..decompositions import golub_kahan
+from ..utilities.decompositions import golub_kahan
 __authors__ = "Mirjeta Pasha and Connor Sanderford"
 __copyright__ = "Copyright 2022, TRIPs-Py library"
 __license__ = "GPL"

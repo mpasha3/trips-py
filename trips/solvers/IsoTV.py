@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.linalg import qr
 from scipy.optimize import fminbound
-from trips.decompositions import gsvd
+from trips.utilities.decompositions import gsvd
 from trips.parameter_selection import *
 def l2lq_isoTV_(A, b, L, Ls, q, e, iter, delta, nx, nt):
     Rerr = []

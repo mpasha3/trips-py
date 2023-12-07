@@ -1,20 +1,19 @@
 #!/usr/bin/env python
 """
-Definition of discrepancy principle for Tikhonov regularization parameter choice
+Definition of functions for Discrepancy principle
 --------------------------------------------------------------------------
-Created June 26, 2023 for TRIPs-Py library
+Created in 2023 for TRIPs-Py library
 """
-__author__ = "Mirjeta Pasha and Connor Sanderford"
-__copyright__ = "Copyright 2022, TRIPs-Py library"
+__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu"
+__affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
+__copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"
-__version__ = "0.1"
-__maintainer__ = "Mirjeta Pasha"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com"
+__version__ = "1.0"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
 import numpy as np 
 import scipy.linalg as la
-
-from trips.utils import operator_qr, operator_svd, is_identity
+from trips.utilities.utils import operator_qr, operator_svd, is_identity
 import warnings
 
 def discrepancy_principle(Q, A, L, b, delta = None, eta = 1.01, **kwargs):

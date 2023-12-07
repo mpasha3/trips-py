@@ -1,6 +1,6 @@
 
-from trips.functions import add, subtract, multiply
-from trips.functions import convert_fahrenheit_to_celsius as f2c
+from trips.utilities.functions import add, subtract, multiply
+from trips.utilities.functions import convert_fahrenheit_to_celsius as f2c
 import pytest
 
 def test_add():

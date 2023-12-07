@@ -1,9 +1,9 @@
 import os, sys
 sys.path.insert(0, '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package')
 from trips.solvers.tSVD import *
-from trips.testProblems import Deblurring
+from trips.utilities.testProblems import Deblurring
 import matplotlib.pyplot as plt
-from trips.helpers import *
+from trips.utilities.helpers import *
 from trips.solvers.CGLS import *
 # Deblurring example test problem
 Deblur = Deblurring()

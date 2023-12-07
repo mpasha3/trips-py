@@ -10,7 +10,7 @@ import scipy as sp
 import scipy.sparse as sps
 import scipy.io as spio
 import scipy.sparse.linalg as spsla
-from trips.testProblems import *
+from trips.utilities.testProblems import *
 import sys, os
 sys.path.insert(0, '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos')
 sizex = 128
