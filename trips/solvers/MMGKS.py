@@ -78,7 +78,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
                 ny = prob_dims[1]
             wr = GS_weights(x, nx, ny, epsilon, qnorm)
         else:
-            wr = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).reshape((-1,1))**(1/2)
+            wr = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).reshape((-1,1))#**(1/2)
         # q = sparse.spdiags(data = z.flatten() , diags=0, m=z.shape[0], n=z.shape[0])
         # temp = q @ (L @ V)
         # wr = (u**2 + epsilon**2)**(qnorm/2 - 1)
