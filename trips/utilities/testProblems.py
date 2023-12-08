@@ -463,24 +463,10 @@ class Deblurring1D():
                     continue
                 image[i] = v
         return image
-
-    def forward_Op_matrix_1D(self, spread, shape):
-        m = shape
-        n = 1
-        A = np.zeros((m*n, m*n))
-        count = 0
-        spread = spread
-        shape = shape
-        for i in range(m):
-            for j in range(n):
-                column = (self.P1D(spread, i,  shape))
-                A[:, count] = column
-                count += 1
-        normalize = np.sum(A[:, int(m*n/2 + n/2)])
-        A = 1/normalize * A
-        return A
     
-    def forward_Op_1D(self, x, blur_type, parameter, boundary_condition = 'reflect'):
+    def forward_Op_1D(self, x, parameter, nx, boundary_condition = 'reflect'):
+        self.nx = nx
+        self.ny = 1
         self.parameter = parameter
         self.PSF, self.center = self.Gauss1D(self.grid_points, self.parameter)
         proj_forward = lambda x: self.operator(x, 'forward', self.PSF, boundary_condition)
@@ -488,25 +474,16 @@ class Deblurring1D():
         blur = pylops.FunctionOperator(proj_forward, proj_backward, self.grid_points)
         return blur
     
-    # def gen_data(self, x, blur_type, parameter, boundary_condition = 'reflect'):
-    #     self.parameter = parameter
-    #     self.PSF, self.center = self.Gauss1D(self.grid_points, self.parameter)
-    #     proj_forward = lambda x: self.operator(x, 'forward', self.PSF, boundary_condition)
-    #     proj_backward = lambda x: self.operator(x, 'backward', self.PSF, boundary_condition)
-    #     blur = pylops.FunctionOperator(proj_forward, proj_backward, self.grid_points)
-    #     b = self.operator(x, 'forward', self.PSF, boundary_condition)
-    #     return b
-    
     def gen_data(self, x):
         nxbig = 2*self.nx
-        nybig = 2*self.ny
+        nybig = 1#2*self.ny
         im = x.reshape((self.nx, self.ny)) # check the shape
         padim = np.zeros((nxbig, nybig))
         putidx = self.nx//2
-        putidy = self.ny//2
+        putidy = 1#self.ny//2
         # check the indeces
         padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)] = im
-        PSF, _ = Gauss1D(self.dim, self.spread)
+        PSF, _ = self.Gauss1D(self.dim, self.spread)
         A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
         b = A0(padim)
         x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
@@ -605,7 +582,7 @@ class Deblurring1D():
         if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
         plt.pause(.1)
         plt.draw()   
-         
+
 class Deblurring():
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
@@ -786,7 +763,7 @@ class Deblurring():
 
 if __name__ == '__main__':
     # Test Deblurring class
-    from solvers.gks_all import *
+    # from solvers.gks_all import *
     Deblur = Deblurring()
     generate_matrix = True
     imagesize_x = 64
