@@ -49,6 +49,8 @@ def convert_image_for_trips(imag, image_type):
 
 def plot_singular_vectors_svd(Operator, size, parameter = 'A'):
     Operator = check_operator_type(Operator)
+    print("MP")
+    print(str(type(A)))
     if parameter == 'A':
         U, S, V = np.linalg.svd(Operator)
         V = V.T
