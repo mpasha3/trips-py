@@ -604,8 +604,8 @@ class Deblurring1D():
         plt.axis('off')
         if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
         plt.pause(.1)
-        plt.draw()    
-
+        plt.draw()   
+         
 class Deblurring():
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
@@ -682,6 +682,7 @@ class Deblurring():
                 raise TypeError("The dimension of the image is not specified. You can input nx and ny as gen_true(im, nx, ny) or first define the forward operator through A = Deblur.forward_Op_matrix([11,11], nx, ny) or A = Deblur.forward_Op([11,11], 0.7, nx, ny) ")
         if im in ['satellite', 'hubble', 'h_im']:
             image = self.im_image_dat(im)
+            newimage = image
             current_shape = get_input_image_size(image)
             if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
                 newimage = image_to_new_size(image, (self.nx, self.ny))
@@ -780,6 +781,7 @@ class Deblurring():
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
             plt.pause(.1)
             plt.draw() 
+
 
 
 if __name__ == '__main__':
