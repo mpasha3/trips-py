@@ -145,6 +145,9 @@ def generate_emoji(noise_level, dataset):
     AA = list(range(T))
     B = list(range(T))
     e = np.random.randn(b.shape[0], 1)
+    print('Shapes printed here')
+    print(b.shape)
+    print(e.shape)
     sig_obs = noise_level * np.linalg.norm(b)/np.linalg.norm(e)
     b = b + sig_obs*e
     delta = np.linalg.norm(sig_obs*e)
