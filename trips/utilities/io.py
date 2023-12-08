@@ -145,7 +145,7 @@ def generate_emoji(noise_level, dataset):
     b = b.reshape(-1, 1, order='F').squeeze()
     AA = list(range(T))
     B = list(range(T))
-    e = np.random.randn(b.shape[0], 1)
+    e = np.random.randn(b.shape[0],)
     print('Shapes printed here')
     print(b.shape)
     print(e.shape)
