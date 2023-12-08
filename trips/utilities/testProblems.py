@@ -488,14 +488,14 @@ class Deblurring1D():
         blur = pylops.FunctionOperator(proj_forward, proj_backward, self.grid_points)
         return blur
     
-    def gen_data(self, x, blur_type, parameter, boundary_condition = 'reflect'):
-        self.parameter = parameter
-        self.PSF, self.center = self.Gauss1D(self.grid_points, self.parameter)
-        proj_forward = lambda x: self.operator(x, 'forward', self.PSF, boundary_condition)
-        proj_backward = lambda x: self.operator(x, 'backward', self.PSF, boundary_condition)
-        blur = pylops.FunctionOperator(proj_forward, proj_backward, self.grid_points)
-        b = self.operator(x, 'forward', self.PSF, boundary_condition)
-        return b
+    # def gen_data(self, x, blur_type, parameter, boundary_condition = 'reflect'):
+    #     self.parameter = parameter
+    #     self.PSF, self.center = self.Gauss1D(self.grid_points, self.parameter)
+    #     proj_forward = lambda x: self.operator(x, 'forward', self.PSF, boundary_condition)
+    #     proj_backward = lambda x: self.operator(x, 'backward', self.PSF, boundary_condition)
+    #     blur = pylops.FunctionOperator(proj_forward, proj_backward, self.grid_points)
+    #     b = self.operator(x, 'forward', self.PSF, boundary_condition)
+    #     return b
     
     def gen_data(self, x):
         nxbig = 2*self.nx
