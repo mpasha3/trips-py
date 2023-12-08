@@ -352,7 +352,7 @@ class Tomography():
             b = b.T
         return (A, x_true, b)
 
-    def gen_data(self, x, matrix, nx, ny, views):
+    def gen_data(self, x, nx, ny, views):
         self.nx = nx
         self.ny = ny
         self.views = views
@@ -373,7 +373,7 @@ class Tomography():
         self.p = self.views
         self.q = int(bshape[0]/self.views)
         bimage = b.reshape((self.p, self.q))
-        return (A, b, self.p, self.q, AforMatrixOperation)
+        return A, b, self.p, self.q, AforMatrixOperation
     
     def add_noise(self, b_true, opt, noise_level):
         if (opt == 'Gaussian'):
