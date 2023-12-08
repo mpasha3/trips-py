@@ -124,7 +124,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         Lvn = vn
         Lvn = L*vn
         LV = np.column_stack((LV, Lvn))
-        residual_history.append(r)
+        residual_history.append(la.norm(r))
     if x_true is not None:
         x_true_norm = la.norm(x_true)
         rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]

@@ -88,6 +88,7 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         r = r - V @ (V.T @ r)
         r = r - V @ (V.T @ r)
         r = r - V @ (V.T @ r)
+        residual_history.append(la.norm(r))
         vn = r / np.linalg.norm(r)
         V = np.column_stack((V, vn))
         Avn = A @ vn
