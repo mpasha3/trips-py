@@ -21,13 +21,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import astra
-# import utilities.phantoms as phantom
+import utilities.phantoms as phantom
 from venv import create
 import pylops
 from scipy.ndimage import convolve
 from scipy import sparse
 import scipy.special as spe
-# from trips.utilities.operators import *
+from trips.utilities.operators import *
 from PIL import Image
 from resizeimage import resizeimage
 import requests
@@ -36,7 +36,7 @@ from os.path import exists
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
-# from trips.utilities.utils import *
+from trips.utilities.utils import *
 import scipy.linalg as la
 
 class DeblurringCrime():
