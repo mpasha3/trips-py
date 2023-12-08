@@ -35,6 +35,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
     
     x_history = []
     lambda_history = []
+    residual_history = []
     e = 1
     x = A.T @ b # initialize x for reweighting
     AV = A@V
@@ -123,7 +124,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         Lvn = vn
         Lvn = L*vn
         LV = np.column_stack((LV, Lvn))
-        residual_history = [A@x - b for x in x_history]
+        residual_history.append(r)
     if x_true is not None:
         x_true_norm = la.norm(x_true)
         rre_history = [la.norm(x - x_true)/x_true_norm for x in x_history]
