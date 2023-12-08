@@ -606,30 +606,25 @@ class Deblurring1D():
         plt.pause(.1)
         plt.draw()    
 
-class Deblurring:
+class Deblurring():
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
         self.nx = None
         self.ny = None
         self.CommitCrime = kwargs['CommitCrime'] if ('CommitCrime' in kwargs) else False
 
-    # def __init__(self,CommitCrime=False):
-    #     self.nx = None
-    #     self.ny = None
-    #     self.CommitCrime = CommitCrime
-
     def Gauss(self, PSFdim, PSFspread):
         self.m = PSFdim[0]
         self.n = PSFdim[1]
         self.dim = PSFdim
         self.spread = PSFspread
-        self.s1, self.s2 = PSFspread, PSFspread
-        # if len(PSFspread) == 1:
-        #     # Symmetric Gaussian kernel, both directions the same spread
-        #     self.s1, self.s2 = PSFspread, PSFspread
-        # elif len(PSFspread) == 2:
-        #     # Potentially nonsymmetric Gaussian kernel (if PSFspread[0] is not PSFspread[1])
-        #     self.s1, self.s2 = PSFspread[0], PSFspread[1]
+        # self.s1, self.s2 = PSFspread[0], PSFspread[1]
+        if type(PSFspread) in [int]:
+        # Symmetric Gaussian kernel, both directions the same spread
+            self.s1, self.s2 = PSFspread, PSFspread
+        else:
+            # Potentially nonsymmetric Gaussian kernel (if PSFspread[0] is not PSFspread[1])
+            self.s1, self.s2 = PSFspread[0], PSFspread[1]
         # Set up grid points to evaluate the Gaussian function
         x = np.arange(-np.fix(self.n/2), np.ceil(self.n/2))
         y = np.arange(-np.fix(self.m/2), np.ceil(self.m/2))
@@ -672,13 +667,10 @@ class Deblurring:
             else:
                 raise TypeError("The dimension of the image is not specified. You can input nx and ny as gen_true(im, nx, ny) or first define the forward operator through A = Deblur.forward_Op_matrix([11,11], nx, ny) or A = Deblur.forward_Op([11,11], 0.7, nx, ny) ")
         image = self.im_image_dat(im)
-        print('MP')
-        print(image.shape)
         current_shape = get_input_image_size(image)
         if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
             newimage = image_to_new_size(image, (self.nx, self.ny))
             newimage[np.isnan(newimage)] = 0
-
         return newimage
 
     def gen_true(self, im, **kwargs):
@@ -701,24 +693,21 @@ class Deblurring:
     def gen_data(self, x):
         im = x.reshape((self.nx, self.ny))
         if self.CommitCrime == False:
-            # nxbig = 2*self.nx
-            # nybig = 2*self.ny
-            # im = x.reshape((self.nx, self.ny))
-            # padim = np.zeros((nxbig, nybig))
-            # putidx = self.nx//2
-            # putidy = self.ny//2
-            # # check the indeces
-            # padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)] = im
-            # PSF, _ = Gauss(self.dim, self.spread)
-            # A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
-            # b = A0(padim)
-            # x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
-            # b = b[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+            nxbig = 2*self.nx
+            nybig = 2*self.ny
+            im = x.reshape((self.nx, self.ny))
+            padim = np.zeros((nxbig, nybig))
+            putidx = self.nx//2
+            putidy = self.ny//2
+            # check the indeces
+            padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)] = im
             PSF, _ = self.Gauss(self.dim, self.spread)
-            A0 = lambda X: convolve(X, PSF, mode='constant')
-            b = A0(im)
-            b = b.reshape((-1,1))
+            A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
+            b = A0(padim)
+            x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+            b = b[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
         else:
+            PSF, _ = self.Gauss(self.dim, self.spread)
             A = lambda X: convolve(X, PSF, mode='reflect')
             b = A(im)
             b = b.reshape((-1,1))
@@ -791,6 +780,7 @@ class Deblurring:
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
             plt.pause(.1)
             plt.draw() 
+
 
 if __name__ == '__main__':
     # Test Deblurring class
