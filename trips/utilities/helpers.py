@@ -99,7 +99,7 @@ def plot_singular_vectors_svd(Operator, size, parameter = 'A'):
 def plot_singular_values_svd(Operator, parameter = 'A'):
     A = check_operator_type(Operator)
     if parameter == 'A':
-        U, S, V = np.linalg.svd(Operator)
+        U, S, V = np.linalg.svd(A)
         plt.plot(S)
         plt.title('Singular values of $A$')
         plt.xlabel('$\ell$')
