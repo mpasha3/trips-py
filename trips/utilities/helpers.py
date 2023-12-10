@@ -12,7 +12,7 @@ __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
 from trips.utilities.io import *
-from trips.utilities.operators import *
+from trips.utilities.operators_old import *
 from trips.solvers.AnisoTV import *
 from matplotlib import transforms
 from scipy import ndimage
