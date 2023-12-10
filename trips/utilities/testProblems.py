@@ -258,12 +258,6 @@ class Tomography():
         OP = pylops.FunctionOperator(operatorf, operatorb, self.p*self.q, sizex*sizey)
         return OP, A
 
-    # def forward_Op_mat(self, sizex, sizey, views):
-    #     proj_id = self.define_proj_id(sizex, sizey, views)
-    #     self.mat_id = astra.projector.matrix(proj_id)
-    #     self.Amat = astra.matrix.get(self.mat_id) 
-    #     return self.Amat
-
     def gen_true(self, sizex, sizey, test_problem):
         if test_problem == 'grains':
             N_fine = sizex
@@ -357,16 +351,6 @@ class Tomography():
         self.ny = ny
         self.views = views
         proj_id = self.define_proj_id(self.nx, self.ny, self.views)
-        # if matrix == True:
-        #     A = self.forward_Op_mat(self.nx, self.ny, self.views)
-        #     b = A@x.reshape((-1,1))
-        #     bshape = b.shape
-        #     self.p = self.views
-        #     self.q = int(bshape[0]/self.views)
-        #     bimage = b.reshape((self.p, self.q))
-        #     AforMatrixOperation = []
-        # elif matrix == False:
-            # A = self.forward_Op(self.nx, self.ny, self.views)
         (A, AforMatrixOperation) = self.forward_Op(x, self.nx, self.ny, self.views)
         b = A@x.reshape((-1,1))
         bshape = b.shape
@@ -624,7 +608,7 @@ class Deblurring():
         return blur
     
     def im_image_dat(self, im):
-        assert im in ['satellite', 'hubble', 'star', 'h_im']
+        # assert im in ['satellite', 'hubble', 'star', 'h_im']
         if exists(f'./data/image_data/{im}.mat'):
             print('data already in the path.')
         else:
