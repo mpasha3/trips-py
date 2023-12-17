@@ -641,7 +641,7 @@ class Deblurring():
                 self.ny = kwargs['ny'] 
             else:
                 raise TypeError("The dimension of the image is not specified. You can input nx and ny as gen_true(im, nx, ny) or first define the forward operator through A = Deblur.forward_Op_matrix([11,11], nx, ny) or A = Deblur.forward_Op([11,11], 0.7, nx, ny) ")
-        if im in ['satellite', 'hubble', 'h_im']:
+        if im in ['satellite', 'hubble', 'h_im','shape']:
             image = self.im_image_dat(im)
             newimage = image
             current_shape = get_input_image_size(image)
