@@ -27,7 +27,7 @@ import pylops
 from scipy.ndimage import convolve
 from scipy import sparse
 import scipy.special as spe
-from trips.utilities.operators import *
+from trips.utilities.operators_old import *
 from PIL import Image
 from resizeimage import resizeimage
 import requests

@@ -70,6 +70,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
             weightx = np.concatenate((weightx.flatten(), weightx.flatten()))
             weightt = (u[2*spacent:]**2 + epsilon**2)**((qnorm-2) / 4)
             wr = np.concatenate((weightx.reshape(-1,1), weightt))
+            # print(wr.shape)
             ######
         elif GS_option in  ['GS', 'gs', 'Gs']:
             if prob_dims == False:

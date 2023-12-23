@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.linalg import fractional_matrix_power
 from numpy import array, diag, dot, maximum, empty, repeat, ones, sum
 from numpy.linalg import inv
-from trips.utilities.operators import *
+from trips.utilities.operators_old import *
 ##Specify the font
 ##Latex needs to be installed! If not installed, please comment the following 5 lines
 # parameters = {'xtick.labelsize': 12, 'ytick.labelsize': 12,
@@ -34,7 +34,7 @@ import numpy as np
 import h5py
 # functions to generate emoji data are stored in io_l.py
 from trips.utilities.io import *
-from trips.utilities.operators import *
+from trips.utilities.operators_old import *
 from trips.solvers.AnisoTV import *
 from trips.utilities.helpers import *
 (A, b, AA, B, nx, ny, nt, delta) = generate_emoji(noise_level = 0.01, dataset = 30)
