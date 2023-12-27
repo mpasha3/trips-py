@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from scipy.linalg import fractional_matrix_power
 from numpy import array, diag, dot, maximum, empty, repeat, ones, sum
 from numpy.linalg import inv
-from trips.utilities.operators import *
+from trips.utilities.operators_old import *
 ##Specify the font
 ##Latex needs to be installed! If not installed, please comment the following 5 lines
 parameters = {'xtick.labelsize': 12, 'ytick.labelsize': 12,
