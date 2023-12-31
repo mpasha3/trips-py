@@ -13,7 +13,7 @@ __maintainer__ = "Mirjeta Pasha and Connor Sanderford"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
 
 from trips.utilities.io import *
-from trips.utilities.operators import *
+from trips.utilities.operators_old import *
 from matplotlib import transforms
 from scipy import ndimage
 from trips.solvers.gks import *

@@ -26,7 +26,7 @@ def gen_first_derivative_operator(n):
     Lx = L[0:-1, :]
     return Lx
 
-def gen_first_derivative_operator_2D_matrix(nx, ny):
+def gen_first_derivative_operator_2D(nx, ny):
     D_x = gen_first_derivative_operator(nx)
     D_y = gen_first_derivative_operator(ny)
     IDx = sparse.kron( sparse.identity(nx), D_x)
@@ -35,7 +35,7 @@ def gen_first_derivative_operator_2D_matrix(nx, ny):
     return L
 
 def gen_spacetime_derivative_operator(nx, ny, nt):
-    D_spatial = gen_first_derivative_operator_2D_matrix(nx,ny)
+    D_spatial = gen_first_derivative_operator_2D(nx,ny)
     Lt = gen_first_derivative_operator(nt)
     ITLs = sparse.kron(sparse.identity(nt), D_spatial)
     LTIN = sparse.kron(Lt, sparse.identity(nx**2))
