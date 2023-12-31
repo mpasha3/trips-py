@@ -13,12 +13,26 @@ __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk
 
 import os, sys
 import numpy as np
-sys.path.insert(0, '/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package')
+from trips.parameter_selection.gcv import *
+from trips.parameter_selection.discrepancy_principle import *
 
-def TruncatedSVD_sol(A, k, b_vec):
+def TruncatedSVD_sol(A, b, regparam = 'gcv', **kwargs):
+
+  b = b.reshape((-1,1))
+
+  delta = kwargs['delta'] if ('delta' in kwargs) else None
+  if (regparam == 'dp') and delta == None:
+        raise Exception("""A value for the noise level delta was not provided and the discrepancy principle cannot be applied. 
+                    Please supply a value of delta based on the estimated noise level of the problem, or choose the regularization parameter according to gcv.""")
+  
   U, S, VT = np.linalg.svd(A)
-  S_hat = S[0:k] #extract the first r singular values
-  S_hat_mat = np.diag(S_hat) #form a diagonal matrix
+  if regparam == 'gcv':
+    k = generalized_crossvalidation(U, S, VT, b, gcvtype = 'tsvd')
+  elif regparam == 'dp':
+    k = discrepancy_principle(U, S, VT, b, dptype = 'tsvd', **kwargs)
+  else:
+    k = regparam # make sure we have checks on the values of k (eventually have them here, if in general we check for a positive scalar value only)
+  S_hat = S[0:k] #extract the first r singular values # CHECK IF EXTREMA ARE INCLUSIVE OR EXCLUSIVE
   U_temp = U[:, 0:k]
-  x_trunc = np.transpose(VT[0:k, :])@np.linalg.inv(S_hat_mat)@np.transpose(U_temp)@b_vec
-  return x_trunc
+  x_trunc = np.transpose(VT[0:k, :])@(((np.transpose(U_temp)@b).reshape((-1,1)))/S_hat.reshape((-1,1)))
+  return x_trunc, k

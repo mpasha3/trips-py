@@ -76,7 +76,29 @@ def generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs):
     else:
         tol = 10**(-12)
 
+    if 'gcvtype' in kwargs:
+        gcvtype = kwargs['gcvtype']
+    else:
+        gcvtype = 'tikhonov'
+    
+
     # function to minimize
-    gcv_func = lambda reg_param: gcv_numerator(reg_param, Q_A, R_A, R_L, b) / gcv_denominator(reg_param, R_A, R_L, b, **kwargs)
-    lambdah = op.fminbound(func = gcv_func, x1 = 1e-09, x2 = 1e2, args=(), xtol=1e-12, maxfun=1000, full_output=0, disp=0)
+    if gcvtype == 'tikhonov':    
+        gcv_func = lambda reg_param: gcv_numerator(reg_param, Q_A, R_A, R_L, b) / gcv_denominator(reg_param, R_A, R_L, b, **kwargs)
+        lambdah = op.fminbound(func = gcv_func, x1 = 1e-09, x2 = 1e2, args=(), xtol=1e-12, maxfun=1000, full_output=0, disp=0) ## should there be tol here?
+    else:
+        m = Q_A.shape[0]
+        n = R_L.shape[1]
+        gcv_vals = []
+        bhat = Q_A.T@b
+        f = np.ones((m,1))
+        for i in range(n):
+            f[n-(i+1),] = 0
+            fvar = np.concatenate((1 - f[:n,], f[n:,]))
+            coeff = (fvar*bhat)**2
+            gcv_numerator = np.sum(coeff)
+            gcv_denominator = (m - (n-(i+1)))**2
+            gcv_vals.append(gcv_numerator/gcv_denominator)   
+        lambdah = n - (gcv_vals.index(min(gcv_vals))+1)
+    
     return lambdah

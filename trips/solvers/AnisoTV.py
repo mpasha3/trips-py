@@ -16,7 +16,7 @@ from trips.utilities.io import *
 from trips.utilities.operators import *
 from matplotlib import transforms
 from scipy import ndimage
-from trips.solvers.GKS import *
+from trips.solvers.gks import *
 from trips.solvers.MMGKS import *
 
 def AnisoTV(A, b, AA, B, nx, ny, nt, dynamic, iters, reg_param, testproblem, delta, **kwargs):

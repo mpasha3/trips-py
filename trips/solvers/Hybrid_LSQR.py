@@ -21,8 +21,36 @@ from trips.solvers import Tikhonov
 from tqdm import tqdm
 from collections.abc import Iterable
 
-def Hybrid_LSQR(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what's the naming convention here?
+def Hybrid_LSQR(A, b, n_iter = 100, regparam = 'gcv', x_true=None, **kwargs):
+    """
+    Description: Hybrid version of the LSQR method
 
+    Inputs: 
+
+    A: the matrix of the system to be solved
+
+    b: the available data (right-hand-side vector)
+
+    Optional inputs:
+
+    n_iter: the maximum number of iterations to be performed
+    
+    regparam: a value or a method to find the regularization parameter for the projected problems
+
+    x_true: true solution (allows us to returns error norms with respect to x_true at each iteration)
+
+    Outputs: 
+
+    x: the computed solution
+
+    info: a dictionary with the following items
+
+
+    Example of calling the method: 
+
+    (x, x_history, k) = TP_cgls(A, b, x_0, max_iter = 30, tol = 0.001)
+
+    """
     delta = kwargs['delta'] if ('delta' in kwargs) else None
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
