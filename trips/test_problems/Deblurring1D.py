@@ -1,17 +1,15 @@
 #!/usr/bin/env python
-"""
-Definition of test problems
+""" 
+Builds a deblurring class for 1D Deblurring problem
 --------------------------------------------------------------------------
-Created December 10, 2022 for TRIPs-Py library
+Created in January 2024 for TRIPs-Py library
 """
-__authors__ = "Mirjeta Pasha and Connor Sanderford"
-__copyright__ = "Copyright 2022, TRIPs-Py library"
+__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu"
+__affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
+__copyright__ = "Copyright 2024, TRIPs-Py library"
 __license__ = "GPL"
-__version__ = "0.1"
-__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
-# import sys, os
-# sys.path.insert(0,'/Users/mirjetapasha/Documents/Research_Projects/TRIPSpy/TRIPSpy')
+__version__ = "1.0"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 import time
 import numpy as np
 import scipy as sp
@@ -40,8 +38,13 @@ from trips.utilities.utils import *
 import scipy.linalg as la
 
 class Deblurring1D():
+
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
+        self.nx = None
+        self.ny = None
+        self.CommitCrime = kwargs['CommitCrime'] if ('CommitCrime' in kwargs) else False
+
     def operator(self, x, projection, PSF, boundary_condition):
         if projection == 'forward':
             return self.forward_p(x, PSF, boundary_condition)
@@ -96,21 +99,25 @@ class Deblurring1D():
         return blur
     
     def gen_data(self, x):
-        nxbig = 2*self.nx
-        nybig = 1#2*self.ny
-        im = x.reshape((self.nx, self.ny)) # check the shape
-        padim = np.zeros((nxbig, nybig))
-        putidx = self.nx//2
-        putidy = 1#self.ny//2
-        # check the indeces
-        padim[putidx:(putidx+self.nx), :] = im
-        PSF, _ = self.Gauss1D(self.nx, self.parameter)
-        # A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
-        A0 = lambda x: self.operator(x, 'forward', self.PSF, self.boundary_condition)
-        print(padim.shape)
-        b = A0(padim)
-        x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
-        b = b[putidx:(putidx+self.nx), :].reshape((-1,1))
+        if self.CommitCrime == False:
+            nxbig = 2*self.nx
+            nybig = 1#2*self.ny
+            im = x.reshape((self.nx, self.ny)) # check the shape
+            padim = np.zeros((nxbig, nybig))
+            putidx = self.nx//2
+            putidy = 1#self.ny//2
+            # check the indeces
+            padim[putidx:(putidx+self.nx), :] = im
+            PSF, _ = self.Gauss1D(self.nx, self.parameter)
+            # A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
+            A0 = lambda x: self.operator(x, 'forward', self.PSF, self.boundary_condition)
+            b = A0(padim)
+            x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
+            b = b[putidx:(putidx+self.nx), :].reshape((-1,1))
+        else:
+            self.PSF, self.center = self.Gauss1D(self.grid_points, self.parameter)
+            A = lambda x, projection: self.operator(x, projection, self.PSF, self.boundary_condition)
+            b = self.operator(x, 'forward', self.PSF, self.boundary_condition)
         return b
 
     def gen_xtrue(self, N, test):
