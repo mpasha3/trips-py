@@ -6,13 +6,10 @@ Created in January 2024 for TRIPs-Py library
 """
 __authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu"
 __affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
-__copyright__ = "Copyright 2023, TRIPs-Py library"
+__copyright__ = "Copyright 2024, TRIPs-Py library"
 __license__ = "GPL"
 __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
-
-# import sys, os
-# sys.path.insert(0,'/Users/mirjetapasha/Documents/Research_Projects/TRIPSpy/TRIPSpy')
 import time
 import numpy as np
 import scipy as sp
@@ -52,21 +49,15 @@ class Deblurring():
         self.n = PSFdim[1]
         self.dim = PSFdim
         self.spread = PSFspread
-        # self.s1, self.s2 = PSFspread[0], PSFspread[1]
         if type(PSFspread) in [int]:
-        # Symmetric Gaussian kernel, both directions the same spread
             self.s1, self.s2 = PSFspread, PSFspread
         else:
-            # Potentially nonsymmetric Gaussian kernel (if PSFspread[0] is not PSFspread[1])
             self.s1, self.s2 = PSFspread[0], PSFspread[1]
-        # Set up grid points to evaluate the Gaussian function
         x = np.arange(-np.fix(self.n/2), np.ceil(self.n/2))
         y = np.arange(-np.fix(self.m/2), np.ceil(self.m/2))
         X, Y = np.meshgrid(x, y)
-        # Compute the Gaussian, and normalize the PSF.
         PSF = np.exp( -0.5* ((X**2)/(self.s1**2) + (Y**2)/(self.s2**2)) )
         PSF /= PSF.sum()
-        # find the center
         mm, nn = np.where(PSF == PSF.max())
         center = np.array([mm[0], nn[0]])   
         return PSF, center.astype(int)
@@ -81,7 +72,6 @@ class Deblurring():
         return blur
     
     def im_image_dat(self, im):
-        # assert im in ['satellite', 'hubble', 'star', 'h_im']
         if exists(f'./data/image_data/{im}.mat'):
             print('data already in the path.')
         else:
@@ -134,7 +124,6 @@ class Deblurring():
             padim = np.zeros((nxbig, nybig))
             putidx = self.nx//2
             putidy = self.ny//2
-            # check the indeces
             padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)] = im
             PSF, _ = self.Gauss(self.dim, self.spread)
             A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
@@ -156,7 +145,7 @@ class Deblurring():
             delta = np.linalg.norm(sig_obs*e)
             b_meas_im = b_meas.reshape((self.nx, self.ny))
         if (opt == 'Poisson'):
-            gamma = 1 # background counts assumed known
+            gamma = 1 
             b_meas = np.random.poisson(lam=b_true+gamma) 
             b_meas_im = b_meas.reshape((self.nx, self.ny))
             e = 0
@@ -216,11 +205,7 @@ class Deblurring():
             plt.pause(.1)
             plt.draw() 
 
-
-
 if __name__ == '__main__':
-    # Test Deblurring class
-    # from solvers.gks_all import *
     Deblur = Deblurring()
 
     
