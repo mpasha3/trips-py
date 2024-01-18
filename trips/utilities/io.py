@@ -29,6 +29,7 @@ import scipy.sparse as sps
 # split into test problems
 # separate IO from test problem class implementation
 import os,sys
+import pylops
 """
 H image:
 """
