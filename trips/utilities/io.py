@@ -226,16 +226,16 @@ def get_stempo_data(data_set = 'real', data_thinning = 2):
         Generate stempo observations
         """
         data_file = {'simulation':'stempo_ground_truth_2d_b4','real':'stempo_seq8x45_2d_b'+str(data_thinning)}[data_set]+'.mat'
-        if not os.path.exists('./data'): os.makedirs('./data')
-        if not os.path.exists('./data/'+data_file):
+        if not os.path.exists('./data/stempo_data'): os.makedirs('./data/stempo_data/')
+        if not os.path.exists('./data/stempo_data'+data_file):
             import requests
             print("downloading...")
             r = requests.get('https://zenodo.org/record/7147139/files/'+data_file)
-            with open('./data/'+data_file, "wb") as file:
+            with open('./data/stempo_data/'+data_file, "wb") as file:
                 file.write(r.content)
             print("Stempo data downloaded.")
         if data_set=='simulation':
-            truth = spio.loadmat('./data/'+data_file)
+            truth = spio.loadmat('./data/stempo_data/'+data_file)
             image = truth['obj']
             nx, ny, nt = 560, 560, 20
             anglecount = 10
