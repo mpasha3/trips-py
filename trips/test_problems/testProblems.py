@@ -743,8 +743,6 @@ class Deblurring():
             plt.pause(.1)
             plt.draw() 
 
-
-
 if __name__ == '__main__':
     # Test Deblurring class
     # from solvers.gks_all import *
