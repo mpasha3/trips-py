@@ -30,6 +30,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
     GS_option = kwargs['GS'] if ('GS' in kwargs) else False
     epsilon = kwargs['epsilon'] if ('epsilon' in kwargs) else 0.1
     prob_dims = kwargs['prob_dims'] if ('prob_dims' in kwargs) else False
+    non_neg = kwargs['non_neg'] if ('non_neg' in kwargs) else False
     regparam_sequence = kwargs['regparam_sequence'] if ('regparam_sequence' in kwargs) else [0.1*(0.5**(x)) for x in range(0,n_iter)]
     (U, B, V) = golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
     
@@ -104,6 +105,8 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         # y, _,_,_ = la.lstsq(R_stacked, b_stacked) # get least squares solution
         y,_,_,_ = np.linalg.lstsq(np.concatenate((R_A, np.sqrt(lambdah) * R_L)), np.concatenate((Q_A.T@ b, np.zeros((R_L.shape[0],1)))),rcond=None)
         x = V @ y # project y back
+        if non_neg == True:
+            x[x<0] = 0
         x_history.append(x)
         if ii >= R_L.shape[0]:
             break
