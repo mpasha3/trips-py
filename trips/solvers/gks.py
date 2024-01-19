@@ -76,6 +76,8 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         y,_,_,_ = np.linalg.lstsq(np.concatenate((R_A, np.sqrt(lambdah) * R_L)), np.concatenate((Q_A.T@ b, np.zeros((R_L.shape[0],1)))),rcond=None)
 
         x = V @ y # project y back
+        if non_neg == True:
+            x[x<0] = 0
         x_history.append(x)
         v = AV@y
         v = v - b
