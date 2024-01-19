@@ -122,7 +122,9 @@ def get_emoji_data(dataset = 30):
 
 
 
-def generate_emoji(noise_level, dataset):
+def generate_emoji(dataset, **kwargs):
+    
+    noise_level = kwargs['noise_level'] if ('noise_level' in kwargs) else 0
 
     get_emoji_data(dataset)
 
@@ -142,7 +144,6 @@ def generate_emoji(noise_level, dataset):
     nt = int(T)
     nx = int(N)
     ny = int(N)
-    # b = b.reshape((-1,1))
     b = b.reshape(-1, 1, order='F').squeeze()
     AA = list(range(T))
     B = list(range(T))
@@ -178,8 +179,9 @@ def get_crossPhantom(dataset):
         print("CrossPhantom data downloaded.")
  
 
-def generate_crossPhantom(noise_level, dataset): # use noise_level
+def generate_crossPhantom(dataset, **kwargs): # use noise_level
 
+    noise_level = kwargs['noise_level'] if ('noise_level' in kwargs) else 0
     assert dataset in [15,60]
 
     get_crossPhantom(dataset)
@@ -216,10 +218,11 @@ def generate_crossPhantom(noise_level, dataset): # use noise_level
     return A_small, b, AA, B, nx, ny, nt, delta
 
 
-def get_stempo_data(data_set = 'real', data_thinning = 2):
+def get_stempo_data(data_set = 'real', data_thinning = 2, **kwargs):
         """
         Generate stempo observations
         """
+        noise_level = kwargs['noise_level'] if ('noise_level' in kwargs) else 0
         data_file = {'simulation':'stempo_ground_truth_2d_b4','real':'stempo_seq8x45_2d_b'+str(data_thinning)}[data_set]+'.mat'
         if not os.path.exists('./data/stempo_data'): os.makedirs('./data/stempo_data/')
         if not os.path.exists('./data/stempo_data'+data_file):
