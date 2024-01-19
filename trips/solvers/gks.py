@@ -26,7 +26,7 @@ from collections.abc import Iterable
 def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
 
     delta = kwargs['delta'] if ('delta' in kwargs) else None
-
+    non_neg = kwargs['non_neg'] if ('non_neg' in kwargs) else False
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
     if (regparam == 'dp' or dp_stop != False) and delta == None:
