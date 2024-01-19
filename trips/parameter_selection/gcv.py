@@ -40,7 +40,8 @@ def gcv_numerator(reg_param, Q_A, R_A, R_L, b):
 
     inverted = la.solve( ( R_A_2 + reg_param * R_L_2), (R_A.T @ Q_A.T @ b) )
 
-    return np.sqrt((np.linalg.norm( R_A @ inverted - Q_A.T @ b ))**2 + np.linalg.norm(b - Q_A@(Q_A.T@b))**2)
+    # return np.sqrt((np.linalg.norm( R_A @ inverted - Q_A.T @ b ))**2 + np.linalg.norm(b - Q_A@(Q_A.T@b))**2)
+    return ((np.linalg.norm( R_A @ inverted - Q_A.T @ b ))**2 + np.linalg.norm(b - Q_A@(Q_A.T@b))**2)
 
 def gcv_denominator(reg_param, R_A, R_L, b, **kwargs):
 
@@ -61,11 +62,12 @@ def gcv_denominator(reg_param, R_A, R_L, b, **kwargs):
     inverted = la.solve( ( R_A_2 + reg_param * R_L_2), R_A.T )
 
     if variant == 'modified':
-       m = kwargs['fullsize']
+       m = kwargs['fullsize'] # probably this can be b.size
        trace_term = (m - R_A.shape[1]) - np.trace(R_A @ inverted) # b.size - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities 
     else:
         # in this way works even if we revert to the fully projected pb (call with Q_A.T@b)
-        trace_term = b.size - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities
+        # trace_term = b.size - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities
+        trace_term = R_A.shape[1] - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities
     
     return trace_term**2
 
@@ -83,22 +85,37 @@ def generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs):
     
 
     # function to minimize
-    if gcvtype == 'tikhonov':    
-        gcv_func = lambda reg_param: gcv_numerator(reg_param, Q_A, R_A, R_L, b) / gcv_denominator(reg_param, R_A, R_L, b, **kwargs)
-        lambdah = op.fminbound(func = gcv_func, x1 = 1e-09, x2 = 1e2, args=(), xtol=1e-12, maxfun=1000, full_output=0, disp=0) ## should there be tol here?
-    else:
-        m = Q_A.shape[0]
-        n = R_L.shape[1]
-        gcv_vals = []
-        bhat = Q_A.T@b
-        f = np.ones((m,1))
-        for i in range(n):
-            f[n-(i+1),] = 0
-            fvar = np.concatenate((1 - f[:n,], f[n:,]))
-            coeff = (fvar*bhat)**2
-            gcv_numerator = np.sum(coeff)
-            gcv_denominator = (m - (n-(i+1)))**2
-            gcv_vals.append(gcv_numerator/gcv_denominator)   
-        lambdah = n - (gcv_vals.index(min(gcv_vals))+1)
+    # if gcvtype == 'tikhonov':    
+    gcv_func = lambda reg_param: gcv_numerator(reg_param, Q_A, R_A, R_L, b) / gcv_denominator(reg_param, R_A, R_L, b, **kwargs)
+    lambdah = op.fminbound(func = gcv_func, x1 = 1e-09, x2 = 1e2, args=(), xtol=1e-12, maxfun=1000, full_output=0, disp=0) ## should there be tol here?
+    # elif gcvtype == 'tsvd':
+    #     m = Q_A.shape[0]
+    #     n = R_L.shape[1]
+    #     gcv_vals = []
+    #     bhat = Q_A.T@b
+    #     f = np.ones((m,1))
+    #     for i in range(n):
+    #         f[n-(i+1),] = 0
+    #         fvar = np.concatenate((1 - f[:n,], f[n:,]))
+    #         coeff = (fvar*bhat)**2
+    #         gcv_numerator = np.sum(coeff)
+    #         gcv_denominator = (m - (n-(i+1)))**2
+    #         gcv_vals.append(gcv_numerator/gcv_denominator)   
+    #     lambdah = n - (gcv_vals.index(min(gcv_vals))+1)
+    # elif gcvtype == 'tgsvd':
+    #     m = Q_A.shape[0]
+    #     n = R_L.shape[1]
+    #     p = R_L.shape[0]
+    #     gcv_vals = []
+    #     bhat = Q_A.T@b
+    #     f = np.ones((m,1))
+    #     for i in range(n):
+    #         f[i,] = 0
+    #         fvar = np.concatenate((1 - f[:n,], f[n:,]))
+    #         coeff = (fvar*bhat)**2
+    #         gcv_numerator = np.sum(coeff)
+    #         gcv_denominator = (m - (n-(i+1)) - (n-p))**2
+    #         gcv_vals.append(gcv_numerator/gcv_denominator)   
+    #     lambdah = gcv_vals.index(min(gcv_vals))
     
     return lambdah
