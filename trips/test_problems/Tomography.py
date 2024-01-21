@@ -94,6 +94,11 @@ class Tomography():
                 newimage = image_to_new_size(image, (self.nx, self.ny))
                 newimage[np.isnan(newimage)] = 0
                 x_truef = newimage
+                self.nx = newimage.shape[0]
+                self.ny = newimage.shape[1]
+            else:
+                self.nx = current_shape[0]
+                self.ny = current_shape[1]
         elif test_problem in ['grains', 'smooth', 'tectonic', 'threephases', 'ppower']:
             if test_problem == 'grains':
                 N_fine = self.nx
