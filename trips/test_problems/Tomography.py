@@ -10,8 +10,6 @@ __copyright__ = "Copyright 2024, TRIPs-Py library"
 __license__ = "GPL"
 __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
-
-# sys.path.insert(0,'/Users/mirjetapasha/Documents/Research_Projects/TRIPSpy/TRIPSpy')
 import time
 import numpy as np
 import scipy as sp
@@ -42,121 +40,133 @@ import scipy.linalg as la
 class Tomography():
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
-    def define_proj_id(self, sizex, sizey, views, **kwargs):
+        self.nx = None
+        self.ny = None
+        self.CommitCrime = kwargs['CommitCrime'] if ('CommitCrime' in kwargs) else False
+        
+    def define_proj_id(self, nx, ny, views, **kwargs):
         self.dataset = kwargs['dataset'] if ('dataset' in kwargs) else False
-        self.nx = sizex
-        self.ny = sizey
+        self.nx = nx
+        self.ny = ny
         self.p = int(np.sqrt(2)*self.nx)    # number of detector pixels
         self.q = views           # number of projection angles
         self.views = views
-        self.theta = np.linspace(0, 2*np.pi, self.q, endpoint=False)   # in rad
+        self.theta = np.linspace(0, np.pi, self.q, endpoint=False)   # in rad
         self.source_origin = 3*self.nx                     # source origin distance [cm]
         self.detector_origin = self.nx                      # origin detector distance [cm]
         self.detector_pixel_size = (self.source_origin + self.detector_origin)/self.source_origin
         self.detector_length = self.detector_pixel_size*self.p   # detector length
         self.vol_geom = astra.create_vol_geom(self.nx,self.nx)
-        self.proj_geom = astra.create_proj_geom('fanflat', self.detector_pixel_size, self.p, self.theta, self.source_origin, self.detector_origin)
-        self.proj_id = astra.create_projector('line_fanflat', self.proj_geom, self.vol_geom)
+        if self. CommitCrime == False:
+            self.theta_mis = self.theta + 1e-8
+            self.proj_geom_mis = astra.create_proj_geom('fanflat', self.detector_pixel_size, self.p, self.theta_mis, self.source_origin, self.detector_origin)
+            self.proj_id = astra.create_projector('line_fanflat', self.proj_geom_mis, self.vol_geom)
+        else:
+            self.proj_geom = astra.create_proj_geom('fanflat', self.detector_pixel_size, self.p, self.theta, self.source_origin, self.detector_origin)
+            self.proj_id = astra.create_projector('line_fanflat', self.proj_geom, self.vol_geom)
         return self.proj_id
 
-    def define_A(self, sizex, sizey, views): 
-            proj_id = self.define_proj_id(sizex, sizey, views)  
+    def define_A(self, nx, ny, views): 
+            proj_id = self.define_proj_id(nx, ny, views)  
             self.A = astra.OpTomo(self.proj_id)     
             return self.A
 
-    def forward_Op(self, x, sizex, sizey, views):
-        A = self.define_A(sizex, sizey, views)
-        operatorf = lambda X: (A*X.reshape((sizex, sizey))).reshape(-1,1)
+    def forward_Op(self, x, nx, ny, views):
+        A = self.define_A(nx, ny, views)
+        operatorf = lambda X: (A*X.reshape((nx, ny))).reshape(-1,1)
         operatorb = lambda B: A.T*B.reshape((self.p, self.q))
-        OP = pylops.FunctionOperator(operatorf, operatorb, self.p*self.q, sizex*sizey)
+        OP = pylops.FunctionOperator(operatorf, operatorb, self.p*self.q, nx*ny)
         return OP, A
 
-    def gen_true(self, sizex, sizey, test_problem):
-        if test_problem == 'grains':
-            N_fine = sizex
-            numGrains = int(round(4*np.sqrt(N_fine)))
-            x_true = phantom.grains(N_fine, numGrains) 
-            tmp_shape = x_true.shape
-            self.nx = tmp_shape[0]
-            self.ny = tmp_shape[1]
-            x_truef = x_true.reshape((-1,1)) 
-        elif test_problem == 'smooth':
-            N_fine = sizex
-            x_true = phantom.smooth(N_fine) 
-            tmp_shape = x_true.shape
-            self.nx = tmp_shape[0]
-            self.ny = tmp_shape[1]
-            x_truef = x_true.reshape((-1,1)) 
-        elif test_problem == 'tectonic':
-            N_fine = sizex
-            x_true = phantom.tectonic(N_fine)
-            tmp_shape = x_true.shape
-            self.nx = tmp_shape[0]
-            self.ny = tmp_shape[1] 
-            x_truef = x_true.reshape((-1,1)) 
-        elif test_problem == 'threephases':
-            N_fine = sizex
-            x_true = phantom.threephases(N_fine) 
-            tmp_shape = x_true.shape
-            self.nx = tmp_shape[0]
-            self.ny = tmp_shape[1]
-            x_truef = x_true.reshape((-1,1)) 
-        elif test_problem == 'ppower':
-            N_fine = sizex
-            x_true = phantom.ppower(N_fine) 
-            tmp_shape = x_true.shape
-            self.nx = tmp_shape[0]
-            self.ny = tmp_shape[1]
-            x_truef = x_true.reshape((-1,1)) 
-        elif test_problem == 'CT60':
-            data = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos/data/CT/Shepp-Logan_proj60_SNR100.mat')
-            x_true = data['x_true']
-            tmp_shape = x_true.shape
-            self.nx = tmp_shape[0]
-            self.ny = tmp_shape[1]
-            x_truef = x_true.reshape((-1,1)) 
-        elif test_problem == 'CT90':
-            data = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos/data/CT/Shepp-Logan_proj90_SNR100.mat')
-            x_true = data['x_true']
-            tmp_shape = x_true.shape
-            self.nx = tmp_shape[0]
-            self.ny = tmp_shape[1]
-            x_truef = x_true.reshape((-1,1)) 
-        elif test_problem == 'head':
-            dataname = 'head'
-            data = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos/data/CT/'+ dataname +'.mat')
-            x_true = data['x_true']
-            tmp_shape = x_true.shape
-            self.nx = tmp_shape[0]
-            self.ny = tmp_shape[1]
-            x_truef = x_true.reshape((-1,1))  
+    def gen_true(self, test_problem, **kwargs):
+        if (self.nx is None or self.ny is None):
+            if (('nx' in kwargs) and ('ny' in kwargs)):
+                self.nx = kwargs['nx'] 
+                self.ny = kwargs['ny'] 
+            else:
+                raise TypeError("The dimension of the image is not specified. You can input nx and ny as (x_true, nx, ny) = Tomo.gen_true(testproblem, nx = nx, ny = ny) or first define the forward operator")
+        
+        if test_problem in ['SL60', 'SL90', 'head']:
+            image = self.im_image_dat(test_problem)
+            newimage = image
+            current_shape = get_input_image_size(image)
+            if ((current_shape[0] is not self.nx) and (current_shape[1] is not self.ny)):
+                newimage = image_to_new_size(image, (self.nx, self.ny))
+                newimage[np.isnan(newimage)] = 0
+                x_truef = newimage
+        elif test_problem in ['grains', 'smooth', 'tectonic', 'threephases', 'ppower']:
+            if test_problem == 'grains':
+                N_fine = self.nx
+                numGrains = int(round(4*np.sqrt(N_fine)))
+                x_true = phantom.grains(N_fine, numGrains) 
+                tmp_shape = x_true.shape
+                self.nx = tmp_shape[0]
+                self.ny = tmp_shape[1]
+                x_truef = x_true.reshape((-1,1)) 
+            elif test_problem == 'smooth':
+                N_fine = self.nx
+                x_true = phantom.smooth(N_fine) 
+                tmp_shape = x_true.shape
+                self.nx = tmp_shape[0]
+                self.ny = tmp_shape[1]
+                x_truef = x_true.reshape((-1,1)) 
+            elif test_problem == 'tectonic':
+                N_fine = self.nx
+                x_true = phantom.tectonic(N_fine)
+                tmp_shape = x_true.shape
+                self.nx = tmp_shape[0]
+                self.ny = tmp_shape[1] 
+                x_truef = x_true.reshape((-1,1)) 
+            elif test_problem == 'threephases':
+                N_fine = self.nx
+                x_true = phantom.threephases(N_fine) 
+                tmp_shape = x_true.shape
+                self.nx = tmp_shape[0]
+                self.ny = tmp_shape[1]
+                x_truef = x_true.reshape((-1,1)) 
+            elif test_problem == 'ppower':
+                N_fine = self.nx
+                x_true = phantom.ppower(N_fine) 
+                tmp_shape = x_true.shape
+                self.nx = tmp_shape[0]
+                self.ny = tmp_shape[1]
+                x_truef = x_true.reshape((-1,1)) 
         else:
             raise TypeError("You must enter a valid test problem! Options are: grains, smooth, tectonic, threephases, ppower, CT60, CT90, head.")
+        
         return (x_truef, self.nx, self.ny)
 
     def gen_saved_data(self, dataset):
         if dataset == 60:
-            CT = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos/data/CT/CT_x128_proj60_loc100.mat')
-            A, phi, s = CT['A'],CT['phi'],CT['s']
-            data = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos/data/CT/Shepp-Logan_proj60_SNR100.mat')
-            x_true = data['x_true']
-            b = data['b'].T#A*x_true.reshape((-1,1))
-            self.q = phi.shape[1]
-            self.p = s.shape[1]
+           test_problem = 'SL60'
+           otherdata = 'CT60'
+           data = self.im_other_dat(test_problem)
+           CT = self.im_other_dat(otherdata)
+           A, phi, s = CT['A'],CT['phi'],CT['s']
+           x_true = data['x_true']
+           b = data['b'].T#A*x_true.reshape((-1,1))
+           self.q = phi.shape[1]
+           self.p = s.shape[1]
         elif dataset == 90:
-            CT = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos/data/CT/CT_x128_proj90_loc100.mat')
-            A, phi, s = CT['A'],CT['phi'],CT['s']
-            data = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos/data/CT/Shepp-Logan_proj90_SNR100.mat')
-            x_true = data['x_true']
-            b = data['b'].T#A*x_true.reshape((-1,1))
-            self.q = phi.shape[1]
-            self.p = s.shape[1]
+           test_problem = 'SL90'
+           otherdata = 'CT90'
+           data = self.im_other_dat(test_problem)
+           CT = self.im_other_dat(otherdata)
+           A, phi, s = CT['A'],CT['phi'],CT['s']
+           x_true = data['x_true']
+           b = data['x_true']['b'].T#A*x_true.reshape((-1,1))
+           b = b[0][0]
+           self.q = phi.shape[1]
+           self.p = s.shape[1]
         elif dataset == 'head':
-            CT = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos/data/CT/CT_x512_proj200_loc512.mat')
+            test_problem = 'head'
+            otherdata = 'CT200'
+            data = self.im_other_dat(test_problem)
+            CT = self.im_other_dat(otherdata)
             A,phi,s = CT['A'],CT['phi'],CT['s']
-            data = spio.loadmat('/Users/mirjetapasha/Documents/Research_Projects/TRIPS_June25/multiparameter_package/demos/data/CT/'+'head'+'.mat')
-            x_true,b = data['x_true'], data['b']
+            x_true, b = data['x_true'], data['b']
             b = b.T
+            b = b
         return (A, x_true, b)
 
     def gen_data(self, x, nx, ny, views):
@@ -206,7 +216,27 @@ class Tomography():
             if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
             plt.pause(.1)
             plt.draw()
-        
+
+    def im_other_dat(self, im):
+        if exists(f'./data/image_data/{im}.mat'):
+            print('data already in the path.')
+        else:
+            print("Please make sure your data are on the data folder!")
+        f = spio.loadmat(f'./data/image_data/{im}.mat')
+        return f
+    
+    def im_image_dat(self, im):
+        if exists(f'./data/image_data/{im}.mat'):
+            print('data already in the path.')
+        else:
+            print("Please make sure your data are on the data folder!")
+        f = spio.loadmat(f'./data/image_data/{im}.mat')
+        X = f['x_true']
+        im_shape = X.shape
+        if len(im_shape) == 3:
+             X = 0.4*X[:, :, 0] + 0.4*X[:, :, 1] + 0.1*X[:, :, 2]
+        return X  
+    
     def plot_data(self, img, save_imgs = False, save_path='./saveImagesData'):
         plt.set_cmap('inferno')
         if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)

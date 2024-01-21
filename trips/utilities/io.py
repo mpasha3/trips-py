@@ -157,7 +157,6 @@ def generate_emoji(dataset, **kwargs):
         B[ii] = b[2170*(ii) : 2170*(ii+1)]
     return (A_small, b, AA, B, nx, ny, nt, delta)
 
-
 """Crossphantom data and operator"""
 
 def get_crossPhantom(dataset):
