@@ -21,32 +21,6 @@ import matplotlib.pyplot as plt
 from trips.test_problems.testProblems import *
 from trips.utilities.utils import *
 
-# def convert_image_for_trips(imag, image_type):
-#     if not exists('./data/my_image_data'):
-#             mkdir("./data/my_image_data")
-#     if image_type in ['jpg', 'png', 'tiff', 'tif', 'mat']:
-#         if image_type == 'tif':
-#             x_true = plt.imread(f'./data/my_image_data/'+imag+'.tif')
-#             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', 
-#                     mdict={'x_true':x_true})
-#         elif image_type == 'png':
-#             x_true = plt.imread(f'./data/my_image_data/'+imag+'.png')
-#             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', 
-#                     mdict={'x_true':x_true})
-#         elif image_type == 'jpg':
-#             x_true = plt.imread(f'./data/my_image_data/'+imag+'.jpg')
-#             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', 
-#                     mdict={'x_true':x_true})
-#         elif image_type == 'tiff':
-#             x_true = plt.imread(f'./data/my_image_data/'+imag+'.tiff')
-#             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', 
-#                     mdict={'x_true':x_true})
-#         elif image_type == 'mat':
-#             x_true = plt.imread(f'./data/my_image_data/'+imag+'.mat')
-#             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', mdict={'x_true':x_true})
-#     else: 
-#         raise TypeError("Make sure to have your images stored in the folder my_image_data. The data type can be .tiff, .png, .jpg, .mat, or .tiff.")
-
 def convert_image_for_trips(imag, image_type):
     if not exists('./data/my_image_data'):
             mkdir("./data/my_image_data")
@@ -72,7 +46,6 @@ def convert_image_for_trips(imag, image_type):
             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', mdict={'x_true':x_true})
     else: 
         raise TypeError("Make sure to have your images stored in the folder my_image_data. The data type can be .tiff, .png, .jpg, .mat, or .tiff.")
-
 
 
 def plot_singular_vectors_svd(Operator, size, parameter = 'A'):
