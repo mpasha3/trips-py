@@ -41,8 +41,8 @@ def convert_image_for_trips(imag, image_type):
             x_true = plt.imread(f'./data/my_image_data/'+imag+'.tiff')
             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', 
                     mdict={'x_true':x_true})
-        elif image_type == 'tiff':
-            x_true = plt.imread(f'./data/my_image_data/'+imag+'.tiff')
+        elif image_type == 'mat':
+            x_true = plt.imread(f'./data/my_image_data/'+imag+'.mat')
             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', mdict={'x_true':x_true})
     else: 
         raise TypeError("Make sure to have your images stored in the folder my_image_data. The data type can be .tiff, .png, .jpg, .mat, or .tiff.")
