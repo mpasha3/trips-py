@@ -13,7 +13,7 @@ __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk
 
 from trips.utilities.io import *
 from trips.utilities.operators_old import *
-from trips.solvers.AnisoTV import *
+# from trips.solvers.AnisoTV import *
 from matplotlib import transforms
 from scipy import ndimage
 import matplotlib.pyplot as plt
