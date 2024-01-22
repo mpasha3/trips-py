@@ -33,6 +33,8 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
         raise Exception("""A value for the noise level delta was not provided and the discrepancy principle cannot be applied. 
                     Please supply a value of delta based on the estimated noise level of the problem, or choose the regularization parameter according to gcv or a different stopping criterion.""")
 
+
+
     (U, B, V) = golub_kahan(A, b, projection_dim, dp_stop, **kwargs)
     AV = A@V
     LV = L@V
