@@ -41,7 +41,7 @@ class Deblurring1D():
 
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
-        self.nx = None
+        self.grid_points = None
         self.ny = None
         self.CommitCrime = kwargs['CommitCrime'] if ('CommitCrime' in kwargs) else False
 
@@ -88,7 +88,7 @@ class Deblurring1D():
         return image
     
     def forward_Op_1D(self, x, parameter, nx, boundary_condition = 'reflect'):
-        self.nx = nx
+        self.grid_points = nx
         self.ny = 1
         self.parameter = parameter
         self.boundary_condition = boundary_condition
@@ -99,21 +99,21 @@ class Deblurring1D():
         return blur
     
     def gen_data(self, x):
+        
         if self.CommitCrime == False:
-            nxbig = 2*self.nx
-            nybig = 1#2*self.ny
-            im = x.reshape((self.nx, self.ny)) # check the shape
+            nxbig = 2*self.grid_points
+            nybig = 1
+            im = x.reshape((self.grid_points, self.ny)) # check the shape
             padim = np.zeros((nxbig, nybig))
-            putidx = self.nx//2
-            putidy = 1#self.ny//2
+            putidx = self.grid_points//2
+            putidy = 1
             # check the indeces
-            padim[putidx:(putidx+self.nx), :] = im
-            PSF, _ = self.Gauss1D(self.nx, self.parameter)
-            # A0 = lambda X: convolve(X.reshape([nxbig,nybig]), PSF, mode='constant')
+            padim[putidx:(putidx+self.grid_points), :] = im
+            PSF, _ = self.Gauss1D(self.grid_points, self.parameter)
             A0 = lambda x: self.operator(x, 'forward', self.PSF, self.boundary_condition)
             b = A0(padim)
-            x = padim[putidx:(putidx+self.nx), putidy:(putidy+self.ny)].reshape((-1,1))
-            b = b[putidx:(putidx+self.nx), :].reshape((-1,1))
+            x = padim[putidx:(putidx+self.grid_points), putidy:(putidy+self.ny)].reshape((-1,1))
+            b = b[putidx:(putidx+self.grid_points), :].reshape((-1,1))
         else:
             self.PSF, self.center = self.Gauss1D(self.grid_points, self.parameter)
             A = lambda x, projection: self.operator(x, projection, self.PSF, self.boundary_condition)
