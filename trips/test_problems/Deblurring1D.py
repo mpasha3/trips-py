@@ -12,6 +12,7 @@ __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 import time
 import numpy as np
+import warnings
 import scipy as sp
 import scipy.stats as sps
 import scipy.io as spio
@@ -43,6 +44,8 @@ class Deblurring1D():
         seed = kwargs.pop('seed',2022)
         self.grid_points = None
         self.ny = None
+        self.parameter = None
+        self.boundary_condition =None
         self.CommitCrime = kwargs['CommitCrime'] if ('CommitCrime' in kwargs) else False
 
     def operator(self, x, projection, PSF, boundary_condition):
@@ -92,14 +95,37 @@ class Deblurring1D():
         self.ny = 1
         self.parameter = parameter
         self.boundary_condition = boundary_condition
+        print(self.parameter)
+        print(self.boundary_condition)
         self.PSF, self.center = self.Gauss1D(self.grid_points, self.parameter)
         proj_forward = lambda x: self.operator(x, 'forward', self.PSF, boundary_condition)
         proj_backward = lambda x: self.operator(x, 'backward', self.PSF, boundary_condition)
         blur = pylops.FunctionOperator(proj_forward, proj_backward, self.grid_points)
         return blur
     
-    def gen_data(self, x):
-        
+    def gen_data(self, x, **kwargs):
+        # if self.parameter is not None and 'parameter' not in kwargs:
+        #     self.parameter = self.parameter
+        if ('parameter' in kwargs):
+            parameter_in_kwargs = True
+        else:
+            parameter_in_kwargs = False
+        if ('boundary_condition' in kwargs):
+            boundary_in_kwargs = True
+        else:
+            boundary_in_kwargs = False
+        if parameter_in_kwargs == False and self.parameter == None:
+            if boundary_in_kwargs == False and self.boundary_condition == None:
+                self.parameter = 0.3
+                self.boundary_condition = 'reflect'
+                warnings.warn("A parameter for the blurring operator and boundary_condition was not provided. We set a default parameter = 0.3 and boundary_condition = 'reflect'. To change the parameter either define the A operator first as A = Deblur.forward_Op_1D(x_true, parameter = 0.4, nx = nx) or specify b_true = Deblur1D.gen_data(x_true, parameter = 0.3, boundary_condition = 'reflect')")
+            elif boundary_in_kwargs == True or self.boundary_condition is not None:
+                self.parameter = 0.3
+                self.boundary_condition = kwargs['boundary_condition']
+                warnings.warn("A parameter for the blurring operator was not provided. We set a default parameter = 0.3. To change the parameter either define the A operator first as A = Deblur.forward_Op_1D(x_true, parameter = 0.4, nx = nx) or specify b_true = Deblur1D.gen_data(x_true, parameter = 0.3)")
+        elif parameter_in_kwargs == True:
+                self.parameter = kwargs['parameter']
+                self.boundary_condition = 'reflect'
         if self.CommitCrime == False:
             nxbig = 2*self.grid_points
             nybig = 1
@@ -109,7 +135,7 @@ class Deblurring1D():
             putidy = 1
             # check the indeces
             padim[putidx:(putidx+self.grid_points), :] = im
-            PSF, _ = self.Gauss1D(self.grid_points, self.parameter)
+            self.PSF, _ = self.Gauss1D(self.grid_points, self.parameter)
             A0 = lambda x: self.operator(x, 'forward', self.PSF, self.boundary_condition)
             b = A0(padim)
             x = padim[putidx:(putidx+self.grid_points), putidy:(putidy+self.ny)].reshape((-1,1))
@@ -122,6 +148,7 @@ class Deblurring1D():
 
     def gen_xtrue(self, N, test):
         self.grid_points = N
+        self.ny = 1
         if test == 'sigma':
             x = np.linspace(-2.5, 2.5, N)
             x_true = np.piecewise(x, [x < 0, x >= 0], [-1, 1]) 
@@ -136,7 +163,7 @@ class Deblurring1D():
             f = lambda x: np.piecewise(x, conditions(x), values)
             xx  = np.linspace(x_min, x_max, N)
             x_true = f(xx)
-        if test == 'shaw':
+        if test == 'curve0':
             h = np.pi/N
             a1 = 2; c1 = 6; t1 =  .8
             a2 = 1; c2 = 2; t2 = -.5
