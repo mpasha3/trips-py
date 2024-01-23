@@ -22,7 +22,9 @@ from ..utilities.utils import operator_qr, operator_svd, is_identity
 Generalized crossvalidation
 """
 
-def gcv_numerator(reg_param, Q_A, R_A, R_L, b):
+def gcv_numerator(reg_param, Q_A, R_A, R_L, b, **kwargs):
+
+    variant = kwargs['variant'] if ('variant' in kwargs) else 'standard'
 
     # the observation term:
 
@@ -41,7 +43,10 @@ def gcv_numerator(reg_param, Q_A, R_A, R_L, b):
     inverted = la.solve( ( R_A_2 + reg_param * R_L_2), (R_A.T @ Q_A.T @ b) )
 
     # return np.sqrt((np.linalg.norm( R_A @ inverted - Q_A.T @ b ))**2 + np.linalg.norm(b - Q_A@(Q_A.T@b))**2)
-    return ((np.linalg.norm( R_A @ inverted - Q_A.T @ b ))**2 + np.linalg.norm(b - Q_A@(Q_A.T@b))**2)
+    if variant == 'modified':
+        return ((np.linalg.norm( R_A @ inverted - Q_A.T @ b ))**2 + np.linalg.norm(b - Q_A@(Q_A.T@b))**2)
+    else:
+        return (np.linalg.norm( R_A @ inverted - Q_A.T @ b ))**2
 
 def gcv_denominator(reg_param, R_A, R_L, b, **kwargs):
 
@@ -62,8 +67,9 @@ def gcv_denominator(reg_param, R_A, R_L, b, **kwargs):
     inverted = la.solve( ( R_A_2 + reg_param * R_L_2), R_A.T )
 
     if variant == 'modified':
-       m = kwargs['fullsize'] # probably this can be b.size
-       trace_term = (m - R_A.shape[1]) - np.trace(R_A @ inverted) # b.size - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities 
+       m = kwargs['fullsize'] # probably this can be b.size -- NOT FOR HYBRID SOLVERS!
+       # trace_term = (m - R_A.shape[1]) - np.trace(R_A @ inverted) # b.size - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities 
+       trace_term = m - np.trace(R_A @ inverted) # b.size - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities 
     else:
         # in this way works even if we revert to the fully projected pb (call with Q_A.T@b)
         # trace_term = b.size - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities
@@ -83,7 +89,6 @@ def generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs):
     else:
         gcvtype = 'tikhonov'
     
-
     # function to minimize
     # if gcvtype == 'tikhonov':    
     gcv_func = lambda reg_param: gcv_numerator(reg_param, Q_A, R_A, R_L, b) / gcv_denominator(reg_param, R_A, R_L, b, **kwargs)
