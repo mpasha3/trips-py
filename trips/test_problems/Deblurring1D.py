@@ -95,8 +95,6 @@ class Deblurring1D():
         self.ny = 1
         self.parameter = parameter
         self.boundary_condition = boundary_condition
-        print(self.parameter)
-        print(self.boundary_condition)
         self.PSF, self.center = self.Gauss1D(self.grid_points, self.parameter)
         proj_forward = lambda x: self.operator(x, 'forward', self.PSF, boundary_condition)
         proj_backward = lambda x: self.operator(x, 'backward', self.PSF, boundary_condition)
@@ -104,8 +102,6 @@ class Deblurring1D():
         return blur
     
     def gen_data(self, x, **kwargs):
-        # if self.parameter is not None and 'parameter' not in kwargs:
-        #     self.parameter = self.parameter
         if ('parameter' in kwargs):
             parameter_in_kwargs = True
         else:
@@ -129,11 +125,10 @@ class Deblurring1D():
         if self.CommitCrime == False:
             nxbig = 2*self.grid_points
             nybig = 1
-            im = x.reshape((self.grid_points, self.ny)) # check the shape
+            im = x.reshape((self.grid_points, self.ny)) 
             padim = np.zeros((nxbig, nybig))
             putidx = self.grid_points//2
             putidy = 1
-            # check the indeces
             padim[putidx:(putidx+self.grid_points), :] = im
             self.PSF, _ = self.Gauss1D(self.grid_points, self.parameter)
             A0 = lambda x: self.operator(x, 'forward', self.PSF, self.boundary_condition)
@@ -205,7 +200,6 @@ class Deblurring1D():
         if (opt == 'Gaussian'):
             mu_obs = np.zeros(self.grid_points)      # mean of noise
             e = np.random.randn(self.grid_points, 1)
-            # delta = noise_level * np.linalg.norm(b_true) #np.linalg.norm(e)
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
             delta = la.norm(sig_obs*e)
@@ -213,7 +207,6 @@ class Deblurring1D():
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
             e = 0
-            # delta = np.linalg.norm(e)
             delta = 0
         if (opt == 'Laplace'):
             mu_obs = np.zeros(self.grid_points)      # mean of noise
@@ -223,7 +216,7 @@ class Deblurring1D():
             delta = la.norm(sig_obs*e)
         return (b_meas, delta)
     
-    def plot_rec(self, img, save_imgs = False, save_path='./saveImagesDeblurring1DReconstructions'):
+    def plot_rec(self, img, save_imgs = False, save_path='./saved_images_testproblems'):
         plt.set_cmap('inferno')
         if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
         plt.plot(img)
@@ -231,7 +224,7 @@ class Deblurring1D():
         if save_imgs:  plt.savefig(save_path+'/rec'+'.png',bbox_inches='tight')
         plt.pause(.1)
         plt.draw()
-    def plot_data(self, img, save_imgs = False, save_path='./saveImagesDeblurring1DData'):
+    def plot_data(self, img, save_imgs = False, save_path='./saved_images_testproblems'):
         plt.set_cmap('inferno')
         if save_imgs and not os.path.exists(save_path): os.makedirs(save_path)
         plt.plot(img)
@@ -242,5 +235,4 @@ class Deblurring1D():
 
 if __name__ == '__main__':
     # Test Deblurring class
-    # from solvers.gks_all import *
     Deblur1D = Deblurring1D()
