@@ -90,37 +90,37 @@ def generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs):
         gcvtype = 'tikhonov'
     
     # function to minimize
-    # if gcvtype == 'tikhonov':    
-    gcv_func = lambda reg_param: gcv_numerator(reg_param, Q_A, R_A, R_L, b) / gcv_denominator(reg_param, R_A, R_L, b, **kwargs)
-    lambdah = op.fminbound(func = gcv_func, x1 = 1e-09, x2 = 1e2, args=(), xtol=1e-12, maxfun=1000, full_output=0, disp=0) ## should there be tol here?
-    # elif gcvtype == 'tsvd':
-    #     m = Q_A.shape[0]
-    #     n = R_L.shape[1]
-    #     gcv_vals = []
-    #     bhat = Q_A.T@b
-    #     f = np.ones((m,1))
-    #     for i in range(n):
-    #         f[n-(i+1),] = 0
-    #         fvar = np.concatenate((1 - f[:n,], f[n:,]))
-    #         coeff = (fvar*bhat)**2
-    #         gcv_numerator = np.sum(coeff)
-    #         gcv_denominator = (m - (n-(i+1)))**2
-    #         gcv_vals.append(gcv_numerator/gcv_denominator)   
-    #     lambdah = n - (gcv_vals.index(min(gcv_vals))+1)
-    # elif gcvtype == 'tgsvd':
-    #     m = Q_A.shape[0]
-    #     n = R_L.shape[1]
-    #     p = R_L.shape[0]
-    #     gcv_vals = []
-    #     bhat = Q_A.T@b
-    #     f = np.ones((m,1))
-    #     for i in range(n):
-    #         f[i,] = 0
-    #         fvar = np.concatenate((1 - f[:n,], f[n:,]))
-    #         coeff = (fvar*bhat)**2
-    #         gcv_numerator = np.sum(coeff)
-    #         gcv_denominator = (m - (n-(i+1)) - (n-p))**2
-    #         gcv_vals.append(gcv_numerator/gcv_denominator)   
-    #     lambdah = gcv_vals.index(min(gcv_vals))
+    if gcvtype == 'tikhonov':    
+        gcv_func = lambda reg_param: gcv_numerator(reg_param, Q_A, R_A, R_L, b) / gcv_denominator(reg_param, R_A, R_L, b, **kwargs)
+        lambdah = op.fminbound(func = gcv_func, x1 = 1e-09, x2 = 1e2, args=(), xtol=1e-12, maxfun=1000, full_output=0, disp=0) ## should there be tol here?
+    elif gcvtype == 'tsvd':
+        m = Q_A.shape[0]
+        n = R_L.shape[1]
+        gcv_vals = []
+        bhat = Q_A.T@b
+        f = np.ones((m,1))
+        for i in range(n):
+            f[n-(i+1),] = 0
+            fvar = np.concatenate((1 - f[:n,], f[n:,]))
+            coeff = (fvar*bhat)**2
+            gcv_numerator_tsvd = np.sum(coeff)
+            gcv_denominator_tsvd = (m - (n-(i+1)))**2
+            gcv_vals.append(gcv_numerator_tsvd/gcv_denominator_tsvd)   
+        lambdah = n - (gcv_vals.index(min(gcv_vals))+1)
+    elif gcvtype == 'tgsvd':
+        m = Q_A.shape[0]
+        n = R_L.shape[1]
+        p = R_L.shape[0]
+        gcv_vals = []
+        bhat = Q_A.T@b
+        f = np.ones((m,1))
+        for i in range(n):
+            f[i,] = 0
+            fvar = np.concatenate((1 - f[:n,], f[n:,]))
+            coeff = (fvar*bhat)**2
+            gcv_numerator_tgsvd = np.sum(coeff)
+            gcv_denominator_tgsvd = (m - (n-(i+1)) - (n-p))**2
+            gcv_vals.append(gcv_numerator_tgsvd/gcv_denominator_tgsvd)   
+        lambdah = gcv_vals.index(min(gcv_vals))
     
     return lambdah
