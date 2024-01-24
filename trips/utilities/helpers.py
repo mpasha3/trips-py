@@ -26,19 +26,19 @@ def convert_image_for_trips(imag, image_type):
             mkdir("./data/my_image_data")
     if image_type in ['jpg', 'png', 'tiff', 'tif', 'mat']:
         if image_type == 'tif':
-            x_true = spio.loadmat(f'./data/my_image_data/'+imag+'.tif')
+            x_true = plt.imread(f'./data/my_image_data/'+imag+'.tif')
             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', 
                     mdict={'x_true':x_true})
         elif image_type == 'png':
-            x_true = spio.loadmat(f'./data/my_image_data/'+imag+'.png')
+            x_true = plt.imread(f'./data/my_image_data/'+imag+'.png')
             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', 
                     mdict={'x_true':x_true})
         elif image_type == 'jpg':
-            x_true = spio.loadmat(f'./data/my_image_data/'+imag+'.jpg')
+            x_true = plt.imread(f'./data/my_image_data/'+imag+'.jpg')
             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', 
                     mdict={'x_true':x_true})
         elif image_type == 'tiff':
-            x_true = spio.loadmat(f'./data/my_image_data/'+imag+'.tiff')
+            x_true = plt.imread(f'./data/my_image_data/'+imag+'.tiff')
             x_new = spio.savemat(f'./data/image_data/'+imag+'.mat', 
                     mdict={'x_true':x_true})
         elif image_type == 'mat':
