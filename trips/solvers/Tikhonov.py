@@ -18,7 +18,8 @@ from ..parameter_selection.discrepancy_principle import discrepancy_principle
 from collections.abc import Iterable
 def Tikhonov(A, b, L, x_true, regparam = 'gcv', **kwargs):
     if regparam in ['gcv', 'GCV', 'Gcv']:
-        lambdah = generalized_crossvalidation(A, b, L) # find ideal lambda by crossvalidation ###
+        # lambdah = generalized_crossvalidation(A, b, L) # find ideal lambda by crossvalidation ###
+        lambdah = generalized_crossvalidation(U, S, VT, b, gcvtype = 'tsvd')
         xTikh = np.linalg.solve(A.T@A + lambdah*L.T@L, A.T@b)
     elif regparam in ['DP', 'dp', 'Dp', 'Discrepancy Principle', 'Discrepancy principle', 'discrepancy principle']:
         lambdah = discrepancy_principle(A, b, L, **kwargs) # find ideal lambdas by discrepancy principle
