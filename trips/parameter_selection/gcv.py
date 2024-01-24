@@ -73,7 +73,7 @@ def gcv_denominator(reg_param, R_A, R_L, b, **kwargs):
     else:
         # in this way works even if we revert to the fully projected pb (call with Q_A.T@b)
         # trace_term = b.size - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities
-        trace_term = R_A.shape[1] - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities
+        trace_term = R_A.shape[0] - np.trace(R_A @ inverted) # this is defined with respect to the projected quantities
     
     return trace_term**2
 
