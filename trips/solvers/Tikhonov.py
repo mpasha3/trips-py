@@ -12,20 +12,17 @@ __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
 import numpy as np
-# from ..utilities.decompositions import golub_kahan, arnoldi
+from pylops import Identity
 from ..parameter_selection.gcv import generalized_crossvalidation
 from ..parameter_selection.discrepancy_principle import discrepancy_principle
 from collections.abc import Iterable
 def Tikhonov(A, b, L, x_true, regparam = 'gcv', **kwargs):
     if regparam in ['gcv', 'GCV', 'Gcv']:
         # lambdah = generalized_crossvalidation(A, b, L) # find ideal lambda by crossvalidation ###
-        lambdah = generalized_crossvalidation(U, S, VT, b, gcvtype = 'tsvd')
-        xTikh = np.linalg.solve(A.T@A + lambdah*L.T@L, A.T@b)
+        lambdah = generalized_crossvalidation(Identity(A.shape[0]), A, Identity(A.shape[1]), b, variant = 'modified', fullsize = A.shape[0], **kwargs)
     elif regparam in ['DP', 'dp', 'Dp', 'Discrepancy Principle', 'Discrepancy principle', 'discrepancy principle']:
-        lambdah = discrepancy_principle(A, b, L, **kwargs) # find ideal lambdas by discrepancy principle
-        print(lambdah)
-        xTikh = np.linalg.solve(A.T@A + lambdah*L.T@L, A.T@b)
+        lambdah = discrepancy_principle(Identity(A.shape[0]), A, L, b, **kwargs) # find ideal lambdas by discrepancy principle
     else:
         lambdah = regparam
-        xTikh = np.linalg.solve(A.T@A + lambdah*L.T@L, A.T@b)
+    xTikh = np.linalg.solve(A.T@A + lambdah*L.T@L, A.T@b)
     return xTikh, lambdah  
