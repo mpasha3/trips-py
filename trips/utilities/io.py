@@ -125,7 +125,7 @@ def get_emoji_data(dataset = 30):
 def generate_emoji(dataset, **kwargs):
     
     noise_level = kwargs['noise_level'] if ('noise_level' in kwargs) else 0
-    if ('noise_level' in kwargs):
+    if ('noise_level' in kwargs) and noise_level is not 0:
         display_delta =True
     else:
         display_delta = False
