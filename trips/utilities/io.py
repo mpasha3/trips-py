@@ -125,7 +125,10 @@ def get_emoji_data(dataset = 30):
 def generate_emoji(dataset, **kwargs):
     
     noise_level = kwargs['noise_level'] if ('noise_level' in kwargs) else 0
-
+    if ('noise_level' in kwargs):
+        display_delta =True
+    else:
+        display_delta = False
     get_emoji_data(dataset)
 
     with h5py.File(f'./data/emoji_data/DataDynamic_128x{dataset}.mat', 'r') as f:
@@ -155,8 +158,13 @@ def generate_emoji(dataset, **kwargs):
     for ii in range(T):
         AA[ii] = A_small[ 2170*(ii):2170*(ii+1), 16384*ii:16384*(ii+1) ]
         B[ii] = b[2170*(ii) : 2170*(ii+1)]
-    return (A_small, b, AA, B, nx, ny, nt, delta)
+    if display_delta == False:
+        return (A_small, b, AA, B, nx, ny, nt)
+    else:
+        return (A_small, b, AA, B, nx, ny, nt, delta)
 
+
+    
 """Crossphantom data and operator"""
 
 def get_crossPhantom(dataset):
