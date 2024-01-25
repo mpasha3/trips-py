@@ -189,8 +189,11 @@ def get_crossPhantom(dataset):
 def generate_crossPhantom(dataset, **kwargs): # use noise_level
 
     noise_level = kwargs['noise_level'] if ('noise_level' in kwargs) else 0
+    if ('noise_level' in kwargs) and noise_level is not 0:
+        display_delta =True
+    else:
+        display_delta = False
     assert dataset in [15,60]
-
     get_crossPhantom(dataset)
 
     f = spio.loadmat(f'./data/crossphantom_data/DataDynamic_128x{dataset}.mat')
@@ -222,8 +225,10 @@ def generate_crossPhantom(dataset, **kwargs): # use noise_level
     for ii in range(T):
         AA[ii] = A_small[ 700*(ii):700*(ii+1), 16384*ii:16384*(ii+1) ] # 217 projections of size 128x128 at each of 10 selected angles
         B[ii] = b[700*(ii) : 700*(ii+1) ]
-    return A_small, b, AA, B, nx, ny, nt, delta
-
+    if display_delta == False:
+        return (A_small, b, AA, B, nx, ny, nt)
+    else:
+        return (A_small, b, AA, B, nx, ny, nt, delta)
 
 def get_stempo_data(data_set = 'real', data_thinning = 2, **kwargs):
         """
