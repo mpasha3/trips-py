@@ -14,8 +14,8 @@ __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk
 from ..utilities.decompositions import golub_kahan_update
 import numpy as np
 from scipy import linalg as la
-from trips.parameter_selection.gcv import *
-from trips.parameter_selection.discrepancy_principle import *
+from trips.utilities.parameter_selection.gcv import *
+from trips.utilities.parameter_selection.discrepancy_principle import *
 from pylops import Identity
 from trips.solvers import Tikhonov
 from tqdm import tqdm

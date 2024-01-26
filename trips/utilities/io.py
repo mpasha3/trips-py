@@ -1,21 +1,18 @@
 #!/usr/bin/env python
 """
-Definition of test problems
+Builds function for GKS
 --------------------------------------------------------------------------
-Created December 10, 2022 for TRIPs-Py library
+Created in 2023 for TRIPs-Py library
 """
-__authors__ = "Mirjeta Pasha and Connor Sanderford"
-__copyright__ = "Copyright 2022, TRIPs-Py library"
+__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu"
+__affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
+__copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"
-__version__ = "0.1"
-__maintainer__ = "Mirjeta Pasha and Connor Sanderford"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com and csanderf@asu.edu; connorsanderford@gmail.com"
-
-
+__version__ = "1.0"
+__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 """
 Functions for downloading or generating data and measurement operators.
 """
-
 import requests
 from scipy import sparse
 import scipy.io as spio
@@ -230,7 +227,7 @@ def generate_crossPhantom(dataset, **kwargs): # use noise_level
     else:
         return (A_small, b, AA, B, nx, ny, nt, delta)
 
-def get_stempo_data(data_set = 'real', data_thinning = 2, **kwargs):
+def generate_stempo(data_set = 'real', data_thinning = 2, **kwargs):
         """
         Generate stempo observations
         """

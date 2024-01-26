@@ -13,8 +13,8 @@ __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk
 
 import os, sys
 import numpy as np
-from trips.parameter_selection.gcv import *
-from trips.parameter_selection.discrepancy_principle import *
+from trips.utilities.parameter_selection.gcv import *
+from trips.utilities.parameter_selection.discrepancy_principle import *
 
 def TruncatedSVD_sol(A, b, regparam = 'gcv', **kwargs):
 

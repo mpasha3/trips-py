@@ -13,8 +13,8 @@ __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk
 
 import numpy as np
 from pylops import Identity
-from ..parameter_selection.gcv import generalized_crossvalidation
-from ..parameter_selection.discrepancy_principle import discrepancy_principle
+from trips.utilities.parameter_selection.gcv import *
+from trips.utilities.parameter_selection.discrepancy_principle import *
 from collections.abc import Iterable
 def Tikhonov(A, b, L, x_true, regparam = 'gcv', **kwargs):
     if regparam in ['gcv', 'GCV', 'Gcv']:
