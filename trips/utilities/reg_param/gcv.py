@@ -16,7 +16,7 @@ from scipy.optimize import newton, minimize
 import scipy.linalg as la
 import scipy.optimize as op
 from pylops import Identity, LinearOperator
-from utilities.utils import operator_qr, operator_svd, is_identity
+from utils import operator_qr, operator_svd, is_identity
 
 """
 Generalized crossvalidation
