@@ -12,14 +12,14 @@ __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
 
 from ..utilities.decompositions import golub_kahan, arnoldi
-from trips.utilities.reg_param.gcv import *
-from trips.utilities.reg_param.discrepancy_principle import *
+from ..trips.utilities.reg_param.gcv import *
+from ..trips.utilities.reg_param.discrepancy_principle import *
 from ..utilities.utils import *#smoothed_holder_weights, operator_qr, operator_svd, is_identity
 from scipy import sparse
 import numpy as np
 from scipy import linalg as la
 from pylops import Identity
-from trips.utilities.weights import *
+from ..trips.utilities.weights import *
 from tqdm import tqdm
 from collections.abc import Iterable
 
