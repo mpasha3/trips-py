@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
-Hybrif LSQR method
+Builds function for Hybrid_LSQR
 --------------------------------------------------------------------------
-Created December 1, 2023 for TRIPs-Py library
+Created in 2023 for TRIPs-Py library
 """
-__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna"
+__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu"
 __affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
 __copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"

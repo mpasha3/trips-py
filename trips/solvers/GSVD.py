@@ -1,7 +1,4 @@
 
-
-
-
 import numpy as np
 from scipy.linalg import toeplitz
 from scipy.sparse import diags

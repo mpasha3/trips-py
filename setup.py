@@ -6,15 +6,17 @@ REQUIRED = [
     'pylops',
     'requests',
     'h5py',
-    'tqdm'
+    'tqdm',
+    'python-resize-image',
+    'astra-toolbox'
 ]
 
 with open('README.md', 'r') as fh:
     LONG_DESCRIPTION = fh.read()
     setuptools.setup(
         name = 'trips',
-        version = '0.1.0',
-        author = 'Mirjeta Pasha, Connor Sanderford',
+        version = '1.0.0',
+        author = 'Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu',
         description = 'A package implementing approaches for regularization of ill-posed inverse problems.',
         long_description = LONG_DESCRIPTION,
         long_description_content_type ='text/markdown',

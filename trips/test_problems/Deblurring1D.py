@@ -10,6 +10,7 @@ __copyright__ = "Copyright 2024, TRIPs-Py library"
 __license__ = "GPL"
 __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
+
 import time
 import numpy as np
 import warnings
@@ -31,6 +32,7 @@ from PIL import Image
 from resizeimage import resizeimage
 import requests
 from os import mkdir
+import os
 from os.path import exists
 import numpy as np
 import matplotlib.pyplot as plt
@@ -38,7 +40,7 @@ from scipy.ndimage import convolve1d
 from trips.utilities.utils import *
 import scipy.linalg as la
 
-class Deblurring1D():
+class Deblurring1DTrue():
 
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
@@ -138,7 +140,7 @@ class Deblurring1D():
         else:
             self.PSF, self.center = self.Gauss1D(self.grid_points, self.parameter)
             A = lambda x, projection: self.operator(x, projection, self.PSF, self.boundary_condition)
-            b = self.operator(x, 'forward', self.PSF, self.boundary_condition)
+            b = self.operator(x, 'forward', self.PSF, self.boundary_condition).reshape((-1,1))
         return b
 
     def gen_xtrue(self, N, test):
@@ -203,6 +205,10 @@ class Deblurring1D():
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
             delta = la.norm(sig_obs*e)
+            print('MP noise')
+            print(b_true.shape)
+            print(b_meas.shape)
+            print(e.shape)
         if (opt == 'Poisson'):
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
