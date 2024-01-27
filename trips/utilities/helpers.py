@@ -71,7 +71,7 @@ def plot_singular_vectors_svd(Operator, size, parameter = 'A'):
             k = 50
         plt.subplots_adjust(bottom=0, top=0.7, left = 0, right=1)
         fig.colorbar(image, ax=axes.ravel().tolist())
-        plt.savefig('v_vectors.png', bbox_inches='tight')
+        # plt.savefig('v_vectors.png', bbox_inches='tight')
         plt.show()
     else:
         n = 2
@@ -92,7 +92,7 @@ def plot_singular_vectors_svd(Operator, size, parameter = 'A'):
             k = 50
         plt.subplots_adjust(bottom=0, top=0.7, left = 0, right=1)
         fig.colorbar(image, ax=axes.ravel().tolist())
-        plt.savefig('v_vectors.png', bbox_inches='tight')
+        # plt.savefig('v_vectors.png', bbox_inches='tight')
         plt.show()
 
 def plot_singular_values_svd(Operator, parameter = 'A'):
@@ -105,7 +105,7 @@ def plot_singular_values_svd(Operator, parameter = 'A'):
         plt.ylabel('$\sigma_{\ell}$')
         plt.minorticks_on()
         plt.grid(which='minor', linestyle=':', linewidth='0.2', color='black')
-        plt.savefig('singular_values.png', bbox_inches='tight')
+        # plt.savefig('singular_values.png', bbox_inches='tight')
         plt.show()
     else:
         plt.plot(S)
@@ -114,7 +114,7 @@ def plot_singular_values_svd(Operator, parameter = 'A'):
         plt.ylabel('$\sigma_{\ell}$')
         plt.minorticks_on()
         plt.grid(which='minor', linestyle=':', linewidth='0.2', color='black')
-        plt.savefig('singular_values.png', bbox_inches='tight')
+        # plt.savefig('singular_values.png', bbox_inches='tight')
         plt.show()
 
 
