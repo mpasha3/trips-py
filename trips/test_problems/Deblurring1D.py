@@ -18,8 +18,6 @@ import scipy as sp
 import scipy.stats as sps
 import scipy.io as spio
 import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
 import astra
 import trips.utilities.phantoms as phantom
 from venv import create
@@ -40,7 +38,7 @@ from scipy.ndimage import convolve1d
 from trips.utilities.utils import *
 import scipy.linalg as la
 
-class Deblurring1DTrue():
+class Deblurring1D():
 
     def __init__(self,**kwargs):
         seed = kwargs.pop('seed',2022)
@@ -205,10 +203,6 @@ class Deblurring1DTrue():
             sig_obs = noise_level * np.linalg.norm(b_true)/np.linalg.norm(e)
             b_meas = b_true + sig_obs*e
             delta = la.norm(sig_obs*e)
-            print('MP noise')
-            print(b_true.shape)
-            print(b_meas.shape)
-            print(e.shape)
         if (opt == 'Poisson'):
             gamma = 1 # background counts assumed known
             b_meas = np.random.poisson(lam=b_true+gamma) 
