@@ -1,11 +1,5 @@
-# TRIPS - py
+# TRIPS - Py
 
-Developers of the package
-
-Mirjeta Pasha (Tufts University)
-Silvia Gazzola (University of Bath)
-Connor Sanderford (Arizona State University)
-Ugochukwu Obinna Ugwu (Tufts University)
 
 TRIPS-py is a python package that is dedicated to serve research and didactical purposes.  The package aims
 1) to provide tools for solving small and large scale inverse problems, and
@@ -14,7 +8,8 @@ TRIPS-py is a python package that is dedicated to serve research and didactical 
 TRIPS-py includes both direct and iterative methods for solving discrete inverse problems as well as a wide range of regularization techniques. 
 Each method incorporates options to determine the regularization parameter automatically through discrepancy principle (if the noise level is known) or through generalized cross validation. A regularization parameter can be inputed from the user too.
 
-### Installation 
+
+### Building TRIPs-Py from source code 
 
 ##### Clone the repository
 
@@ -22,10 +17,15 @@ Each method incorporates options to determine the regularization parameter autom
 git clone https://github.com/trips-py/trips-py
 ```
 
-##### Install the package
+##### Install the package and the dependencies
 ```ruby
 pip install .
 ```
+
+### Reference
+Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, Ugochukwu O. Ugwu
+TRIPs-Py: Techniques for Regularization of Inverse Problems in Python
+
 
 
 
