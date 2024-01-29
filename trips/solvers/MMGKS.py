@@ -38,29 +38,30 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
     lambda_history = []
     residual_history = []
     e = 1
-    x = A.T @ b # initialize x for reweighting
+    x = A.T @ b 
     AV = A@V
-    LV = L@V
+    if GS_option in  ['GS', 'gs', 'Gs']:
+        nx = prob_dims[0]
+        ny = prob_dims[1]
+        nt = prob_dims[2]
+        Ls = generate_first_derivative_operator_2d_matrix(nx, ny)
+        L = sparse.kron(sparse.identity(nt), Ls)
+        LV = L@V
+    else:
+        LV = L@V
     for ii in tqdm(range(n_iter), desc='running MMGKS...'):
-        # compute reweighting for p-norm approximation
         v = A @ x - b
         wf = (v**2 + epsilon**2)**(pnorm/2 - 1)
         AA = AV*wf
-        # z = smoothed_holder_weights(v, epsilon=epsilon, p=pnorm).reshape((-1,1))**(1/2)
-        # p = sparse.spdiags(data = z.flatten() , diags=0, m=z.shape[0], n=z.shape[0])
-        # temp = p @ (A @ V)
-        (Q_A, R_A) = la.qr(AA, mode='economic') # Project A into V, separate into Q and R
-        # Compute reweighting for q-norm approximation
+        (Q_A, R_A) = la.qr(AA, mode='economic') 
         u = L @ x
         if isoTV_option in ['isoTV', 'ISOTV', 'IsoTV']:
             if prob_dims == False:
-                raise TypeError("For Isotropic TV you must enter the dimension of the dynamic problem! Example: (x_mmgks, info_mmgks) = MMGKS(A, data_vec, L, pnorm=2, qnorm=1, projection_dim=2, n_iter =3, regparam = 0.005, x_true = None, isoTV = 'isoTV', prob_dims = (nx,ny, nt))")
+                raise TypeError("For Isotropic TV you must enter the dimension of the dynamic problem! Example: (x_mmgks, info_mmgks) = MMGKS(A, data_vec, L, pnorm=2, qnorm=1, projection_dim=2, n_iter =3, regparam = 'gcv', x_true = None, isoTV = 'isoTV', prob_dims = (nx,ny, nt))")
             else:
                 nx = prob_dims[0]
                 ny = prob_dims[1]
-            #### This are the same weights as in utilities.weights
             nt = int((x.reshape((-1,1)).shape[0])/(nx*ny))
-            Ls = first_derivative_operator_2d(nx, ny)
             spacen = int(Ls.shape[0] / 2)
             spacent = spacen * nt
             X = x.reshape(nx**2, nt)
@@ -71,42 +72,34 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
             weightx = np.concatenate((weightx.flatten(), weightx.flatten()))
             weightt = (u[2*spacent:]**2 + epsilon**2)**((qnorm-2) / 4)
             wr = np.concatenate((weightx.reshape(-1,1), weightt))
-            # print(wr.shape)
-            ######
         elif GS_option in  ['GS', 'gs', 'Gs']:
             if prob_dims == False:
-                raise TypeError("For Isotropic TV you must enter the dimension of the dynamic problem. (x_mmgks, info_mmgks) = MMGKS(A, data_vec, L, pnorm=2, qnorm=1, projection_dim=2, n_iter =3, regparam = 0.005, x_true = None, isoTV = 'isoTV', prob_dims = (nx,ny, nt))")
+                raise TypeError("For Isotropic Group Sparsity you must enter the dimension of the dynamic problem. (x_mmgks, info_mmgks) = MMGKS(A, data_vec, L, pnorm=2, qnorm=1, projection_dim=2, n_iter =3, regparam = 'gcv', x_true = None, GS = 'GS', prob_dims = (nx,ny, nt))")
             else:
                 nx = prob_dims[0]
                 ny = prob_dims[1]
-            wr = GS_weights(x, nx, ny, epsilon, qnorm)
+            nt = int((x.reshape((-1,1)).shape[0])/(nx*ny))
+            utemp = np.reshape(x, (nx*ny, nt))
+            Dutemp = Ls.dot(utemp)
+            wr = np.exp(2) * np.ones((2*nx*(ny-1), 1))
+            for i in range(2*nx*(ny-1)):
+                wr[i] = (np.linalg.norm(Dutemp[i,:])**2 + wr[i])**(qnorm/2-1)
+            wr = np.kron(np.ones((nt, 1)), wr)
         else:
-            wr = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).reshape((-1,1))#**(1/2)
-        # q = sparse.spdiags(data = z.flatten() , diags=0, m=z.shape[0], n=z.shape[0])
-        # temp = q @ (L @ V)
-        # wr = (u**2 + epsilon**2)**(qnorm/2 - 1)
+            wr = smoothed_holder_weights(u, epsilon=epsilon, p=qnorm).reshape((-1,1))
         LL = LV * wr
-        (Q_L, R_L) = la.qr(LL, mode='economic') # Project L into V, separate into Q and R
-
-        # Compute the projected rhs
-        bhat = (Q_A.T @ b).reshape(-1,1)
-       
+        (Q_L, R_L) = la.qr(LL, mode='economic') 
         if regparam == 'gcv':
-            lambdah = generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambda by crossvalidation
+            lambdah = generalized_crossvalidation(Q_A, R_A, R_L, wf *b, **kwargs)
         elif regparam == 'dp':
-            lambdah = discrepancy_principle(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambdas by crossvalidation
+            lambdah = discrepancy_principle(Q_A, R_A, R_L, wf *b, **kwargs)
 
         else:
             lambdah = regparam
         
         lambda_history.append(lambdah)
-        # R_stacked = np.vstack( [R_A]+ [lambdah*R_L] ) # Stack projected operators
-        # b_stacked = np.vstack([bhat] + [np.zeros(shape=(R_L.shape[0], 1))]) # pad with zeros
-        # y, _,_,_ = la.lstsq(R_stacked, b_stacked) # get least squares solution
         y,_,_,_ = np.linalg.lstsq(np.concatenate((R_A, np.sqrt(lambdah) * R_L)), np.concatenate((Q_A.T@ b, np.zeros((R_L.shape[0],1)))),rcond=None)
-        x = V @ y # project y back
-        if non_neg == True:
-            x[x<0] = 0
+        x = V @ y
         x_history.append(x)
         if ii >= R_L.shape[0]:
             break
@@ -120,7 +113,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         r = ra + lambdah * rb
         r = r - V @ (V.T @ r)
         r = r - V @ (V.T @ r)
-        normed_r = r / la.norm(r) # normalize residual
+        normed_r = r / la.norm(r) 
         vn = r / np.linalg.norm(r)
         V = np.column_stack((V, vn))
         Avn = A @ vn

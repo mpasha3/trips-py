@@ -26,7 +26,6 @@ from collections.abc import Iterable
 def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **kwargs):
 
     delta = kwargs['delta'] if ('delta' in kwargs) else None
-    non_neg = kwargs['non_neg'] if ('non_neg' in kwargs) else False
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
     if (regparam == 'dp' or dp_stop != False) and delta == None:
@@ -72,12 +71,9 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 
         lambda_history.append(lambdah)
 
-        # bhat = (Q_A.T @ b).reshape(-1,1) # Project b
         y,_,_,_ = np.linalg.lstsq(np.concatenate((R_A, np.sqrt(lambdah) * R_L)), np.concatenate((Q_A.T@ b, np.zeros((R_L.shape[0],1)))),rcond=None)
 
         x = V @ y # project y back
-        if non_neg == True:
-            x[x<0] = 0
         x_history.append(x)
         v = AV@y
         v = v - b
