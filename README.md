@@ -14,5 +14,11 @@ TRIPS-py is a python package that is dedicated to serve research and didactical 
 TRIPS-py includes both direct and iterative methods for solving discrete inverse problems as well as a wide range of regularization techniques. 
 Each method incorporates options to determine the regularization parameter automatically through discrepancy principle (if the noise level is known) or through generalized cross validation. A regularization parameter can be inputed from the user too.
 
+```ruby
+require 'redcarpet'
+markdown = Redcarpet.new("Hello World!")
+puts markdown.to_html
+```
+
 
 
