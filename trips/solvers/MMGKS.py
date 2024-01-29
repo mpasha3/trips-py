@@ -44,8 +44,8 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
         nx = prob_dims[0]
         ny = prob_dims[1]
         nt = prob_dims[2]
-        # Ls = generate_first_derivative_operator_2d_matrix(nx, ny)
-        Ls = first_derivative_operator_2d(nx, ny)
+        Ls = generate_first_derivative_operator_2d_matrix(nx, ny)
+        # Ls = first_derivative_operator_2d(nx, ny)
         L = sparse.kron(sparse.identity(nt), Ls)
         LV = L@V
     else:
