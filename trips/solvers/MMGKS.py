@@ -40,7 +40,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
     e = 1
     x = A.T @ b 
     AV = A@V
-    if GS_option in  ['GS', 'gs', 'Gs']:
+    if GS_option in  ['GS', 'gs', 'Gs'] or isoTV_option in ['isoTV', 'ISOTV', 'IsoTV']:
         nx = prob_dims[0]
         ny = prob_dims[1]
         nt = prob_dims[2]
