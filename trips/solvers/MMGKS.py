@@ -61,11 +61,11 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
             else:
                 nx = prob_dims[0]
                 ny = prob_dims[1]
+            Ls = first_derivative_operator_2d(nx, ny)
             nt = int((x.reshape((-1,1)).shape[0])/(nx*ny))
             spacen = int(Ls.shape[0] / 2)
             spacent = spacen * nt
             X = x.reshape(nx**2, nt)
-            Ls = first_derivative_operator_2d(nx, ny)
             LsX = Ls @ X
             LsX1 = LsX[:spacen, :]
             LsX2 = LsX[spacen:2*spacen, :]
