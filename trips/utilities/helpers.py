@@ -18,7 +18,7 @@ from matplotlib import transforms
 from scipy import ndimage
 import matplotlib.pyplot as plt
 # from trips.cil_io import *
-from trips.test_problems.Deblurring import *
+from trips.test_problems.Deblurring2D import *
 from trips.test_problems.Deblurring1D import *
 from trips.test_problems.Tomography import *
 from trips.utilities.utils import *
