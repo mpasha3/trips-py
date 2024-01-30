@@ -207,7 +207,7 @@ class Deblurring2D():
             plt.draw() 
 
 if __name__ == '__main__':
-    Deblur = Deblurring()
+    Deblur = Deblurring2D()
 
     
 
