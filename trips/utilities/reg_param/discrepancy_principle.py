@@ -18,7 +18,6 @@ import warnings
 
 def discrepancy_principle(Q, A, L, b, delta = None, eta = 1.01, **kwargs):
 
-    # DO WE NEED THIS CHECK HERE?
     if not ( isinstance(delta, float) or isinstance(delta, int)):
         raise Exception("""A value for the noise level delta was not provided and the discrepancy principle cannot be applied. 
                     Please supply a value of delta based on the estimated noise level of the problem, or choose the regularization parameter according to gcv.""")
