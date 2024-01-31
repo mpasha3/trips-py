@@ -231,6 +231,7 @@ def generate_stempo(data_set = 'real', data_thinning = 2, **kwargs):
         """
         Generate stempo observations
         """
+        nt = kwargs['nt'] if ('nt' in kwargs) else 10
         noise_level = kwargs['noise_level'] if ('noise_level' in kwargs) else 0
         data_file = {'simulation':'stempo_ground_truth_2d_b4','real':'stempo_seq8x45_2d_b'+str(data_thinning)}[data_set]+'.mat'
         if not os.path.exists('./data/stempo_data'): os.makedirs('./data/stempo_data/')
@@ -244,11 +245,10 @@ def generate_stempo(data_set = 'real', data_thinning = 2, **kwargs):
         if data_set=='simulation':
             truth = spio.loadmat('./data/stempo_data/'+data_file)
             image = truth['obj']
-            nx, ny, nt = 560, 560, 10
+            nx, ny = 560, 560
             anglecount = 10
             rowshift = 5
             columnsshift = 14
-            nt = 20
             angleVector = list(range(nt))
             for t in range(nt):
                 angleVector[t] = np.linspace(rowshift*t, 14*anglecount+ rowshift*t, num = anglecount+1)
@@ -280,10 +280,7 @@ def generate_stempo(data_set = 'real', data_thinning = 2, **kwargs):
                 savex_true[:, i] = x_truef_sino
                 sn = A_n@x_truef_sino
                 b_i = sn.flatten(order='F') 
-                # print('MP here')
-                # tmp = A_n.T*b_i
-                # print(tmp.shape)
-                sigma = 0.01 # noise level
+                sigma = noise level
                 e = np.random.normal(0, 1, b_i.shape[0])
                 e = e/np.linalg.norm(e)*np.linalg.norm(b_i)*sigma
                 delta = np.linalg.norm(e)
@@ -294,14 +291,12 @@ def generate_stempo(data_set = 'real', data_thinning = 2, **kwargs):
                 saveb[:, i] = b_m
                 savee[:, i] = e
                 savedelta[i] = delta
-            Afull = pylops.BlockDiag(saveA)
-            # A = sps.block_diag((saveA))    
+            Afull = pylops.BlockDiag(saveA)   
             b = saveb.flatten(order ='F') 
-            # xf = savex_true.flatten(order = 'F')
             truth = savex_true.reshape((nx, ny, nt), order='F').transpose((2,0,1))
         elif data_set=='real':
             import h5py
-            N = int(2240/data_thinning) # 140
+            N = int(2240/data_thinning)
             nx, ny, nt =  N, N, 8
             N_det = N
             N_theta = 45
