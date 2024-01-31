@@ -280,7 +280,7 @@ def generate_stempo(data_set = 'real', data_thinning = 2, **kwargs):
                 savex_true[:, i] = x_truef_sino
                 sn = A_n@x_truef_sino
                 b_i = sn.flatten(order='F') 
-                sigma = noise level
+                sigma = noise_level
                 e = np.random.normal(0, 1, b_i.shape[0])
                 e = e/np.linalg.norm(e)*np.linalg.norm(b_i)*sigma
                 delta = np.linalg.norm(e)
@@ -323,7 +323,7 @@ def generate_stempo(data_set = 'real', data_thinning = 2, **kwargs):
             for i in range(nt):
                 tmp = m[45*(i):45*(i+1), :]
                 b_i = tmp.flatten()
-                sigma = 0.01 # noise level
+                sigma = noise_level
                 e = np.random.normal(0, 1, b_i.shape[0])
                 e = e/np.linalg.norm(e)*np.linalg.norm(b_i)*sigma
                 delta = np.linalg.norm(e)
