@@ -10,7 +10,6 @@ __copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "GPL"
 __version__ = "1.0"
 __email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
-
 import os, sys
 import numpy as np
 from ..utilities.decompositions import arnoldi
