@@ -66,10 +66,7 @@ def Arnoldi_Tikhonov(A, b, n_iter = 3, regparam = 'gcv', **kwargs):
 
     dp_stop = kwargs['dp_stop'] if ('dp_stop' in kwargs) else False
 
-
     (Vdp1,H) = arnoldi(A, b, n_iter, dp_stop, **kwargs)
-
-    
     Vd = Vdp1[:, 0:-1]
     bhat = Vdp1.T @ b
 
@@ -83,6 +80,9 @@ def Arnoldi_Tikhonov(A, b, n_iter = 3, regparam = 'gcv', **kwargs):
         R_A = np.diag(R_A)
         R_L = Identity(H.shape[1])
         lambdah = generalized_crossvalidation(Q_A, R_A, R_L, bhat, **kwargs)
+        L = L.todense() if isinstance(L, LinearOperator) else L
+        y = la.solve(H.T@H + lambdah*L.T@L, H.T@bhat)
+        x = Vd @ y
     elif regparam == 'dp':
         lambdah = discrepancy_principle(Vdp1, H, L, b, **kwargs)
         L = L.todense() if isinstance(L, LinearOperator) else L 
