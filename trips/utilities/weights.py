@@ -62,6 +62,7 @@ def GS_weights(x, nx, ny, epsilon, qnorm):
     wr = np.kron(np.ones((nt, 1)), wr)
     return wr
 
+
 # Define regular weights for MMGKS
 def smoothed_holder_weights(x, epsilon, p):
     z = (x**2 + epsilon**2)**(p/2 - 1)

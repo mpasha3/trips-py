@@ -244,7 +244,7 @@ def generate_stempo(data_set = 'real', data_thinning = 2, **kwargs):
         if data_set=='simulation':
             truth = spio.loadmat('./data/stempo_data/'+data_file)
             image = truth['obj']
-            nx, ny, nt = 560, 560, 20
+            nx, ny, nt = 560, 560, 10
             anglecount = 10
             rowshift = 5
             columnsshift = 14
