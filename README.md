@@ -1,5 +1,5 @@
 # TRIPS - Py
-
+<img src="trips.png" alt="J" width="200"/>
 
 TRIPS-py is a python package that is dedicated to serve research and didactical purposes.  The package aims
 1) to provide tools for solving small and large scale inverse problems, and
