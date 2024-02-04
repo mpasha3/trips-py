@@ -4,8 +4,6 @@ Version: 1.0.0
 Summary: A package implementing approaches for regularization of ill-posed inverse problems.
 Home-page: https://sites.google.com/view/mirjeta-pasha/home
 Author: Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu
-License: UNKNOWN
-Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: The Unlicense (Unlicense)
 Classifier: Operating System :: OS Independent
@@ -38,8 +36,6 @@ pip install .
 ### Reference
 Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, Ugochukwu O. Ugwu
 TRIPs-Py: Techniques for Regularization of Inverse Problems in Python
-
-
 
 
 
