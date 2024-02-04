@@ -1,0 +1,8 @@
+numpy
+scipy
+pylops
+requests
+h5py
+tqdm
+python-resize-image
+astra-toolbox
