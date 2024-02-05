@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Functions which implement truncated SVD
+Functions which implement truncated GSVD
 --------------------------------------------------------------------------
 Created in 2022 for TRIPs-Py library
 """
@@ -15,24 +15,25 @@ import os, sys
 import numpy as np
 from trips.utilities.reg_param.gcv import *
 from trips.utilities.reg_param.discrepancy_principle import *
+from trips.utilities.decompositions import gsvd
 
-def tSVD_sol(A, b, regparam = 'gcv', **kwargs):
+def tGSVD_sol(A, L, b, regparam = 'gcv', **kwargs):
 
-  b = b.reshape((-1,1))
+  b_vec = b.reshape((-1,1))
 
   delta = kwargs['delta'] if ('delta' in kwargs) else None
   if (regparam == 'dp') and delta == None:
         raise Exception("""A value for the noise level delta was not provided and the discrepancy principle cannot be applied. 
                     Please supply a value of delta based on the estimated noise level of the problem, or choose the regularization parameter according to gcv.""")
   
-  U, S, VT = np.linalg.svd(A)
+  U, _, Z, C, S = gsvd(A,L) 
   if regparam == 'gcv':
-    k = generalized_crossvalidation(U, S, VT, b, gcvtype = 'tsvd')
+    k = generalized_crossvalidation(U, S, Z, b_vec, gcvtype = 'tgsvd')
   elif regparam == 'dp':
-    k = discrepancy_principle(U, S, VT, b, dptype = 'tsvd', **kwargs)
+    k = discrepancy_principle(U, S, Z, b_vec, dptype = 'tgsvd', **kwargs)
   else:
-    k = regparam # make sure we have checks on the values of k (eventually have them here, if in general we check for a positive scalar value only)
-  S_hat = S[0:k] #extract the first r singular values # CHECK IF EXTREMA ARE INCLUSIVE OR EXCLUSIVE
-  U_temp = U[:, 0:k]
-  x_trunc = np.transpose(VT[0:k, :])@(((np.transpose(U_temp)@b).reshape((-1,1)))/S_hat.reshape((-1,1)))
-  return x_trunc, k
+    k = regparam 
+  Y = np.linalg.inv(Z.T)
+  C[:k,:k] = 0
+  xsol = Y@C@(U.T@b_vec)
+  return (xsol, k)
