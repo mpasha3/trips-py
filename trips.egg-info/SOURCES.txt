@@ -19,6 +19,7 @@ trips/solvers/MMGKS.py
 trips/solvers/Tikhonov.py
 trips/solvers/__init__.py
 trips/solvers/gks.py
+trips/solvers/tGSVD.py
 trips/solvers/tSVD.py
 trips/test_problems/Deblurring1D.py
 trips/test_problems/Deblurring2D.py

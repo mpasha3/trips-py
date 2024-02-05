@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Functions which implement decompositions based on Krylov subspaces.
+Functions which implement truncated SVD
 --------------------------------------------------------------------------
 Created in 2022 for TRIPs-Py library
 """
@@ -16,7 +16,7 @@ import numpy as np
 from trips.utilities.reg_param.gcv import *
 from trips.utilities.reg_param.discrepancy_principle import *
 
-def TruncatedSVD_sol(A, b, regparam = 'gcv', **kwargs):
+def tSVD_sol(A, b, regparam = 'gcv', **kwargs):
 
   b = b.reshape((-1,1))
 
