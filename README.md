@@ -20,13 +20,9 @@ git clone https://github.com/trips-py/trips-py
 pip install .
 ```
 
-### Reference
-Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, Ugochukwu O. Ugwu
-TRIPs-Py: Techniques for Regularization of Inverse Problems in Python
-
 ### Requirements
 Packages required that are installed automatically with TRIPs-Py are
-'numpy', 'scipy', 'pylops', 'requests', 'h5py', 'tqdm', 'python-resize-image', 'astra-toolbox'
+'numpy', 'scipy', 'pylops', 'requests', 'h5py', 'tqdm', 'python-resize-image', 'astra-toolbox'.
 
 ### Disclaimer
 TRIPs-Py package is made available and contributed to under the Apache-2.0 license. The project is offered “as-is” without warranty, and disclaiming liability for damages resulting from using the software. 
@@ -36,6 +32,18 @@ For assistance or questions regarding the package, please send an email to conta
 ### Contact
 email: contact.tripspy@gmail.com
 website: https://sites.google.com/view/mirjeta-pasha/home?authuser=1
+
+
+### Overview of the TRIPs-Py's structure and contents
+<img src="overview_TRIPsPy.png" alt="J" width="800"/>
+
+Most of the files available in the `Utilities' directory are auxiliary functions that can be used by the TRIPs-Py solvers, such as functions to set the regularization operators, or to display data and reconstructions.
+
+### Reference
+Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, Ugochukwu O. Ugwu
+TRIPs-Py: Techniques for Regularization of Inverse Problems in Python
+
+
 
 
 
