@@ -25,10 +25,9 @@ Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, Ugochukwu O. Ugwu
 TRIPs-Py: Techniques for Regularization of Inverse Problems in Python
 
 ### Discalimer
-Our TRIPs-Py package is made available and contributed to under license that include terms that, for the protection of authors. It makes it clear that the project is offered “as-is” without warranty, and disclaiming liability for damages resulting from using the software. 
-This is a first version of TRIPs-Py and is by no means perfect. We welcome comments and suggestions from the users.
-For any help needed with the software, please send an email to the contact information below and please cc mirjeta.pasha1@gmail.com.
-
+TRIPs-Py package is made available and contributed to under the Apache-2.0 license. It makes it clear that the project is offered “as-is” without warranty, and disclaiming liability for damages resulting from using the software. 
+This is a first version of TRIPs-Py and is by no means perfect. We welcome comments and suggestions from the users to improve the software. Interested users are welcome to contribute to the package.
+For any assistance needed with the package, please send an email to contact.tripspy@gmail.com and please cc mirjeta.pasha1@gmail.com.
 
 ### Contact
 email: contact.tripspy@gmail.com
