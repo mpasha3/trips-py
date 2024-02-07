@@ -19,6 +19,14 @@ git clone https://github.com/trips-py/trips-py
 ```ruby
 pip install .
 ```
+### Overview of the TRIPs-Py's structure and contents
+<img src="overview_TRIPsPy.png" alt="J" width="800"/>
+
+Most of the files available in the `Utilities' directory are auxiliary functions that can be used by the TRIPs-Py solvers, such as functions to set the regularization operators, or to display data and reconstructions.
+
+### Reference
+Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, Ugochukwu O. Ugwu
+TRIPs-Py: Techniques for Regularization of Inverse Problems in Python
 
 ### Requirements
 Packages required that are installed automatically with TRIPs-Py are
@@ -34,14 +42,6 @@ email: contact.tripspy@gmail.com
 website: https://sites.google.com/view/mirjeta-pasha/home?authuser=1
 
 
-### Overview of the TRIPs-Py's structure and contents
-<img src="overview_TRIPsPy.png" alt="J" width="800"/>
-
-Most of the files available in the `Utilities' directory are auxiliary functions that can be used by the TRIPs-Py solvers, such as functions to set the regularization operators, or to display data and reconstructions.
-
-### Reference
-Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, Ugochukwu O. Ugwu
-TRIPs-Py: Techniques for Regularization of Inverse Problems in Python
 
 
 
