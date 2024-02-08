@@ -12,7 +12,6 @@ trips/solvers/CGLS.py
 trips/solvers/GKS.py
 trips/solvers/GK_Tikhonov.py
 trips/solvers/GMRES.py
-trips/solvers/GSVD.py
 trips/solvers/Hybrid_GMRES.py
 trips/solvers/Hybrid_LSQR.py
 trips/solvers/MMGKS.py

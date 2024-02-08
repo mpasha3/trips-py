@@ -90,7 +90,7 @@ class Deblurring1D():
                 image[i] = v
         return image
     
-    def forward_Op_1D(self, x, parameter, nx, boundary_condition = 'reflect'):
+    def forward_Op_1D(self, parameter, nx, boundary_condition = 'reflect'):
         self.grid_points = nx
         self.ny = 1
         self.parameter = parameter
