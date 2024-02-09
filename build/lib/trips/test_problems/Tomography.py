@@ -155,11 +155,11 @@ class Tomography():
         self.ny = ny
         self.views = views
         if self. CommitCrime == False:
-            (A, AforMatrixOperation, A_mis) = self.forward_Op(x, self.nx, self.ny, self.views)
+            (A, AforMatrixOperation, A_mis) = self.forward_Op(self.nx, self.ny, self.views)
             b = (A_mis*x.reshape((nx,ny))).reshape((-1,1))
             print('no crime')
         else:
-            (A, AforMatrixOperation) = self.forward_Op(x, self.nx, self.ny, self.views)
+            (A, AforMatrixOperation) = self.forward_Op(self.nx, self.ny, self.views)
             b = A@x.reshape((-1,1))
             print('crime')
         bshape = b.shape
