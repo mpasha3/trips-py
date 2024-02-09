@@ -75,7 +75,7 @@ class Tomography():
                 self.A_mis = astra.OpTomo(self.proj_id_mis)
             # return self.A
 
-    def forward_Op(self, x, nx, ny, views):
+    def forward_Op(self, nx, ny, views):
         A = self.define_A(nx, ny, views)
         self.define_A(nx, ny, views)
         operatorf = lambda X: (self.A*X.reshape((nx, ny))).reshape(-1,1)
