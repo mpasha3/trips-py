@@ -19,6 +19,10 @@ git clone https://github.com/trips-py/trips-py
 ```ruby
 pip install .
 ```
+### Data for test problems
+For a smooth usage of the package, we recommend the users to first download the data needed for test problems from the google drive and place the folder data inside the folder demos.
+https://drive.google.com/drive/folders/1VB8LaFewgwNKXq7QSVns4D6Rod8W8Pa1?usp=sharing
+
 ### Overview of the TRIPs-Py's structure and contents
 <img src="overview_TRIPsPy.png" alt="J" width="800"/>
 
