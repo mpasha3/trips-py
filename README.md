@@ -45,6 +45,10 @@ For assistance or questions regarding the package, please send an email to conta
 email: contact.tripspy@gmail.com
 website: https://sites.google.com/view/mirjeta-pasha/home?authuser=1
 
+### Acknowledgments
+The work of Mirjeta Pasha is fully supported by the NSF award DMS 2202846. Mirjeta Pasha and Silvia Gazzola acknowledge the Isaac Newton Institute for Mathematical Sciences, Cambridge, for the support and hospitality during the programme Rich and Nonlinear Tomography - a multidisciplinary approach" (supported by EPSRC grant no EP/R014604/) where partial work on this package was undertaken. Silvia Gazzola would like to thank Ludovico Carozza. We would like to thank Tatiana Bubba for discussions about avoiding inverse crimes in `inverse problems'.
+
+
 
 
 
