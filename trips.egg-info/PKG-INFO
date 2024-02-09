@@ -34,6 +34,10 @@ git clone https://github.com/trips-py/trips-py
 ```ruby
 pip install .
 ```
+### Data for test problems
+For a smooth usage of the package, we recommend the users to first download the data needed for test problems from the google drive and place the folder data inside the folder demos.
+https://drive.google.com/drive/folders/1VB8LaFewgwNKXq7QSVns4D6Rod8W8Pa1?usp=sharing
+
 ### Overview of the TRIPs-Py's structure and contents
 <img src="overview_TRIPsPy.png" alt="J" width="800"/>
 
@@ -55,6 +59,10 @@ For assistance or questions regarding the package, please send an email to conta
 ### Contact
 email: contact.tripspy@gmail.com
 website: https://sites.google.com/view/mirjeta-pasha/home?authuser=1
+
+### Acknowledgments
+The work of Mirjeta Pasha is fully supported by the NSF award DMS 2202846. Mirjeta Pasha and Silvia Gazzola acknowledge the Isaac Newton Institute for Mathematical Sciences, Cambridge, for the support and hospitality during the programme Rich and Nonlinear Tomography - a multidisciplinary approach" (supported by EPSRC grant no EP/R014604/) where partial work on this package was undertaken. Silvia Gazzola would like to thank Ludovico Carozza. We would like to thank Tatiana Bubba for discussions about avoiding inverse crimes in `inverse problems'.
+
 
 
 
