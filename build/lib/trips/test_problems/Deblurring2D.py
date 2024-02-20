@@ -4,12 +4,12 @@ Builds a deblurring class for 2D problems
 --------------------------------------------------------------------------
 Created in January 2024 for TRIPs-Py library
 """
-__authors__ = "Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu"
-__affiliations__ = 'Tufts University, University of Bath, Arizona State University, and Tufts University'
-__copyright__ = "Copyright 2024, TRIPs-Py library"
-__license__ = "GPL"
+__developers__ = "Mirjeta Pasha and Silvia Gazzola"
+__affiliations__ = 'MIT and Tufts University, University of Bath'
+__copyright__ = "Copyright 2023, TRIPs-Py library"
+__license__ = "Apache"
 __version__ = "1.0"
-__email__ = "mirjeta.pasha@tufts.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
+__email__ = "mpasha@mit.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk;"
 
 import time
 import numpy as np
