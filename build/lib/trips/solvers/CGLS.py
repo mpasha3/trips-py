@@ -9,7 +9,7 @@ __affiliations__ = 'MIT and Tufts University'
 __copyright__ = "Copyright 2023, TRIPs-Py library"
 __license__ = "Apache"
 __version__ = "1.0"
-__email__ = "mpasha@mit.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csanderf@asu.edu; connorsanderford@gmail.com; Ugochukwu.Ugwu@tufts.edu"
+__email__ = "mpasha@mit.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk;"
 
 import numpy as np
 import sys
