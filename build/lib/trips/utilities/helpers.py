@@ -101,7 +101,7 @@ def plot_singular_values_svd(Operator, parameter = 'A'):
     A = check_operator_type(Operator)
     if parameter == 'A':
         U, S, V = np.linalg.svd(A)
-        plt.plot(S)
+        plt.semilogy(S)
         plt.title('Singular values of $A$')
         plt.xlabel('$\ell$')
         plt.ylabel('$\sigma_{\ell}$')
@@ -110,7 +110,7 @@ def plot_singular_values_svd(Operator, parameter = 'A'):
         # plt.savefig('singular_values.png', bbox_inches='tight')
         plt.show()
     else:
-        plt.plot(S)
+        plt.semilogy(S)
         plt.title('Singular values of $A$')
         plt.xlabel('$\ell$')
         plt.ylabel('$\sigma_{\ell}$')

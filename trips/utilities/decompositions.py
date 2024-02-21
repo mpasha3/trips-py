@@ -327,7 +327,7 @@ def diagp(Y, X, k):
     j = np.where(np.real(D) < 0) or np.where(np.imag(D) != 0)
     j = np.asarray(j, dtype=int).flatten()
     D = np.diag(np.conj(D[j]) / np.abs(D[j]))
-    Y[:, np.ix_(j)] = Y[:, np.ix_(j)] @ D.T
+    Y[:, np.ix_(j)[0]] = np.matmul(Y[:, np.ix_(j)], D.T)
     X[j, :] = D @ X[j, :]
     X = X + 0  # Use "+0" to set possible -0 elements to 0
     return Y, X
