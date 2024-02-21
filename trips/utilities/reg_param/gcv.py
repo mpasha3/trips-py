@@ -28,6 +28,8 @@ def gcv_numerator(reg_param, Q_A, R_A, R_L, b, **kwargs):
 
     # the observation term:
 
+    R_A = R_A.todense() if isinstance(R_A, LinearOperator) else R_A
+
     R_A_2 = R_A.T @ R_A
 
     R_A_2 = R_A_2.todense() if isinstance(R_A_2, LinearOperator) else R_A_2
@@ -40,7 +42,7 @@ def gcv_numerator(reg_param, Q_A, R_A, R_L, b, **kwargs):
 
     # the inverse term:
 
-    inverted = la.solve( ( R_A_2 + reg_param * R_L_2), (R_A.T @ Q_A.T @ b) )
+    inverted = la.solve( ( R_A_2 + reg_param * R_L_2), (R_A.T @ (Q_A.T @ b)) )
 
     # return np.sqrt((np.linalg.norm( R_A @ inverted - Q_A.T @ b ))**2 + np.linalg.norm(b - Q_A@(Q_A.T@b))**2)
     if variant == 'modified':
@@ -51,8 +53,9 @@ def gcv_numerator(reg_param, Q_A, R_A, R_L, b, **kwargs):
 def gcv_denominator(reg_param, R_A, R_L, b, **kwargs):
 
     variant = kwargs['variant'] if ('variant' in kwargs) else 'standard'
-    # print(variant)
     # the observation term:
+
+    R_A = R_A.todense() if isinstance(R_A, LinearOperator) else R_A
 
     R_A_2 = R_A.T @ R_A
 
