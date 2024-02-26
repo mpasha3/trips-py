@@ -31,8 +31,8 @@ def tSVD_sol(A, b, regparam = 'gcv', **kwargs):
   elif regparam == 'dp':
     k = discrepancy_principle(U, S, VT, b, dptype = 'tsvd', **kwargs)
   else:
-    k = regparam # make sure we have checks on the values of k (eventually have them here, if in general we check for a positive scalar value only)
-  S_hat = S[0:k] #extract the first r singular values # CHECK IF EXTREMA ARE INCLUSIVE OR EXCLUSIVE
+    k = regparam # make sure we have checks on the values of k (eventually have them here, if in general we check for a positive scalar
+  S_hat = S[0:k] #extract the first r singular values 
   U_temp = U[:, 0:k]
   x_trunc = np.transpose(VT[0:k, :])@(((np.transpose(U_temp)@b).reshape((-1,1)))/S_hat.reshape((-1,1)))
   return x_trunc, k

@@ -113,13 +113,11 @@ def generalized_crossvalidation(Q_A, R_A, R_L, b, **kwargs):
         p = R_L.shape[0]
         gcv_vals = []
         bhat = Q_A.T@b
-        f = np.ones((m,1))
+        coeff = np.square(bhat)
         for i in range(n):
-            f[i,] = 0
-            fvar = np.concatenate((1 - f[:n,], f[n:,]))
-            coeff = (fvar*bhat)**2
+            coeff[n-(i+1),] = 0
             gcv_numerator_tgsvd = np.sum(coeff)
-            gcv_denominator_tgsvd = (m - (n-(i+1)) - (n-p))**2
+            gcv_denominator_tgsvd = (n-(i+1) - (n-p))**2
             gcv_vals.append(gcv_numerator_tgsvd/gcv_denominator_tgsvd)   
         lambdah = gcv_vals.index(min(gcv_vals))
     

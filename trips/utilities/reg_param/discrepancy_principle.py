@@ -97,11 +97,10 @@ def discrepancy_principle(Q, A, L, b, delta = None, eta = 1.01, **kwargs):
                 iterations += 1
         else:
             alpha = 0
-    else:
+    elif dptype == 'tsvd':
         m = Q.shape[0]
         n = L.shape[1]
         f = np.ones((m,1))
-        # f[0:n] = 0
         bhat = Q.T@b
         alpha = n
         for i in range(n):
@@ -111,6 +110,20 @@ def discrepancy_principle(Q, A, L, b, delta = None, eta = 1.01, **kwargs):
             dp_val = np.sum(coeff) - (eta*delta)**2
             if dp_val < 0:
                 alpha = n - (i+1)
+            else:
+                break
+    elif dptype == 'tgsvd':
+        m = Q.shape[0]
+        n = L.shape[1]
+        f = np.ones((m,1))
+        bhat = Q.T@b
+        alpha = n
+        coeff = np.square(bhat)
+        for i in range(n):
+            coeff[n-(i+1),] = 0
+            dp_val = np.sum(coeff) - (eta*delta)**2
+            if dp_val >= 0:
+                alpha = i
             else:
                 break
 

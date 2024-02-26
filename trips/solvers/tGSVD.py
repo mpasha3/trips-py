@@ -30,7 +30,7 @@ def tGSVD_sol(A, L, b, regparam = 'gcv', **kwargs):
   if regparam == 'gcv':
     k = generalized_crossvalidation(U, S, Z, b_vec, gcvtype = 'tgsvd')
   elif regparam == 'dp':
-    k = discrepancy_principle(U, S, Z, b_vec, dptype = 'tgsvd', **kwargs)
+    k = discrepancy_principle(U, C, Z, b_vec, dptype = 'tgsvd', **kwargs)
   else:
     k = regparam 
   Y = np.linalg.inv(Z.T)
