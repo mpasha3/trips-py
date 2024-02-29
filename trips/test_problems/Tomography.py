@@ -149,7 +149,7 @@ class Tomography():
             raise TypeError("You must enter a valid test problem! Options are: grains, smooth, tectonic, threephases, ppower, CT60, CT90, head.")
         
         return (x_truef, self.nx, self.ny)
-
+    
     def gen_data(self, x, nx, ny, views):
         self.nx = nx
         self.ny = ny
