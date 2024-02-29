@@ -1,4 +1,4 @@
-# TRIPS - Py
+# TRIPs - Py
 <img src="trps.png" alt="J" width="800"/>
 
 TRIPS-py is a python package that is dedicated to serve research and didactical purposes.  The package aims
