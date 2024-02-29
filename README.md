@@ -31,6 +31,9 @@ Most of the files available in the `Utilities' directory are auxiliary functions
 ### Reference
 Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, Ugochukwu O. Ugwu
 TRIPs-Py: Techniques for Regularization of Inverse Problems in Python
+ 
+#### Arxiv link 
+https://doi.org/10.48550/arXiv.2402.17603
 
 ### Requirements
 Packages required that are installed automatically with TRIPs-Py are
