@@ -4,14 +4,20 @@ Version: 1.0.0
 Summary: A package implementing approaches for regularization of ill-posed inverse problems.
 Home-page: https://sites.google.com/view/mirjeta-pasha/home
 Author: Mirjeta Pasha, Silvia Gazzola, Connor Sanderford, and Ugochukwu Obinna Ugwu
-License: UNKNOWN
-Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: The Unlicense (Unlicense)
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.5
 Description-Content-Type: text/markdown
 License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: pylops
+Requires-Dist: requests
+Requires-Dist: h5py
+Requires-Dist: tqdm
+Requires-Dist: python-resize-image
+Requires-Dist: astra-toolbox
 
 # TRIPs - Py
 <img src="trps.png" alt="J" width="800"/>
@@ -65,8 +71,6 @@ website: https://sites.google.com/view/mirjeta-pasha/home?authuser=1
 
 ### Acknowledgments
 The work of Mirjeta Pasha is fully supported by the NSF award DMS 2202846. Mirjeta Pasha and Silvia Gazzola acknowledge the Isaac Newton Institute for Mathematical Sciences, Cambridge, for the support and hospitality during the programme Rich and Nonlinear Tomography - a multidisciplinary approach" (supported by EPSRC grant no EP/R014604/) where partial work on this package was undertaken. SG would like to thank Ludovico Carozza for his advice on many Python functionalities. We would like to thank Tatiana Bubba for discussions about avoiding inverse crimes in `inverse problems'.
-
-
 
 
 
