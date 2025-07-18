@@ -338,7 +338,129 @@ def generate_stempo(data_set = 'real', data_thinning = 2, **kwargs):
             truth = None
         return Afull, b, saveA, B, nx, ny, nt, savedelta, truth
 
+def generate_stempo_updated(data_set = 'real', data_thinning = 2,views=11, new_shape= (64,64),columnsshift=14, **kwargs):
+        """
+        Generate stempo observations
+        """
+        nt = kwargs['nt'] if ('nt' in kwargs) else 10
+        noise_level = kwargs['noise_level'] if ('noise_level' in kwargs) else 0
+        data_file = {'simulation':'stempo_ground_truth_2d_b4','real':'stempo_seq8x45_2d_b'+str(data_thinning)}[data_set]+'.mat'
+        if not os.path.exists('./data/stempo_data'): os.makedirs('./data/stempo_data/')
+        if not os.path.isfile('./data/stempo_data/'+data_file):
+            import requests
+            print("downloading...")
+            r = requests.get('https://zenodo.org/record/7147139/files/'+data_file)
+            with open('./data/stempo_data/'+data_file, "wb") as file:
+                file.write(r.content)
+            print("Stempo data downloaded.")
+        if data_set=='simulation':
+            truth = spio.loadmat('./data/stempo_data/'+data_file)
+            image = truth['obj']
+            nx= new_shape[0]
+            ny= new_shape[1]
+            temp =np.zeros((nx, ny, 360))
+            for i in range(360):
+                img = image[:, :, i]
+                imm = image_to_new_size(img, (nx, ny))
+                temp[:, :, i] = imm # imm.flatten()
+            temp[np.isnan(temp)] = 0
+            image = temp
+            anglecount = views-1
+            rowshift = 5
+            columnsshift = 14
+            angleVector = list(range(nt))
+            for t in range(nt):
+                angleVector[t] = np.linspace(rowshift*t, columnsshift*anglecount+ rowshift*t, num = anglecount+1)
+            angleVectorRad = np.deg2rad(angleVector)
+                    # Generate matrix versions of the operators and a large bidiagonal sparse matrix
+            N = nx         # object size N-by-N pixels
+            # view angles
+            theta = angleVectorRad#[0]#np.linspace(0, 2*np.pi, q, endpoint=False)   # in rad
+            views = theta.shape[1]          # number of projection angles
+            saveA = list(range(nt))
+            saveb = np.zeros((views*N, nt))
+            saveb_true = np.zeros((views*N, nt))
+            savee = np.zeros((views*N, nt))
+            savedelta = np.zeros((nt, 1))
+            savex_true = np.zeros((nx*ny, nt))
+            B = list(range(nt))
+            count = int(360/nt)
 
+            for i in range(nt):
+                slice_geom = astra.create_vol_geom(N, N)
+                sino_geom = astra.create_proj_geom('parallel', 1, N, theta[i])
+                proj_id = astra.creators.create_projector('linear', sino_geom, slice_geom)
+                A = astra.OpTomo(proj_id)
+                
+                def gen(A):
+                    operatorf = lambda X: (A*(X.reshape(N, N))).reshape(-1, 1) / N
+                    operatorb = lambda B: (A.T*(B.reshape(views, N))).reshape(-1, 1) / N
+                    A_n = pylops.FunctionOperator(operatorf, operatorb, views*N, N*N)
+                    return A_n
+                A_n = gen(A)
+
+                x_true = image[:, :, count*i]*1000
+                x_truef_sino = x_true.flatten(order='F')
+                savex_true[:, i] = x_truef_sino
+                sn = A_n@x_truef_sino
+                b_i = sn.flatten(order='F') 
+                sigma = noise_level
+                e = np.random.normal(0, 1, b_i.shape[0])
+                e = e/np.linalg.norm(e)*np.linalg.norm(b_i)*sigma
+                delta = np.linalg.norm(e)
+                b_m = b_i + e
+                saveA[i] = A_n
+                B[i] = b_m
+                saveb_true[:, i] = sn
+                saveb[:, i] = b_m
+                savee[:, i] = e
+                savedelta[i] = delta
+            Afull = pylops.BlockDiag(saveA)   
+            b = saveb.flatten(order ='F') 
+            truth = savex_true.reshape((nx, ny, nt), order='F').transpose((2,1,0))
+        elif data_set=='real':
+            import h5py
+            N = int(2240/data_thinning)
+            nx, ny, nt =  N, N, 8
+            N_det = N
+            N_theta = 45
+            theta = np.linspace(0,360,N_theta,endpoint=False)
+            with h5py.File(f'./data/stempo_data/'+data_file, 'r') as f:
+                param = np.array(f['CtData']["parameters"])
+                m = np.array(f['CtData']['sinogram']).T
+            with h5py.File(f'./data/stempo_data/A_seqData.mat', 'r') as f:
+                Adata = np.array(f["A"]["data"])
+                print(Adata.shape)
+                Arowind = np.array(f["A"]["ir"])
+                print(Arowind.shape)
+                Acolind = np.array(f["A"]["jc"])
+                print(Acolind.shape)
+            n_rows = N_det*N_theta 
+            n_cols = N*N
+            Aloaded = scipy.sparse.csc_matrix((Adata, Arowind, Acolind), shape=(n_rows, n_cols))
+            # Aloaded = pylops.LinearOperator.tosparse((Adata, Arowind, Acolind), shape=(n_rows, n_cols))
+            saveA = list(range(nt))
+            saveb = np.zeros((n_rows, nt))
+            savee = np.zeros((n_rows, nt))
+            savedelta = np.zeros((nt, 1))
+            B = list(range(nt))
+            for i in range(nt):
+                tmp = m[45*(i):45*(i+1), :]
+                b_i = tmp.flatten()
+                sigma = noise_level
+                e = np.random.normal(0, 1, b_i.shape[0])
+                e = e/np.linalg.norm(e)*np.linalg.norm(b_i)*sigma
+                delta = np.linalg.norm(e)
+                b_m = b_i + e
+                saveA[i] = Aloaded
+                B[i] = b_m
+                saveb[:, i] = b_m
+                savee[:, i] = e
+                savedelta[i] = delta  
+            Afull = pylops.BlockDiag(saveA)
+            b = saveb.flatten(order ='F')
+            truth = None
+        return Afull, b, saveA, B, nx, ny, nt, savedelta, truth
 if __name__ == "__main__":
 
     (A, b, AA, B, nx, ny, nt, z) = generate_emoji(noise_level = 0, dataset=60)
