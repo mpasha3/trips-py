@@ -96,7 +96,7 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
             lambdah = generalized_crossvalidation(Q_A, R_A, R_L, (wf**exp) *b, **kwargs)
         elif regparam == 'dp':
             lambdah = discrepancy_principle(Q_A, R_A, R_L, (wf**exp) *b, **kwargs)
-        elif regparam = 'l_curve':
+        elif regparam == 'l_curve':
             lambdah = l_curve(R_A, R_L,Q_A.T@ ((wf**exp)*b))
         else:
             lambdah = regparam
