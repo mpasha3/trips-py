@@ -14,6 +14,7 @@ __email__ = "mpasha@mit.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csander
 from ..utilities.decompositions import *
 from ..utilities.reg_param.gcv import *
 from ..utilities.reg_param.discrepancy_principle import *
+from ..utilities.reg_param.l_curve import *
 from ..utilities.utils import *
 from scipy import sparse
 import numpy as np
