@@ -13,6 +13,7 @@ __email__ = "mpasha@mit.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csander
 
 from ..utilities.decompositions import golub_kahan, arnoldi
 from ..utilities.reg_param.gcv import *
+from ..utilities.reg_param.l_curve import *
 from ..utilities.reg_param.discrepancy_principle import *
 from ..utilities.utils import *#smoothed_holder_weights, operator_qr, operator_svd, is_identity
 from scipy import sparse
@@ -63,7 +64,8 @@ def GKS(A, b, L, projection_dim=3, n_iter=50, regparam = 'gcv', x_true=None, **k
 
         elif regparam == 'dp':
             lambdah = discrepancy_principle(Q_A, R_A, R_L, b, **kwargs)#['x'].item() # find ideal lambdas by crossvalidation
-
+        elif regparam == 'l_curve':
+            lambdah = l_curve(R_A, R_L,Q_A.T@b)
         elif isinstance(regparam, Iterable):
             lambdah = regparam[ii]
         else:
