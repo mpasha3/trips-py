@@ -14,6 +14,7 @@ __email__ = "mpasha@mit.edu; mirjeta.pasha1@gmail.com; sg968@bath.ac.uk; csander
 from ..utilities.decompositions import *
 from ..utilities.reg_param.gcv import *
 from ..utilities.reg_param.discrepancy_principle import *
+from ..utilities.reg_param.l_curve import *
 from ..utilities.utils import *
 from scipy import sparse
 import numpy as np
@@ -22,6 +23,7 @@ from pylops import Identity
 from trips.utilities.weights import *
 from tqdm import tqdm
 from collections.abc import Iterable
+
 
 def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv', x_true=None, **kwargs):
 
@@ -95,7 +97,8 @@ def MMGKS(A, b, L, pnorm=2, qnorm=1, projection_dim=3, n_iter=5, regparam='gcv',
             lambdah = generalized_crossvalidation(Q_A, R_A, R_L, wf *b, **kwargs)
         elif regparam == 'dp':
             lambdah = discrepancy_principle(Q_A, R_A, R_L, wf *b, **kwargs)
-
+        elif regparam == 'l_curve':
+            lambdah = l_curve(R_A, R_L,Q_A.T@b)
         else:
             lambdah = regparam
         

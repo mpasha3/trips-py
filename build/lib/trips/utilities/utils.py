@@ -16,7 +16,7 @@ from trips.utilities.operators_old import *
 from scipy import linalg as la
 # from scipy.sparse._arrays import _sparray
 from scipy import sparse
-
+_sparray = sparse.sparray
 import numpy as np
 
 from pylops import Identity, LinearOperator

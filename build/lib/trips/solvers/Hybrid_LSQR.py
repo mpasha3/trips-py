@@ -16,6 +16,7 @@ import numpy as np
 from scipy import linalg as la
 from trips.utilities.reg_param.gcv import *
 from trips.utilities.reg_param.discrepancy_principle import *
+from trips.utilities.reg_param.l_curve import * 
 from pylops import Identity
 from trips.solvers import Tikhonov
 from tqdm import tqdm
@@ -90,6 +91,11 @@ def Hybrid_LSQR(A, b, n_iter = 100, regparam = 'gcv', x_true=None, **kwargs):
                     y = np.linalg.lstsq(np.vstack((B, np.sqrt(lambdah)*L)), np.vstack((bhat.reshape((-1,1)), np.zeros((B.shape[1],1)))), rcond=None)[0]
                     x = V[:,:-1] @ y
                     break
+            elif regparam == 'l_curve':
+                Q_A, R_A, _ = la.svd(B, full_matrices=False) # this is a factorization of the projected matrix
+                R_A = np.diag(R_A)
+                R_L = Identity(B.shape[1])
+                lambdah = l_curve(R_A, R_L,Q_A.T@b)
             else:
                 lambdah = regparam
             lambda_history.append(lambdah)    

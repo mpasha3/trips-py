@@ -38,3 +38,4 @@ trips/utilities/reg_param/__init__.py
 trips/utilities/reg_param/discrepancy_principle.py
 trips/utilities/reg_param/gcv.py
 trips/utilities/reg_param/gcv_new.py
+trips/utilities/reg_param/l_curve.py
