@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-Builds function for GKS
+Builds function for test problems
 --------------------------------------------------------------------------
-Created in 2023 for TRIPs-Py library
+Created in 2023 for TRIPs-Py library --updated 2025
 """
 __authors__ = "Mirjeta Pasha, Connor Sanderford, and Toluwani Okuanola"
 __affiliations__ = 'Virginia Tech, Arizona State University, and Tufts University'
@@ -27,6 +27,7 @@ import scipy.sparse as sps
 # separate IO from test problem class implementation
 import os,sys
 import pylops
+from trips.utilities.utils import image_to_new_size
 """
 H image:
 """

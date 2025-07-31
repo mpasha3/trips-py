@@ -27,6 +27,7 @@ import scipy.sparse as sps
 # separate IO from test problem class implementation
 import os,sys
 import pylops
+from trips.utilities.utils import image_to_new_size
 """
 H image:
 """

@@ -40,6 +40,15 @@ git clone https://github.com/trips-py/trips-py
 ```ruby
 pip install .
 ```
+
+##### In Windows (if issues arise please change the following code in the setup.py file)
+
+```ruby
+with open('README.md', 'r', encoding="utf-8") as fh:
+    LONG_DESCRIPTION = fh.read()
+    setuptools.setup(...)
+```
+
 ### Data for test problems
 For a smooth usage of the package, we recommend the users to first download the data needed for test problems from the google drive and place the folder data inside the folder demos.
 https://drive.google.com/drive/folders/1VB8LaFewgwNKXq7QSVns4D6Rod8W8Pa1?usp=sharing
