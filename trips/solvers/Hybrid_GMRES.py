@@ -16,6 +16,7 @@ import numpy as np
 from scipy import linalg as la
 from trips.utilities.reg_param.gcv import *
 from trips.utilities.reg_param.discrepancy_principle import *
+from trips.utilities.reg_param.l_curve import *
 from pylops import Identity
 from tqdm import tqdm
 
@@ -63,6 +64,11 @@ def Hybrid_GMRES(A, b, n_iter, regparam = 'gcv', x_true=None, **kwargs): # what'
                     y = np.linalg.lstsq(np.vstack((H, np.sqrt(lambdah)*L)), np.vstack((bhat.reshape((-1,1)), np.zeros((H.shape[1],1)))), rcond=None)[0]
                     x = V[:,:-1] @ y
                     break
+            elif regparam == 'l_curve':
+                Q_A, R_A, _ = la.svd(H, full_matrices=False)
+                R_A = np.diag(R_A)
+                R_L = Identity(H.shape[1]).todense()
+                lambdah = l_curve(R_A, R_L, Q_A.T@bhat.reshape((-1,1)))    
             else:
                 lambdah = regparam
         lambda_history.append(lambdah)

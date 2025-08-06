@@ -80,7 +80,7 @@ def Hybrid_LSQR(A, b, n_iter = 100, regparam = 'gcv', x_true=None, **kwargs):
             if regparam == 'gcv':
                 Q_A, R_A, _ = la.svd(B, full_matrices=False) # this is a factorization of the projected matrix
                 R_A = np.diag(R_A)
-                R_L = Identity(B.shape[1])
+                R_L = Identity(B.shape[1]).todense()
                 lambdah = generalized_crossvalidation(Q_A, R_A, R_L, bhat, variant = 'modified', fullsize = A.shape[0], **kwargs)
             elif regparam == 'dp':
                 lambdah = discrepancy_principle(U, B, L, b, **kwargs)
@@ -91,11 +91,11 @@ def Hybrid_LSQR(A, b, n_iter = 100, regparam = 'gcv', x_true=None, **kwargs):
                     y = np.linalg.lstsq(np.vstack((B, np.sqrt(lambdah)*L)), np.vstack((bhat.reshape((-1,1)), np.zeros((B.shape[1],1)))), rcond=None)[0]
                     x = V[:,:-1] @ y
                     break
-            # elif regparam == 'l_curve':
-            #     Q_A, R_A, _ = la.svd(B, full_matrices=False) # this is a factorization of the projected matrix
-            #     R_A = np.diag(R_A)
-            #     R_L = Identity(B.shape[1])
-            #     lambdah = l_curve(R_A, R_L,Q_A.T@b)
+            elif regparam == 'l_curve':
+                Q_A, R_A, _ = la.svd(B, full_matrices=False)
+                R_A = np.diag(R_A)
+                R_L = Identity(B.shape[1]).todense()
+                lambdah = l_curve(R_A, R_L, Q_A.T@bhat.reshape((-1,1)))
             else:
                 lambdah = regparam
             lambda_history.append(lambdah)    
