@@ -19,6 +19,7 @@ from pylops import Identity, LinearOperator
 from ..utils import operator_qr, operator_svd, is_identity
 import numpy as np
 from scipy import optimize as op
+import pylops
 
 def compute_x_l(l, C, D, B, E, b, d=None):
     """
@@ -198,6 +199,9 @@ def l_curve(A, L, b, d=None):
     Returns:
     - λ that maximizes curvature κ(λ)
     """
+    A = A.tosparse() if  isinstance(A, pylops.LinearOperator) else A
+    L = L.tosparse() if isinstance(L, pylops.LinearOperator) else L
+    b = b.reshape(-1,1)
     l_func = lambda l: -1 * curvature(l, A, L, b, d)
     lambdah = op.fminbound(func=l_func, x1=1e-9, x2=2, xtol=1e-12, maxfun=1000, full_output=0, disp=0)
     return lambdah
