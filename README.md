@@ -58,12 +58,12 @@ email: contact.tripspy@gmail.com
 website: https://sites.google.com/view/mirjeta-pasha/home?authuser=1
 
 ### Past and current developers (random order)
-Mirjeta Pasha @mpasha3
-Silvia Gazzola @silviagazzola
-Connor Sanderford @crsanderford
-Jonathan Lindbloom @jlindbloom
-Toluwani Okunola @Toluwa-okunola
-Ugochukwu O. Ugwu uougwu @uougw
+- Mirjeta Pasha [@mpasha3](https://github.com/mpasha3)
+- Silvia Gazzola @silviagazzola
+- Connor Sanderford @crsanderford
+- Jonathan Lindbloom @jlindbloom
+- Toluwani Okunola @Toluwa-okunola
+- Ugochukwu O. Ugwu uougwu @uougw
 
 ### Acknowledgments
 The work of Mirjeta Pasha is fully supported by the NSF award DMS 2202846. Mirjeta Pasha and Silvia Gazzola acknowledge the Isaac Newton Institute for Mathematical Sciences, Cambridge, for the support and hospitality during the programme Rich and Nonlinear Tomography - a multidisciplinary approach" (supported by EPSRC grant no EP/R014604/) where partial work on this package was undertaken. SG would like to thank Ludovico Carozza for his advice on many Python functionalities. We would like to thank Tatiana Bubba for discussions about avoiding inverse crimes in `inverse problems'.
