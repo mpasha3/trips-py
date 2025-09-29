@@ -4,8 +4,9 @@ Builds an MRI class
 --------------------------------------------------------------------------
 Created in August 2025 for TRIPs-Py library
 Code on this file is adapted by the repositori developed by Tao Hong: https://github.com/hongtao-argmin/CQNPCS_MRIReco
+Before running, get data from https://github.com/hongtao-argmin/CQNPCS_MRIReco/tree/main/data and place them in the folder MRI under data
 """
-__authors__ = "Mirjeta Pasha and Code on this file is adapted for TRIPs-Py from the repositori developed by Tao Hong: https://github.com/hongtao-argmin/CQNPCS_MRIReco"
+__authors__ = "Mirjeta Pasha and Tao Hong; Code on this file is adapted for TRIPs-Py from the repositori developed by Tao Hong: https://github.com/hongtao-argmin/CQNPCS_MRIReco"
 __affiliations__ = 'Virginia Tech and University of Texas at Austin'
 __copyright__ = "Copyright 2025, TRIPs-Py library"
 __license__ = "Apache"
